@@ -2,6 +2,8 @@
 
 Tracking [W000 #1](https://github.com/igorpooh1978/GoEF/issues/1). Probes took place on 2026-11-25 UTC against baseline `2a886c78e622f583fa2980ea0a61a7e328a40e28`. The documentation transport and topic lookups passed for all four providers. Exact release provenance passed for two. PostgreSQL and MySQL exact MCP provenance remain blocked. GoEF engine behavior, permissions and client operation with enabled project configuration remain untested.
 
+The post-publication [PostgreSQL recheck](MCP_POSTGRES_RECHECK.md) found exact 18.7 tagged documentation in a read-only GitHub MCP fetch. The dedicated route still lacks exact coverage. The [MySQL recheck](MCP_MYSQL_RECHECK.md) corroborated 8.4.13.1 directly with Oracle and from the exact release's version file through GitHub MCP. The accessible documentation MCP route still serves only the 8.4 family.
+
 ## Method and observed transport
 
 Checked the publisher documentation, maintenance and advisory surfaces, endpoint and live input schemas. [Context7 Codex documentation](https://github.com/upstash/context7/blob/master/docs/clients/codex.mdx) · [Context7 releases](https://github.com/upstash/context7/releases) · [Context7 security](https://github.com/upstash/context7/security) · [Microsoft Learn developer reference](https://learn.microsoft.com/en-us/training/support/mcp-developer-reference) · [Microsoft Learn release notes](https://learn.microsoft.com/en-us/training/support/mcp-release-notes)

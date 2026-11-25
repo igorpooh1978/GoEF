@@ -465,7 +465,7 @@ MCP has two distinct purposes: **documentation retrieval** and **read-only test-
 
 ### 16.1. Concrete candidate servers to discover and verify
 
-These public candidates were identified from their published documentation/repositories; none has been installed, security-certified or live-handshake-tested for this project. Do not claim they are connected. Recheck maintenance status, releases/security advisories, exact source and permissions, licensing, actual tool discovery and version coverage. Select only after audit and explicit approval of external tooling. Use project-scoped, secret-free example config and environment-injected credentials. Pin local packages by version/digest; never run unreviewed `npx -y ...@latest`, upstream scripts, or globally alter user config.
+These public candidates were identified from their published documentation and repositories. The [MCP evidence](../evidence/W000/MCP_REPORT.md) records standalone handshakes, lookup results and pending client configuration. An isolated documentation lookup does not approve an endpoint for installation or database access. Do not claim they are connected. Recheck maintenance status, releases/security advisories, exact source and permissions, licensing, actual tool discovery and version coverage. Select only after audit and explicit approval of external tooling. Use project-scoped, secret-free example config and environment-injected credentials. Pin local packages by version/digest; never run unreviewed `npx -y ...@latest`, upstream scripts, or globally alter user config.
 
 | Engine | Documentation MCP route (must resolve and verify) | Optional isolated read-only schema MCP candidates | Canonical vendor sources |
 |---|---|---|---|

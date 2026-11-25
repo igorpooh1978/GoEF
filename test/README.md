@@ -1,7 +1,7 @@
 # GoEF test assets
 
-- The [Go language feasibility evidence](../docs/evidence/W000/GO_FEASIBILITY.md) identifies the isolated compiler probe and its command.
-- [Provider environments](../docs/development/TEST_ENVIRONMENT.md) define fixture and engine requirements.
+- The [W000 Go language probe](../docs/evidence/W000/GO_FEASIBILITY.md) and [W001 typed query fixtures](../docs/evidence/W001/LINQ_COMPILER.md) are separate isolated modules.
+- [Provider environments](../docs/development/TEST_ENVIRONMENT.md) define fixture and engine requirements. The [W002 lab design](../docs/development/CONFORMANCE_LAB.md) describes setup and acceptance for the planned suite.
 - [Transaction conformance](conformance/transactions/README.md) and [LINQ parity](../docs/upstream/LINQ_RESEARCH.md) define planned behavioral tests.
 - [Bootstrap validation](bootstrap/README.md) checks repository artifacts. The project has no production module or executable GoEF Gherkin suite yet.
 

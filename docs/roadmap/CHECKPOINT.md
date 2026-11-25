@@ -1,25 +1,21 @@
 # Current checkpoint
 
-Mode: BOOTSTRAP_ONLY. W000 is partial. Baseline: 2a886c78e622f583fa2980ea0a61a7e328a40e28. Start with the [W000 evidence report](../evidence/W000/BOOTSTRAP_REPORT.md) and [wave dependencies](WAVES.md).
+The [published W000 baseline](https://github.com/igorpooh1978/GoEF/commit/c789602e46c7063e6c0f1ddbfec68bc22c2dbb75) was audited after publication. The current scope covers W001 architecture design and compiler fixtures, provider documentation rechecks, and the W002 test lab design. Start with the [published W000 audit](../evidence/W000/PUBLISHED_REVIEW.md), [bootstrap evidence](../evidence/W000/BOOTSTRAP_REPORT.md), and [wave dependencies](WAVES.md).
 
-Confirm origin and HEAD, open the live tracking issue, inspect the [source lock](../upstream/lock.json), and load the relevant [skills](../development/SKILLS.md). The following is the W000 handoff for 2026-11-25. All issues were read back as open and assigned to igorpooh1978. Use GitHub for the current state on resume.
+Confirm origin and HEAD, open the live tracker, read the [source lock](../upstream/lock.json), and load the relevant [skills](../development/SKILLS.md). All listed issues are assigned to igorpooh1978. GitHub remains the current source for issue state.
 
-| Issue | Owner | Lifecycle | Handoff and blockers |
-| --- | --- | --- | --- |
-| [#1](https://github.com/igorpooh1978/GoEF/issues/1) W000 integration and handoff | igorpooh1978 | Blocked | Exact PostgreSQL and MySQL documentation versions remain unverified. |
-| [#2](https://github.com/igorpooh1978/GoEF/issues/2) Migration, transaction and error contracts | igorpooh1978 | Local evidence awaiting publication | Native error and transaction/migration behavior move to real-engine tests in #13. |
-| [#3](https://github.com/igorpooh1978/GoEF/issues/3) Architecture and compiler feasibility | igorpooh1978 | Local evidence awaiting publication | Compiler probe passed. Race and public contract fixtures move to #12. |
-| [#4](https://github.com/igorpooh1978/GoEF/issues/4) LINQ inventory and execution boundary | igorpooh1978 | Local evidence awaiting publication | Source inventory is registered. Executable LINQ behavior moves to #12 and #13. |
-| [#5](https://github.com/igorpooh1978/GoEF/issues/5) Repository skills and workflow | igorpooh1978 | Local evidence awaiting publication | Discovery, explicit attachment and 36 content-assisted checks recorded. |
-| [#6](https://github.com/igorpooh1978/GoEF/issues/6) SQL Server documentation route | igorpooh1978 | Local evidence awaiting publication | SQL Server exact documentation lookup passed. Real engine is still untested. |
-| [#7](https://github.com/igorpooh1978/GoEF/issues/7) Upstream pins and feature inventory | igorpooh1978 | Local evidence awaiting publication | Source pins checked. Open enumeration and MySQL differential gap remain visible. |
-| [#8](https://github.com/igorpooh1978/GoEF/issues/8) SQLite documentation route | igorpooh1978 | Local evidence awaiting publication | SQLite exact documentation lookup passed. Real engine is still untested. |
-| [#9](https://github.com/igorpooh1978/GoEF/issues/9) Gherkin, traceability and gates | igorpooh1978 | Local evidence awaiting publication | Bootstrap validation and negative controls passed. Runtime harness moves to #13. |
-| [#10](https://github.com/igorpooh1978/GoEF/issues/10) PostgreSQL documentation route | igorpooh1978 | Blocked | Context7 returns 18.6. Confirm the selected PostgreSQL 18.7 source. |
-| [#11](https://github.com/igorpooh1978/GoEF/issues/11) MySQL documentation route | igorpooh1978 | Blocked | Context7 returns 8.4 documentation. Confirm the selected MySQL 8.4.13.1 update. |
-| [#12](https://github.com/igorpooh1978/GoEF/issues/12) W001 architecture fixtures | igorpooh1978 | Ready after handoff and a new mode | Architecture fixtures start after W000 handoff and separate mode authorization. |
-| [#13](https://github.com/igorpooh1978/GoEF/issues/13) W002 conformance environment | igorpooh1978 | Blocked | Requires W001 contract decisions and pinned isolated engine/driver environments. |
-| [#14](https://github.com/igorpooh1978/GoEF/issues/14) User and reference guides | igorpooh1978 | Local evidence awaiting publication | 19 guides and 8 references are proposed. Future examples need runtime proof. |
-| [#15](https://github.com/igorpooh1978/GoEF/issues/15) GoEF project license | igorpooh1978 | Blocked | Project license and attribution require a maintainer decision. |
+| Issue | Handoff | Evidence or next proof |
+| --- | --- | --- |
+| [#1](https://github.com/igorpooh1978/GoEF/issues/1) W000 | Partial | Published and audited. The dedicated exact-version documentation routes and project license are still tracked. |
+| [#10](https://github.com/igorpooh1978/GoEF/issues/10) PostgreSQL documentation | Dedicated route blocked | [Recheck](../evidence/W000/MCP_POSTGRES_RECHECK.md). Exact 18.7 source was retrieved through GitHub MCP. Context7 still has older content. |
+| [#11](https://github.com/igorpooh1978/GoEF/issues/11) MySQL documentation | Exact MCP route blocked | [Recheck](../evidence/W000/MCP_MYSQL_RECHECK.md). Oracle's exact release note and the tag's version file agree. The dedicated MCP corpus returned the 8.4 family. |
+| [#12](https://github.com/igorpooh1978/GoEF/issues/12) W001 architecture | Design delivered for review | [Module graph](../architecture/MODULE_GRAPH.md) and [public API proposal](../architecture/PUBLIC_API.md). Stabilize the API before authoring provider modules. |
+| [#17](https://github.com/igorpooh1978/GoEF/issues/17) W001 LINQ compilation | Isolated fixture accepted | [Compiler evidence](../evidence/W001/LINQ_COMPILER.md). Model-generated descriptors and real SQL behavior still require their own proof. |
+| [#16](https://github.com/igorpooh1978/GoEF/issues/16) W002 test lab design | Design delivered | [Lab design](../development/CONFORMANCE_LAB.md). Implement the lab once the provider contracts and versions are accepted. |
+| [#13](https://github.com/igorpooh1978/GoEF/issues/13) W002 conformance implementation | Blocked | Requires approved W001 contracts, pinned engines and drivers, and the executable isolated suite. |
+| [#18](https://github.com/igorpooh1978/GoEF/issues/18) W000 publication audit | Audit delivered | [Published baseline audit](../evidence/W000/PUBLISHED_REVIEW.md). The master plan now distinguishes probes from installed endpoint configuration. |
+| [#15](https://github.com/igorpooh1978/GoEF/issues/15) GoEF project license | Blocked | The maintainer owns the project license and attribution decision. |
 
-W000 has an isolated Go language probe. Production API examples and the executable GoEF provider suite are future work. Remote issue closure requires evidence on a published commit. This mode requires separate push authorization.
+The published W000 documentation issues [#2](https://github.com/igorpooh1978/GoEF/issues/2), [#3](https://github.com/igorpooh1978/GoEF/issues/3), [#4](https://github.com/igorpooh1978/GoEF/issues/4), [#5](https://github.com/igorpooh1978/GoEF/issues/5), [#6](https://github.com/igorpooh1978/GoEF/issues/6), [#7](https://github.com/igorpooh1978/GoEF/issues/7), [#8](https://github.com/igorpooh1978/GoEF/issues/8), [#9](https://github.com/igorpooh1978/GoEF/issues/9), and [#14](https://github.com/igorpooh1978/GoEF/issues/14) are open for scoped acceptance or follow-up.
+
+The language and typed-query probes are isolated test modules. Production API examples, native errors on real providers, and full four-engine Gherkin execution remain future work.
