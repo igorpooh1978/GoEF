@@ -1,0 +1,8 @@
+//go:build goef_sqlite_351
+
+package driverlab
+
+const (
+	sqliteVersion  = "3.51.3"
+	sqliteSourceID = "2026-03-13 10:38:09 737ae4a34738ffa0c3ff7f9bb18df914dd1cad163f28fd6b6e114a344fe6d618"
+)

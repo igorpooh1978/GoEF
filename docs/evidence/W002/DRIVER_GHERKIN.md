@@ -2,6 +2,8 @@
 
 [W002 #13](https://github.com/igorpooh1978/GoEF/issues/13) · [Gherkin binding #29](https://github.com/igorpooh1978/GoEF/issues/29) · [Local CI #26](https://github.com/igorpooh1978/GoEF/issues/26) · [Version profiles #31](https://github.com/igorpooh1978/GoEF/issues/31)
 
+This report preserves the initial six-profile run. See the [legacy compatibility evidence](LEGACY_COMPATIBILITY.md) for the expanded local matrix and SQLite file checks.
+
 The first driver lab is an isolated Go module under [test/conformance/driverlab](../../../test/conformance/driverlab/README.md). Its direct SDK pins and Go checksum database identities match the [W002 artifact research](TEST_LAB_DESIGN.md). Go 1.27.4 downloaded and verified the test module graph. Core's module remains driver-free.
 
 | Driver | Direct module pin |

@@ -15,3 +15,5 @@ The [source lock](docs/upstream/lock.json) records commit and license blob IDs. 
 ## W002 test module dependencies
 
 The isolated W002 test module pins pgx v5.13.0 (MIT), modernc.org/sqlite v1.63.0 (BSD-3-Clause), go-mssqldb v1.11.0 (BSD-3-Clause), and go-sql-driver/mysql v1.10.0 (MPL-2.0). The selected modules include their license texts. See the [dependency and checksum report](docs/evidence/W002/DRIVER_GHERKIN.md). Before distributing a test binary, review the resolved transitive graph and preserve its applicable license terms. The core Go module does not import the test drivers.
+
+The older SQLite test build separately pins modernc.org/sqlite v1.47.0. Its [tagged license](https://raw.githubusercontent.com/modernc-org/sqlite/v1.47.0/LICENSE) is BSD-3-Clause.

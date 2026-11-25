@@ -56,15 +56,57 @@ class DriverEvidenceTests(unittest.TestCase):
         self.assertEqual(result["provider"], "sqlserver")
         self.assertEqual(result["status"], "BLOCKED")
 
-    def test_explicit_postgres_profile_matches_its_own_identity(self):
+    def test_sqlserver_current_and_legacy_eula_opt_ins_are_independent(self):
+        cases = (
+            ("sqlserver-2017", "--accept-sqlserver-eula", "--accept-legacy-sqlserver-eula"),
+            ("sqlserver-2019", "--accept-sqlserver-eula", "--accept-legacy-sqlserver-eula"),
+            ("sqlserver-2022", "--accept-legacy-sqlserver-eula", "--accept-sqlserver-eula"),
+        )
+        for profile, supplied, required in cases:
+            with self.subTest(profile=profile):
+                stdout = io.StringIO()
+                with (
+                    patch.object(driver_run, "build_binary") as build,
+                    patch.object(driver_run.Lab, "container") as container,
+                    redirect_stdout(stdout),
+                ):
+                    self.assertEqual(driver_run.main(["sqlserver", "--profile", profile, supplied]), 1)
+                build.assert_not_called()
+                container.assert_not_called()
+                result = json.loads(stdout.getvalue())
+                self.assertEqual(result["status"], "BLOCKED")
+                self.assertIn(required, result["reason"])
+
+    def test_sqlserver_profile_requires_exact_build_and_database_compatibility(self):
         rows = self.result_lines()
-        for row, code in zip(rows, ("", "23505", "23503"), strict=True):
-            row["provider"] = "postgres"
-            row["facts"] = {"engine_version": "16.16", "native_code": code}
+        for row, code in zip(rows, ("", "2627", "547"), strict=True):
+            row["provider"] = "sqlserver"
+            row["facts"] = {
+                "version": "14.0.3570.2", "product_update_level": "CU31",
+                "compatibility_level": "140", "native_code": code,
+            }
         output = self.output(rows)
-        self.assertEqual(len(driver_run.verified_results(output, "postgres", "postgres-16")), 3)
+        self.assertEqual(len(driver_run.verified_results(output, "sqlserver", "sqlserver-2017")), 3)
         with self.assertRaises(driver_run.LabError):
-            driver_run.verified_results(output, "postgres")
+            driver_run.verified_results(output, "sqlserver", "sqlserver-2019")
+        for field, value in (("compatibility_level", "150"), ("product_update_level", "CU32")):
+            with self.subTest(field=field):
+                wrong = rows.copy()
+                wrong[0] = {**rows[0], "facts": {**rows[0]["facts"], field: value}}
+                with self.assertRaises(driver_run.LabError):
+                    driver_run.verified_results(self.output(wrong), "sqlserver", "sqlserver-2017")
+
+    def test_explicit_postgres_profile_matches_its_own_identity(self):
+        for profile, version in (("postgres-16", "16.16"), ("postgres-17", "17.12")):
+            with self.subTest(profile=profile):
+                rows = self.result_lines()
+                for row, code in zip(rows, ("", "23505", "23503"), strict=True):
+                    row["provider"] = "postgres"
+                    row["facts"] = {"engine_version": version, "native_code": code}
+                output = self.output(rows)
+                self.assertEqual(len(driver_run.verified_results(output, "postgres", profile)), 3)
+                with self.assertRaises(driver_run.LabError):
+                    driver_run.verified_results(output, "postgres")
 
     def test_legacy_mysql_does_not_use_newer_identity_or_client_options(self):
         legacy = driver_run.PROFILES["mysql-8.0"]

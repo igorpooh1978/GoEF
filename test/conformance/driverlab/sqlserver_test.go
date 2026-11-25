@@ -37,6 +37,12 @@ JOIN sys.dm_exec_sessions AS s ON s.session_id = @@SPID
 WHERE d.database_id = DB_ID();`
 )
 
+type sqlServerPin struct {
+	version            string
+	updateLevel        string
+	compatibilityLevel int
+}
+
 // sqlServerDialer keeps driver-directed routing inside the isolated endpoint.
 type sqlServerDialer struct{}
 
@@ -52,6 +58,19 @@ func (sqlServerDialer) DialContext(ctx context.Context, network, address string)
 
 func openSQLServer(t *testing.T) fixture {
 	t.Helper()
+
+	profile := os.Getenv("GOEF_DRIVERLAB_PROFILE")
+	if profile == "" {
+		profile = "sqlserver-2022"
+	}
+	expected, ok := map[string]sqlServerPin{
+		"sqlserver-2017": {version: "14.0.3570.2", updateLevel: "CU31", compatibilityLevel: 140},
+		"sqlserver-2019": {version: "15.0.4510.2", updateLevel: "CU32", compatibilityLevel: 150},
+		"sqlserver-2022": {version: "16.0.4325.4", updateLevel: "CU28", compatibilityLevel: 160},
+	}[profile]
+	if !ok {
+		t.Fatal("unknown SQL Server fixture profile")
+	}
 
 	password := os.Getenv("GOEF_DRIVERLAB_PASSWORD")
 	if password == "" {
@@ -96,10 +115,10 @@ func openSQLServer(t *testing.T) fixture {
 	if err != nil {
 		t.Fatal("could not read SQL Server fixture settings")
 	}
-	if version != "16.0.4325.4" || update != "CU28" || edition != "Developer Edition (64-bit)" {
+	if version != expected.version || update != expected.updateLevel || edition != "Developer Edition (64-bit)" {
 		t.Fatal("SQL Server fixture build or edition differs from the pin")
 	}
-	if catalog != sqlServerCatalog || databaseID <= 4 || compatibility != 160 ||
+	if catalog != sqlServerCatalog || databaseID <= 4 || compatibility != expected.compatibilityLevel ||
 		collation != "Latin1_General_100_BIN2" || snapshot != 0 || rcsi {
 		t.Fatal("SQL Server fixture catalog or database settings differ from the profile")
 	}

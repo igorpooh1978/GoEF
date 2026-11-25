@@ -23,6 +23,18 @@ SCENARIOS = {f"LAB-DRIVER-001-S{i:02d}" for i in range(1, 4)}
 MODULE = Path(__file__).resolve().parents[1] / "driverlab"
 BINARY = "/tmp/goef-driverlab"
 RESULT_PREFIX = "GOEF_DRIVERLAB_RESULT="
+SQLSERVER_EULA = "--accept-sqlserver-eula"
+LEGACY_SQLSERVER_EULA = "--accept-legacy-sqlserver-eula"
+
+
+@dataclass(frozen=True)
+class SQLServerSettings:
+    compatibility_level: int
+    update_level: str
+    eula_flag: str
+    sqlcmd_path: str = sqlserver.SQLCMD[0]
+
+
 @dataclass(frozen=True)
 class Profile:
     provider: str
@@ -31,17 +43,36 @@ class Profile:
     image: str | None = None
     probe: str = ""
     client_flags: tuple[str, ...] = ()
+    sqlserver_settings: SQLServerSettings | None = None
 
 
 PROFILES = {
     "postgres-18": Profile("postgres", "engine_version", "18.7", postgres.IMAGE, "180007"),
+    "postgres-17": Profile(
+        "postgres", "engine_version", "17.12",
+        "docker.io/library/postgres@sha256:e711be2c7ff64c9eb8883fc87571621be6caa2f943d825a49e5d20ac5b0221d7",
+        "170012",
+    ),
     "postgres-16": Profile(
         "postgres", "engine_version", "16.16",
         "docker.io/library/postgres@sha256:e8a7960781a4aeb21928aa4565124f0e469bd27e0bcc4321d8b9102145312f84",
         "160016",
     ),
     "sqlite-3.54": Profile("sqlite", "engine_version", "3.54.1"),
-    "sqlserver-2022": Profile("sqlserver", "version", "16.0.4325.4", sqlserver.IMAGE),
+    "sqlserver-2022": Profile(
+        "sqlserver", "version", "16.0.4325.4", sqlserver.IMAGE,
+        sqlserver_settings=SQLServerSettings(160, "CU28", SQLSERVER_EULA),
+    ),
+    "sqlserver-2019": Profile(
+        "sqlserver", "version", "15.0.4510.2",
+        "mcr.microsoft.com/mssql/server@sha256:debdc21628cddd1a4433371c601c8dee9bad3533ae8b18fe9dc8c5596368b10d",
+        sqlserver_settings=SQLServerSettings(150, "CU32", LEGACY_SQLSERVER_EULA),
+    ),
+    "sqlserver-2017": Profile(
+        "sqlserver", "version", "14.0.3570.2",
+        "mcr.microsoft.com/mssql/server@sha256:5f6fd78f8752390dbd3584b91dee463f1f4b2b30beef9af3fd35753d32940c52",
+        sqlserver_settings=SQLServerSettings(140, "CU31", LEGACY_SQLSERVER_EULA, "/opt/mssql-tools/bin/sqlcmd"),
+    ),
     "mysql-8.4": Profile(
         "mysql", "server_version", "8.4.13.1", mysql.IMAGE, "VERSION_WITH_UPDATE()",
         ("--no-login-paths",),
@@ -152,8 +183,9 @@ GRANT SELECT ON goef_marker.target TO 'goef_driver'@'%';
 
 @contextmanager
 def sqlserver_container(lab, password, token, profile):
+    expected = profile.sqlserver_settings
     if not lab.allow_sqlserver:
-        raise Blocked("SQL Server requires --accept-sqlserver-eula for this local run.")
+        raise Blocked(f"SQL Server requires {expected.eula_flag} for this local run.")
     provision_password = "GoEF9!" + secrets.token_hex(24)
     environment = {
         "ACCEPT_EULA": "Y",
@@ -162,17 +194,17 @@ def sqlserver_container(lab, password, token, profile):
     }
     with lab.container(profile.image, environment) as container:
         settings = {"SQLCMDPASSWORD": provision_password}
-        client = [*sqlserver.SQLCMD, "-d", "master"]
+        client = [expected.sqlcmd_path, *sqlserver.SQLCMD[1:], "-N", "-d", "master"]
         container.wait([*client, "-Q", "SELECT 1;"], env=settings)
         identity = container.exec([*client, "-Q", sqlserver.SERVER_IDENTITY], env=settings)
-        if identity.strip() != f"{profile.version}|CU28|Developer Edition (64-bit)":
+        if identity.strip() != f"{profile.version}|{expected.update_level}|Developer Edition (64-bit)":
             raise LabError("SQL Server provisioning target does not match the pin.")
         container.exec(
             [*client, "-Q", "CREATE DATABASE [goef_smoke] COLLATE Latin1_General_100_BIN2;"],
             env=settings,
         )
         container.exec(
-            [*client, "-Q", "ALTER DATABASE [goef_smoke] SET COMPATIBILITY_LEVEL = 160;"],
+            [*client, "-Q", f"ALTER DATABASE [goef_smoke] SET COMPATIBILITY_LEVEL = {expected.compatibility_level};"],
             env=settings,
         )
         # Both interpolated values are generated internally from hex and a
@@ -244,6 +276,12 @@ def verified_results(output, provider, profile_name=None):
             raise LabError("The driver test emitted invalid scenario facts.")
         if facts.get(profile.fact) != profile.version:
             raise LabError("The scenario did not report the pinned engine identity.")
+        sqlserver_settings = profile.sqlserver_settings
+        if sqlserver_settings is not None and (
+            facts.get("compatibility_level") != str(sqlserver_settings.compatibility_level)
+            or facts.get("product_update_level") != sqlserver_settings.update_level
+        ):
+            raise LabError("The scenario did not report the pinned SQL Server settings.")
         if scenario != "LAB-DRIVER-001-S01":
             expected = NATIVE_CODES[provider][0 if scenario == "LAB-DRIVER-001-S02" else 1]
             if facts.get("native_code") != expected:
@@ -259,13 +297,21 @@ def verified_results(output, provider, profile_name=None):
     return [results[key] for key in sorted(results)]
 
 
-def run_provider(profile_name, binary, allow_sqlserver):
+def missing_eula(profile, accepted_eulas):
+    settings = profile.sqlserver_settings
+    if settings is not None and settings.eula_flag not in accepted_eulas:
+        return settings.eula_flag
+    return None
+
+
+def run_provider(profile_name, binary, accepted_eulas):
     profile = PROFILES[profile_name]
     provider = profile.provider
     phase = "build"
     try:
-        if provider == "sqlserver" and not allow_sqlserver:
-            raise Blocked("SQL Server requires --accept-sqlserver-eula for this local run.")
+        required_flag = missing_eula(profile, accepted_eulas)
+        if required_flag is not None:
+            raise Blocked(f"SQL Server requires {required_flag} for this local run.")
         if isinstance(binary, LabError):
             raise binary
         with TemporaryDirectory(prefix="goef-driver-cell-") as directory:
@@ -277,7 +323,7 @@ def run_provider(profile_name, binary, allow_sqlserver):
             else:
                 password = "GoEF9!" + secrets.token_hex(24) if provider == "sqlserver" else secrets.token_hex(32)
                 token = secrets.token_hex(32)
-                lab = Lab(path, None, allow_sqlserver)
+                lab = Lab(path, None, provider == "sqlserver")
                 phase = "provisioning"
                 with SERVER_CONTAINERS[provider](lab, password, token, profile) as container:
                     phase = "copy test binary"
@@ -303,12 +349,23 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("providers", nargs="+", choices=(*PROVIDERS, "all"))
     parser.add_argument("--profile", choices=tuple(PROFILES))
-    parser.add_argument("--accept-sqlserver-eula", action="store_true")
+    parser.add_argument(SQLSERVER_EULA, action="store_true", help="accept the SQL Server 2022 Developer EULA")
+    parser.add_argument(LEGACY_SQLSERVER_EULA, action="store_true", help="accept the selected SQL Server 2017 or 2019 Developer EULA")
     args = parser.parse_args(argv)
     providers = PROVIDERS if "all" in args.providers else tuple(dict.fromkeys(args.providers))
     if args.profile and providers != (PROFILES[args.profile].provider,):
         parser.error("--profile requires a single matching provider")
-    enabled = [p for p in providers if p != "sqlserver" or args.accept_sqlserver_eula]
+    accepted_eulas = {
+        flag for flag, accepted in (
+            (SQLSERVER_EULA, args.accept_sqlserver_eula),
+            (LEGACY_SQLSERVER_EULA, args.accept_legacy_sqlserver_eula),
+        ) if accepted
+    }
+    selected = {provider: args.profile or DEFAULT_PROFILES[provider] for provider in providers}
+    enabled = [
+        provider for provider, name in selected.items()
+        if missing_eula(PROFILES[name], accepted_eulas) is None
+    ]
     with TemporaryDirectory(prefix="goef-driver-build-") as directory:
         path = Path(directory)
         binaries = {}
@@ -320,10 +377,10 @@ def main(argv=None):
         failed = False
         with ThreadPoolExecutor(max_workers=min(4, len(providers))) as pool:
             tasks = [
-                pool.submit(run_provider, args.profile or DEFAULT_PROFILES[p],
-                            binaries.get("host" if p == "sqlite" else "linux"),
-                            args.accept_sqlserver_eula)
-                for p in providers
+                pool.submit(run_provider, name,
+                            binaries.get("host" if provider == "sqlite" else "linux"),
+                            accepted_eulas)
+                for provider, name in selected.items()
             ]
             for task in tasks:
                 result = task.result()

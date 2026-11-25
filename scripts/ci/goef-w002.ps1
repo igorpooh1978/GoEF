@@ -2,6 +2,7 @@
 [CmdletBinding()]
 param(
     [switch] $AcceptSqlServerEula,
+    [switch] $AcceptLegacySqlServerEula,
     [switch] $Compatibility
 )
 
@@ -28,7 +29,8 @@ function Confirm-DriverResults {
     param(
         [string[]] $Lines,
         [int] $ExitCode,
-        [System.Collections.IDictionary] $ExpectedProfiles
+        [System.Collections.IDictionary] $ExpectedProfiles,
+        [System.Collections.IDictionary] $ExpectedFacts = @{}
     )
 
     $scenarioIds = 'LAB-DRIVER-001-S01', 'LAB-DRIVER-001-S02', 'LAB-DRIVER-001-S03'
@@ -94,6 +96,16 @@ function Confirm-DriverResults {
             }
             if ($result['status'] -isnot [string] -or $result['status'] -cne 'PASS') {
                 $failures.Add("Driver scenario $scenario for $provider did not pass.")
+                continue
+            }
+            if ($ExpectedFacts.Contains($provider)) {
+                $facts = $result['facts']
+                foreach ($expected in $ExpectedFacts[$provider].GetEnumerator()) {
+                    if ($facts -isnot [System.Collections.IDictionary] -or
+                        $facts[$expected.Key] -isnot [string] -or $facts[$expected.Key] -cne $expected.Value) {
+                        $failures.Add("Driver scenario $scenario for $expectedProfile must report $($expected.Key)=$($expected.Value).")
+                    }
+                }
             }
         }
         foreach ($scenario in $scenarioIds) {
@@ -116,13 +128,134 @@ function Invoke-DriverMatrix {
     param(
         [string] $Python,
         [string[]] $Selection,
-        [System.Collections.IDictionary] $ExpectedProfiles
+        [System.Collections.IDictionary] $ExpectedProfiles,
+        [System.Collections.IDictionary] $ExpectedFacts = @{}
     )
 
     $driverArguments = @('-B', 'test/conformance/lab/driver_run.py') + $Selection
     Write-Host "RUN $(Split-Path -Leaf $Python) $($driverArguments -join ' ')"
     $driverOutput = @(& $Python @driverArguments)
-    Confirm-DriverResults -Lines $driverOutput -ExitCode $LASTEXITCODE -ExpectedProfiles $ExpectedProfiles
+    Confirm-DriverResults -Lines $driverOutput -ExitCode $LASTEXITCODE -ExpectedProfiles $ExpectedProfiles -ExpectedFacts $ExpectedFacts
+}
+
+function Invoke-SqliteCompatibility {
+    param([string] $Python)
+
+    $script = 'test/conformance/lab/sqlite_compat.py'
+    Write-Host "RUN $(Split-Path -Leaf $Python) -B $script"
+    $lines = @(& $Python -B $script)
+    $exitCode = $LASTEXITCODE
+    if ($lines.Count -ne 1) {
+        throw "SQLite compatibility must emit one JSON report. Exit code $exitCode."
+    }
+    try {
+        $report = ConvertFrom-Json -InputObject $lines[0] -AsHashtable -NoEnumerate
+    }
+    catch {
+        throw "SQLite compatibility emitted invalid JSON. Exit code $exitCode."
+    }
+    if ($report -isnot [System.Collections.IDictionary] -or
+        $report['status'] -isnot [string] -or $report['status'] -cnotin ('PASS', 'FAIL', 'BLOCKED')) {
+        throw "SQLite compatibility emitted an invalid status. Exit code $exitCode."
+    }
+    # The SQLite runner emits redacted evidence on stdout.
+    Write-Output $lines[0]
+    if ($exitCode -ne 0 -or $report['status'] -cne 'PASS') {
+        throw "SQLite compatibility reported $($report['status']) and exited with code $exitCode."
+    }
+
+    $profiles = [ordered] @{
+        'sqlite-3.51' = @{
+            engine_version = '3.51.3'
+            source_id = '2026-03-13 10:38:09 737ae4a34738ffa0c3ff7f9bb18df914dd1cad163f28fd6b6e114a344fe6d618'
+            driver_version = 'v1.47.0'
+        }
+        'sqlite-3.54' = @{
+            engine_version = '3.54.1'
+            source_id = '2026-10-16 14:45:20 555e07ef33f69a0957d24d8e555b702464a131d6f1607f4c3c1e4551e8e6ca76'
+            driver_version = 'v1.63.0'
+        }
+    }
+    $reportedProfiles = $report['profiles']
+    if ($reportedProfiles -isnot [System.Collections.IDictionary] -or $reportedProfiles.Count -ne $profiles.Count) {
+        throw 'SQLite compatibility must report both exact linked runtimes.'
+    }
+    foreach ($profileName in $profiles.Keys) {
+        $observed = $reportedProfiles[$profileName]
+        foreach ($pin in $profiles[$profileName].GetEnumerator()) {
+            if ($observed -isnot [System.Collections.IDictionary] -or
+                $observed[$pin.Key] -isnot [string] -or $observed[$pin.Key] -cne $pin.Value) {
+                throw "SQLite compatibility for $profileName must report $($pin.Key)=$($pin.Value)."
+            }
+        }
+    }
+
+    $nativeCodes = @{
+        'LAB-DRIVER-001-S01' = $null
+        'LAB-DRIVER-001-S02' = '2067'
+        'LAB-DRIVER-001-S03' = '787'
+    }
+    $driverScenarios = $report['driver_scenarios']
+    if ($driverScenarios -isnot [array] -or $driverScenarios.Count -ne ($profiles.Count * $nativeCodes.Count)) {
+        throw 'SQLite compatibility must report three driver scenarios for each linked runtime.'
+    }
+    $seenDriverScenarios = [System.Collections.Generic.HashSet[string]]::new()
+    foreach ($result in $driverScenarios) {
+        if ($result -isnot [System.Collections.IDictionary] -or
+            $result['provider'] -isnot [string] -or $result['provider'] -cne 'sqlite' -or
+            $result['profile'] -isnot [string] -or $result['profile'] -cnotin $profiles.Keys -or
+            $result['scenario'] -isnot [string] -or $result['scenario'] -cnotin $nativeCodes.Keys -or
+            $result['status'] -isnot [string] -or $result['status'] -cne 'PASS') {
+            throw 'SQLite compatibility emitted an unexpected or failed driver scenario.'
+        }
+        $profileName = $result['profile']
+        $scenario = $result['scenario']
+        if (-not $seenDriverScenarios.Add("$profileName/$scenario")) {
+            throw "SQLite compatibility has a duplicate driver scenario for $profileName/$scenario."
+        }
+        $facts = $result['facts']
+        $nativeCode = $nativeCodes[$scenario]
+        if ($facts -isnot [System.Collections.IDictionary] -or
+            $facts['engine_version'] -isnot [string] -or $facts['engine_version'] -cne $profiles[$profileName].engine_version -or
+            $facts['source_id'] -isnot [string] -or $facts['source_id'] -cne $profiles[$profileName].source_id -or
+            ($null -ne $nativeCode -and ($facts['native_code'] -isnot [string] -or $facts['native_code'] -cne $nativeCode)) -or
+            ($null -eq $nativeCode -and $facts.Contains('native_code'))) {
+            throw "SQLite compatibility reported incorrect engine identity or native code for $profileName/$scenario."
+        }
+    }
+
+    $directions = @{
+        'LAB-SQLITE-FILE-001-S01' = @('3.51.3', '3.54.1', '3.51.3')
+        'LAB-SQLITE-FILE-001-S02' = @('3.54.1', '3.51.3', '3.54.1')
+    }
+    $modes = 'delete', 'wal'
+    $checks = $report['checks']
+    if ($checks -isnot [array] -or $checks.Count -ne ($directions.Count * $modes.Count)) {
+        throw 'SQLite compatibility must report both file directions in DELETE and WAL modes.'
+    }
+    $seenChecks = [System.Collections.Generic.HashSet[string]]::new()
+    foreach ($check in $checks) {
+        if ($check -isnot [System.Collections.IDictionary] -or
+            $check['scenario'] -isnot [string] -or $check['scenario'] -cnotin $directions.Keys -or
+            $check['journal_mode'] -isnot [string] -or $check['journal_mode'] -cnotin $modes -or
+            $check['status'] -isnot [string] -or $check['status'] -cne 'PASS') {
+            throw 'SQLite compatibility emitted an unexpected or failed file check.'
+        }
+        $engines = $check['engines']
+        $expectedEngines = $directions[$check['scenario']]
+        if ($engines -isnot [array] -or $engines.Count -ne $expectedEngines.Count) {
+            throw 'SQLite compatibility must report the engine for each file stage.'
+        }
+        for ($index = 0; $index -lt $engines.Count; $index++) {
+            if ($engines[$index] -isnot [string] -or $engines[$index] -cne $expectedEngines[$index]) {
+                throw 'SQLite compatibility reported an incorrect file engine sequence.'
+            }
+        }
+        if (-not $seenChecks.Add("$($check['scenario'])/$($check['journal_mode'])")) {
+            throw 'SQLite compatibility emitted a duplicate file direction and journal mode.'
+        }
+    }
+    Write-Host 'PASS W002 SQLite linked-runtime and file compatibility suite'
 }
 
 $repoRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
@@ -193,29 +326,56 @@ try {
         'sqlserver' = 'sqlserver-2022'
         'mysql' = 'mysql-8.4'
     }
-    Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles $baselineProfiles
-    Write-Host 'PASS W002 local checks and all four driver suites'
+    $matrixFailures = [System.Collections.Generic.List[string]]::new()
+    try {
+        Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles $baselineProfiles
+        Write-Host 'PASS W002 local checks and all four driver suites'
+    }
+    catch {
+        $matrixFailures.Add($_.Exception.Message)
+    }
     if ($Compatibility) {
         $profiles = [ordered] @{
-            'postgres' = 'postgres-16'
-            'mysql' = 'mysql-8.0'
+            'postgres-16' = @{ Provider = 'postgres'; Facts = @{ engine_version = '16.16'; server_version_num = '160016' } }
+            'postgres-17' = @{ Provider = 'postgres'; Facts = @{ engine_version = '17.12'; server_version_num = '170012' } }
+            'mysql-8.0' = @{ Provider = 'mysql'; Facts = @{ server_version = '8.0.46' } }
+            'sqlserver-2017' = @{ Provider = 'sqlserver'; Facts = @{ version = '14.0.3570.2'; compatibility_level = '140' } }
+            'sqlserver-2019' = @{ Provider = 'sqlserver'; Facts = @{ version = '15.0.4510.2'; compatibility_level = '150' } }
         }
-        $compatibilityFailures = [System.Collections.Generic.List[string]]::new()
         foreach ($entry in $profiles.GetEnumerator()) {
-            $provider = $entry.Key
-            $profileName = $entry.Value
+            $profileName = $entry.Key
+            $provider = $entry.Value.Provider
             $selection = $provider, '--profile', $profileName
+            if ($provider -eq 'sqlserver') {
+                if (-not $AcceptLegacySqlServerEula) {
+                    $matrixFailures.Add("$profileName is BLOCKED. Supply -AcceptLegacySqlServerEula for this run.")
+                    continue
+                }
+                $selection += '--accept-legacy-sqlserver-eula'
+            }
             try {
-                Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles @{ $provider = $profileName }
+                $expectedFacts = @{ $provider = $entry.Value.Facts }
+                Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles @{ $provider = $profileName } -ExpectedFacts $expectedFacts
                 Write-Host "PASS W002 $profileName compatibility suite"
             }
             catch {
-                $compatibilityFailures.Add("$profileName failed. $($_.Exception.Message)")
+                $matrixFailures.Add("$profileName failed. $($_.Exception.Message)")
             }
         }
-        if ($compatibilityFailures.Count -gt 0) {
-            throw ($compatibilityFailures -join [Environment]::NewLine)
+        try {
+            Invoke-SqliteCompatibility -Python $python
         }
+        catch {
+            $matrixFailures.Add($_.Exception.Message)
+        }
+    }
+    if ($matrixFailures.Count -gt 0) {
+        throw ($matrixFailures -join [Environment]::NewLine)
+    }
+    if ($Compatibility) {
+        # SQLite file compatibility reruns the baseline profile and adds one linked runtime.
+        $distinctProfiles = $baselineProfiles.Count + $profiles.Count + 1
+        Write-Host "PASS W002 compatibility matrix with $distinctProfiles distinct engine profiles"
     }
 }
 finally {

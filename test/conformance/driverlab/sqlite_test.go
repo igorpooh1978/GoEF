@@ -17,23 +17,46 @@ import (
 	"modernc.org/sqlite"
 )
 
-const (
-	sqliteVersion       = "3.54.1"
-	sqliteSourceID      = "2026-10-16 14:45:20 555e07ef33f69a0957d24d8e555b702464a131d6f1607f4c3c1e4551e8e6ca76"
-	sqliteBusyTimeoutMS = 1000
-)
+const sqliteBusyTimeoutMS = 1000
 
 func openSQLite(t *testing.T) fixture {
 	t.Helper()
 	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
 	defer cancel()
 
-	path := filepath.ToSlash(filepath.Join(t.TempDir(), "driverlab.db"))
+	db := openSQLitePool(t, filepath.Join(t.TempDir(), "driverlab.db"), "rwc")
+	setSQLiteJournalMode(t, ctx, db, "wal")
+	checkSQLiteConnections(t, ctx, db, "wal")
+	options := sqliteCompileOptions(t, ctx, db)
+	optionsDigest := sha256.Sum256([]byte(strings.Join(options, "\n")))
+	return fixture{
+		db:             db,
+		bind:           func(i int) string { return "?" + strconv.Itoa(i) },
+		code:           sqliteNativeCode,
+		uniqueCode:     "2067", // SQLITE_CONSTRAINT_UNIQUE
+		foreignKeyCode: "787",  // SQLITE_CONSTRAINT_FOREIGNKEY
+		facts: map[string]string{
+			"engine_version":         sqliteVersion,
+			"source_id":              sqliteSourceID,
+			"journal_mode":           "wal",
+			"foreign_keys":           "1",
+			"busy_timeout_ms":        strconv.Itoa(sqliteBusyTimeoutMS),
+			"compile_options_count":  strconv.Itoa(len(options)),
+			"compile_options_sha256": hex.EncodeToString(optionsDigest[:]),
+		},
+	}
+}
+
+func openSQLitePool(t *testing.T, filename, mode string) *sql.DB {
+	t.Helper()
+
+	path := filepath.ToSlash(filename)
 	if !strings.HasPrefix(path, "/") {
 		path = "/" + path // SQLite file URIs spell Windows drive paths as /C:/...
 	}
 	settings := url.Values{
 		"_pragma": {"foreign_keys(1)", "busy_timeout(" + strconv.Itoa(sqliteBusyTimeoutMS) + ")"},
+		"mode":    {mode},
 	}
 	dsn := url.URL{Scheme: "file", Path: path, RawQuery: settings.Encode()}
 	db, err := sql.Open("sqlite", dsn.String())
@@ -47,37 +70,30 @@ func openSQLite(t *testing.T) fixture {
 	})
 	db.SetMaxOpenConns(2)
 	db.SetMaxIdleConns(2)
+	return db
+}
 
+func setSQLiteJournalMode(t *testing.T, ctx context.Context, db *sql.DB, want string) {
+	t.Helper()
+	var query string
+	switch want {
+	case "delete":
+		query = "PRAGMA journal_mode=DELETE"
+	case "wal":
+		query = "PRAGMA journal_mode=WAL"
+	default:
+		t.Fatal("invalid SQLite journal mode")
+	}
 	var journalMode string
-	if err := db.QueryRowContext(ctx, "PRAGMA journal_mode=WAL").Scan(&journalMode); err != nil {
-		t.Fatalf("enable SQLite WAL failed (native code %q)", sqliteNativeCode(err))
+	if err := db.QueryRowContext(ctx, query).Scan(&journalMode); err != nil {
+		t.Fatalf("set SQLite journal mode failed (native code %q)", sqliteNativeCode(err))
 	}
-	if journalMode != "wal" {
-		t.Fatal("SQLite fixture requires WAL journal mode")
-	}
-
-	checkSQLiteConnections(t, ctx, db)
-	options := sqliteCompileOptions(t, ctx, db)
-	optionsDigest := sha256.Sum256([]byte(strings.Join(options, "\n")))
-	return fixture{
-		db:             db,
-		bind:           func(i int) string { return "?" + strconv.Itoa(i) },
-		code:           sqliteNativeCode,
-		uniqueCode:     "2067", // SQLITE_CONSTRAINT_UNIQUE
-		foreignKeyCode: "787",  // SQLITE_CONSTRAINT_FOREIGNKEY
-		facts: map[string]string{
-			"engine_version":         sqliteVersion,
-			"source_id":              sqliteSourceID,
-			"journal_mode":           journalMode,
-			"foreign_keys":           "1",
-			"busy_timeout_ms":        strconv.Itoa(sqliteBusyTimeoutMS),
-			"compile_options_count":  strconv.Itoa(len(options)),
-			"compile_options_sha256": hex.EncodeToString(optionsDigest[:]),
-		},
+	if journalMode != want {
+		t.Fatal("SQLite fixture did not enter the requested journal mode")
 	}
 }
 
-func checkSQLiteConnections(t *testing.T, ctx context.Context, db *sql.DB) {
+func checkSQLiteConnections(t *testing.T, ctx context.Context, db *sql.DB, wantJournalMode string) {
 	t.Helper()
 
 	// Keeping each lease until the end forces database/sql to open two physical connections.
@@ -102,7 +118,7 @@ func checkSQLiteConnections(t *testing.T, ctx context.Context, db *sql.DB) {
 		if version != sqliteVersion || sourceID != sqliteSourceID {
 			t.Fatalf("SQLite connection %d does not match the pinned engine identity", i)
 		}
-		if journalMode != "wal" || foreignKeys != 1 || busyTimeout != sqliteBusyTimeoutMS {
+		if journalMode != wantJournalMode || foreignKeys != 1 || busyTimeout != sqliteBusyTimeoutMS {
 			t.Fatalf("SQLite connection %d has unexpected journal mode, foreign keys, or busy timeout", i)
 		}
 	}
