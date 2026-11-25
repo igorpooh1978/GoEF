@@ -9,6 +9,8 @@ Tracked by [W000 #1](https://github.com/igorpooh1978/GoEF/issues/1). This is the
 | [SQL Server 2022 CU28 (16.0.4325.4)](../providers/SQLSERVER.md) | `github.com/microsoft/go-mssqldb` v1.11.0 | Supported architecture and edition, pinned server artifact, disposable database, compatibility level, collation and isolation settings | Lookup and scoped exact build identity passed [#6](https://github.com/igorpooh1978/GoEF/issues/6). | NOT RUN |
 | [Oracle MySQL 8.4.13.1 LTS](../providers/MYSQL.md) | `github.com/go-sql-driver/mysql` v1.10.0 | Exact release and artifact digest, disposable InnoDB database, SQL mode, collation, time zone and isolation settings | Context7 returns 8.4. Oracle identifies the exact update directly. The [MCP recheck](../evidence/W000/MCP_MYSQL_RECHECK.md) remains blocked [#11](https://github.com/igorpooh1978/GoEF/issues/11). | NOT RUN |
 
+The [version-compatibility matrix](ENGINE_COMPATIBILITY.md) tracks the lower engine profiles, driver pins and feature gates. The [local driver suite](../evidence/W002/DRIVER_GHERKIN.md) provides separate native Go-driver evidence.
+
 ## Acceptance per version
 
 | Suite | Required proof | W000 execution |

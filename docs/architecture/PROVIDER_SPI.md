@@ -14,6 +14,8 @@ The consumer closes rows before releasing the lease. Give cleanup a fresh, bound
 
 ## Compatibility and extensions
 
+Engine release, database compatibility mode, driver version and SPI generation are separate inputs. Future adapters must negotiate observed engine capabilities before dispatch. See the [version-compatibility matrix](../parity/ENGINE_COMPATIBILITY.md).
+
 Keep the required execution interface and its semantics stable within v1. Add features through separately discoverable optional interfaces and explicit capabilities. A change to required methods or existing lifecycle or value semantics requires a new SPI generation and a compatibility record. A provider cannot satisfy an unavailable feature by routing it through an implicit fallback.
 
 Model codecs/map negotiation, the compiler's relational plan types, transactions and savepoints, and migration planning and execution are staged extensions. Required behaviors remain in the [W005 transaction contract](TRANSACTION_ENGINE.md), [migration contract](MIGRATION_ENGINE.md), and [module graph](MODULE_GRAPH.md). In particular, transaction creation must bind the exact connection, only the owner may complete it, and an unknown commit outcome prohibits replay. This change freezes the transport on which those extensions depend and leaves their public types to their implementing waves, where two concrete implementations can validate them.

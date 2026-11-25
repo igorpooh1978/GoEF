@@ -11,3 +11,7 @@ The sources below are research references for the W000 documentation. The W000 s
 | Pomelo EF Core provider 9.0.0 | [MIT, LICENSE](https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql/blob/58dd6883cb9616fe49f671b943a826b459c0117f/LICENSE), Pomelo Foundation | Review source headers and preserve the upstream copyright and permission notice where required. |
 
 The [source lock](docs/upstream/lock.json) records commit and license blob IDs. For any copied or adapted material or approved dependency, record upstream repository, exact commit, file and symbol in a reviewed ADR. Check the exact headers, terms and relevant notices, and update distribution attributions before release. GoEF's own license decision is tracked in [#15](https://github.com/igorpooh1978/GoEF/issues/15) and the release workflow.
+
+## W002 test module dependencies
+
+The isolated W002 test module pins pgx v5.13.0 (MIT), modernc.org/sqlite v1.63.0 (BSD-3-Clause), go-mssqldb v1.11.0 (BSD-3-Clause), and go-sql-driver/mysql v1.10.0 (MPL-2.0). The selected modules include their license texts. See the [dependency and checksum report](docs/evidence/W002/DRIVER_GHERKIN.md). Before distributing a test binary, review the resolved transitive graph and preserve its applicable license terms. The core Go module does not import the test drivers.

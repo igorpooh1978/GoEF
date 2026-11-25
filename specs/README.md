@@ -4,4 +4,6 @@ The features directory contains English Gherkin. Feature tags identify registry 
 
 Bootstrap scenarios are SPECIFIED. They become executable when a named test validates the observable outcome. Record RED or characterization before changing behavior, GREEN after the change, and independently reviewed evidence on the integrated commit. No scenario earns PASS from this document, a stub step, or a SQL string alone.
 
+The separate [W002 driver Gherkin feature](../test/conformance/driverlab/features/driver.feature) characterizes native driver behavior with real engines. Its [execution evidence](../docs/evidence/W002/DRIVER_GHERKIN.md) does not promote these GoEF application scenarios.
+
 Run the [bootstrap validator](../test/bootstrap/README.md) after changing a spec, registry, or guide.
