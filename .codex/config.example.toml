@@ -1,0 +1,11 @@
+# Copy approved entries into a trusted project configuration only when needed.
+# Both documentation servers are disabled by default.
+[mcp_servers.goef_context7]
+url = "https://mcp.context7.com/mcp"
+enabled = false
+enabled_tools = ["resolve-library-id", "query-docs"]
+
+[mcp_servers.goef_microsoft_learn]
+url = "https://learn.microsoft.com/api/mcp"
+enabled = false
+enabled_tools = ["microsoft_docs_search", "microsoft_docs_fetch"]

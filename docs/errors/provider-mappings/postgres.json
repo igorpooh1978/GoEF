@@ -1,0 +1,220 @@
+{
+  "schemaVersion": 1,
+  "provider": "postgres",
+  "mappings": [
+    {
+      "id": "postgres-23505-UniqueViolation",
+      "errorId": "GOEF-CONS-0001",
+      "engineVersionRange": "PostgreSQL 18.x documentation target",
+      "driver": "github.com/jackc/pgx/v5/pgconn",
+      "driverVersion": null,
+      "driverField": "*pgconn.PgError.Code",
+      "native": {
+        "type": "sqlstate",
+        "value": "23505"
+      },
+      "requiredContext": "Server identifies a unique constraint during a write.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrUniqueViolation",
+      "errorsIs": [
+        "ErrUniqueViolation"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://www.postgresql.org/docs/18/errcodes-appendix.html",
+        "https://pkg.go.dev/github.com/jackc/pgx/v5/pgconn#PgError"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "Insert a duplicate key into the isolated fixture.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-POSTGRES-001",
+      "evidence": null
+    },
+    {
+      "id": "postgres-23503-ForeignKeyViolation",
+      "errorId": "GOEF-CONS-0002",
+      "engineVersionRange": "PostgreSQL 18.x documentation target",
+      "driver": "github.com/jackc/pgx/v5/pgconn",
+      "driverVersion": null,
+      "driverField": "*pgconn.PgError.Code",
+      "native": {
+        "type": "sqlstate",
+        "value": "23503"
+      },
+      "requiredContext": "Server identifies a referential constraint during a write.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrForeignKeyViolation",
+      "errorsIs": [
+        "ErrForeignKeyViolation"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://www.postgresql.org/docs/18/errcodes-appendix.html",
+        "https://pkg.go.dev/github.com/jackc/pgx/v5/pgconn#PgError"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "Violate the isolated FK with a controlled parent/child write.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-POSTGRES-002",
+      "evidence": null
+    },
+    {
+      "id": "postgres-23502-NotNullViolation",
+      "errorId": "GOEF-CONS-0003",
+      "engineVersionRange": "PostgreSQL 18.x documentation target",
+      "driver": "github.com/jackc/pgx/v5/pgconn",
+      "driverVersion": null,
+      "driverField": "*pgconn.PgError.Code",
+      "native": {
+        "type": "sqlstate",
+        "value": "23502"
+      },
+      "requiredContext": "Server identifies a null column violation during a write.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrNotNullViolation",
+      "errorsIs": [
+        "ErrNotNullViolation"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://www.postgresql.org/docs/18/errcodes-appendix.html",
+        "https://pkg.go.dev/github.com/jackc/pgx/v5/pgconn#PgError"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "Server identifies a null column violation during a write.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-POSTGRES-003",
+      "evidence": null
+    },
+    {
+      "id": "postgres-23514-CheckViolation",
+      "errorId": "GOEF-CONS-0004",
+      "engineVersionRange": "PostgreSQL 18.x documentation target",
+      "driver": "github.com/jackc/pgx/v5/pgconn",
+      "driverVersion": null,
+      "driverField": "*pgconn.PgError.Code",
+      "native": {
+        "type": "sqlstate",
+        "value": "23514"
+      },
+      "requiredContext": "Server identifies a failed check during a write.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrCheckViolation",
+      "errorsIs": [
+        "ErrCheckViolation"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://www.postgresql.org/docs/18/errcodes-appendix.html",
+        "https://pkg.go.dev/github.com/jackc/pgx/v5/pgconn#PgError"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "Server identifies a failed check during a write.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-POSTGRES-004",
+      "evidence": null
+    },
+    {
+      "id": "postgres-40001-SerializationFailure",
+      "errorId": "GOEF-CONC-0003",
+      "engineVersionRange": "PostgreSQL 18.x documentation target",
+      "driver": "github.com/jackc/pgx/v5/pgconn",
+      "driverVersion": null,
+      "driverField": "*pgconn.PgError.Code",
+      "native": {
+        "type": "sqlstate",
+        "value": "40001"
+      },
+      "requiredContext": "Server rejected the transaction due to concurrent changes. Require authoritative rollback before whole-unit replay.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrSerializationFailure",
+      "errorsIs": [
+        "ErrSerializationFailure"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "transaction_safe",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://www.postgresql.org/docs/18/errcodes-appendix.html",
+        "https://pkg.go.dev/github.com/jackc/pgx/v5/pgconn#PgError"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "Server rejected the transaction due to concurrent changes. Require authoritative rollback before whole-unit replay.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-POSTGRES-005",
+      "evidence": null
+    },
+    {
+      "id": "postgres-40P01-Deadlock",
+      "errorId": "GOEF-CONC-0002",
+      "engineVersionRange": "PostgreSQL 18.x documentation target",
+      "driver": "github.com/jackc/pgx/v5/pgconn",
+      "driverVersion": null,
+      "driverField": "*pgconn.PgError.Code",
+      "native": {
+        "type": "sqlstate",
+        "value": "40P01"
+      },
+      "requiredContext": "Server identified a deadlock victim. Require authoritative rollback before replay.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrDeadlock",
+      "errorsIs": [
+        "ErrDeadlock"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "transaction_safe",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://www.postgresql.org/docs/18/errcodes-appendix.html",
+        "https://pkg.go.dev/github.com/jackc/pgx/v5/pgconn#PgError"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "Server identified a deadlock victim. Require authoritative rollback before replay.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-POSTGRES-006",
+      "evidence": null
+    }
+  ],
+  "gaps": [
+    "Prepare statement timeout, lock budget, authorization and connection failures, including 57014 with caller-vs-server cancellation controls.",
+    "Unmatched native codes return ErrUnknownDriver before commit; unresolved commit uses ErrCommitOutcomeUnknown. Every rule awaits a real-engine positive and a contextual negative."
+  ]
+}

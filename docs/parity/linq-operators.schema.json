@@ -1,0 +1,494 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GoEF LINQ operator discovery and evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "sources": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/source"
+      },
+      "minProperties": 1
+    },
+    "providerPolicies": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/providerPolicy"
+      },
+      "minProperties": 1
+    },
+    "semanticProfiles": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/semanticProfile"
+      },
+      "minProperties": 1
+    },
+    "modeContracts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "objects": {
+          "$ref": "#/$defs/modeContract"
+        },
+        "expressions": {
+          "$ref": "#/$defs/modeContract"
+        },
+        "queryable": {
+          "$ref": "#/$defs/modeContract"
+        }
+      },
+      "required": [
+        "objects",
+        "expressions",
+        "queryable"
+      ]
+    },
+    "acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "adr": {
+          "type": "string",
+          "minLength": 1
+        },
+        "conformance": {
+          "type": "string",
+          "minLength": 1
+        },
+        "examples": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "gap": {
+          "type": "string",
+          "minLength": 1
+        },
+        "issue": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "adr",
+        "conformance",
+        "examples",
+        "gap",
+        "issue"
+      ]
+    },
+    "operators": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/operator"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "version",
+    "sources",
+    "providerPolicies",
+    "semanticProfiles",
+    "modeContracts",
+    "acceptance",
+    "operators"
+  ],
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "repository": {
+          "type": "string",
+          "pattern": "^https://github\\.com/[^/]+/[^/]+$"
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "provenance": {
+          "enum": [
+            "stable",
+            "research"
+          ]
+        }
+      },
+      "required": [
+        "repository",
+        "ref",
+        "sha",
+        "provenance"
+      ]
+    },
+    "providerPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "DISCOVERED",
+            "SPECIFIED",
+            "RED",
+            "IMPLEMENTING",
+            "GREEN",
+            "VERIFIED",
+            "PARTIAL",
+            "BLOCKED",
+            "NOT_APPLICABLE",
+            "DEFERRED"
+          ]
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "status",
+        "versions",
+        "reason"
+      ]
+    },
+    "semanticProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cost": {
+          "type": "string",
+          "minLength": 1
+        },
+        "wave": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "execution",
+        "contract",
+        "cost",
+        "wave"
+      ]
+    },
+    "modeContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "doc": {
+          "type": "string",
+          "minLength": 1
+        },
+        "boundary": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "doc",
+        "boundary"
+      ]
+    },
+    "overload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^LINQ-(OBJ|EXPR|QUERY)-[A-Z0-9]+(-[A-Z0-9]+)*-[a-f0-9]{10}$"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "signature": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "id",
+        "path",
+        "line",
+        "signature"
+      ]
+    },
+    "operator": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^LINQ-(OBJ|EXPR|QUERY)-[A-Z0-9]+(-[A-Z0-9]+)*$"
+        },
+        "featureId": {
+          "enum": [
+            "LINQ-OBJECTS-001",
+            "LINQ-EXPRESSION-001",
+            "LINQ-QUERYABLE-001"
+          ]
+        },
+        "mode": {
+          "enum": [
+            "objects",
+            "expressions",
+            "queryable"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "symbol": {
+          "type": "string",
+          "minLength": 1
+        },
+        "overloads": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/overload"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "implementationPath": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tests": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "status": {
+          "enum": [
+            "DISCOVERED",
+            "SPECIFIED",
+            "RED",
+            "IMPLEMENTING",
+            "GREEN",
+            "VERIFIED",
+            "PARTIAL",
+            "BLOCKED",
+            "NOT_APPLICABLE",
+            "DEFERRED"
+          ]
+        },
+        "semanticProfile": {
+          "type": "string",
+          "minLength": 1
+        },
+        "providerCells": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "postgres": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sqlite": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sqlserver": {
+              "type": "string",
+              "minLength": 1
+            },
+            "mysql": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "postgres",
+            "sqlite",
+            "sqlserver",
+            "mysql"
+          ]
+        },
+        "issue": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "scenarioIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^LINQ-[A-Z]+-[0-9]{3}-S[0-9]{2}$"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "executableTests": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "evidenceSha": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{40}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "featureId",
+        "mode",
+        "source",
+        "owner",
+        "symbol",
+        "overloads",
+        "implementationPath",
+        "tests",
+        "status",
+        "semanticProfile",
+        "providerCells",
+        "issue",
+        "scenarioIds",
+        "executableTests",
+        "evidenceSha"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "VERIFIED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidenceSha": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{40}$"
+              },
+              "executableTests": {
+                "minItems": 1
+              },
+              "scenarioIds": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "objects"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "featureId": {
+                "const": "LINQ-OBJECTS-001"
+              },
+              "id": {
+                "pattern": "^LINQ-OBJ-"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "expressions"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "featureId": {
+                "const": "LINQ-EXPRESSION-001"
+              },
+              "id": {
+                "pattern": "^LINQ-EXPR-"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "queryable"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "featureId": {
+                "const": "LINQ-QUERYABLE-001"
+              },
+              "id": {
+                "pattern": "^LINQ-QUERY-"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

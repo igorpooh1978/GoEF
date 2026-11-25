@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "provider": "mysql",
+  "mappings": [
+    {
+      "id": "mysql-1062-UniqueViolation",
+      "errorId": "GOEF-CONS-0001",
+      "engineVersionRange": "MySQL 8.4.x InnoDB documentation target",
+      "driver": "github.com/go-sql-driver/mysql",
+      "driverVersion": null,
+      "driverField": "*mysql.MySQLError.Number",
+      "native": {
+        "type": "nativeCode",
+        "value": "1062"
+      },
+      "requiredContext": "ER_DUP_ENTRY during a write.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrUniqueViolation",
+      "errorsIs": [
+        "ErrUniqueViolation"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://dev.mysql.com/doc/mysql-errors/8.4/en/server-error-reference.html",
+        "https://pkg.go.dev/github.com/go-sql-driver/mysql#MySQLError"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "Insert a duplicate key into the isolated fixture.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-MYSQL-001",
+      "evidence": null
+    },
+    {
+      "id": "mysql-1452-ForeignKeyViolation",
+      "errorId": "GOEF-CONS-0002",
+      "engineVersionRange": "MySQL 8.4.x InnoDB documentation target",
+      "driver": "github.com/go-sql-driver/mysql",
+      "driverVersion": null,
+      "driverField": "*mysql.MySQLError.Number",
+      "native": {
+        "type": "nativeCode",
+        "value": "1452"
+      },
+      "requiredContext": "A child insert or update references a missing parent.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrForeignKeyViolation",
+      "errorsIs": [
+        "ErrForeignKeyViolation"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://dev.mysql.com/doc/mysql-errors/8.4/en/server-error-reference.html",
+        "https://pkg.go.dev/github.com/go-sql-driver/mysql#MySQLError"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "Violate the isolated FK with a controlled parent/child write.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-MYSQL-002",
+      "evidence": null
+    },
+    {
+      "id": "mysql-1451-ForeignKeyViolation",
+      "errorId": "GOEF-CONS-0002",
+      "engineVersionRange": "MySQL 8.4.x InnoDB documentation target",
+      "driver": "github.com/go-sql-driver/mysql",
+      "driverVersion": null,
+      "driverField": "*mysql.MySQLError.Number",
+      "native": {
+        "type": "nativeCode",
+        "value": "1451"
+      },
+      "requiredContext": "A restricted parent change would orphan a child.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrForeignKeyViolation",
+      "errorsIs": [
+        "ErrForeignKeyViolation"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://dev.mysql.com/doc/mysql-errors/8.4/en/server-error-reference.html",
+        "https://pkg.go.dev/github.com/go-sql-driver/mysql#MySQLError"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "Violate the isolated FK with a controlled parent/child write.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-MYSQL-003",
+      "evidence": null
+    },
+    {
+      "id": "mysql-1213-Deadlock",
+      "errorId": "GOEF-CONC-0002",
+      "engineVersionRange": "MySQL 8.4.x InnoDB documentation target",
+      "driver": "github.com/go-sql-driver/mysql",
+      "driverVersion": null,
+      "driverField": "*mysql.MySQLError.Number",
+      "native": {
+        "type": "nativeCode",
+        "value": "1213"
+      },
+      "requiredContext": "InnoDB reports a deadlock victim. Verify whole-transaction rollback before replay.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrDeadlock",
+      "errorsIs": [
+        "ErrDeadlock"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "transaction_safe",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://dev.mysql.com/doc/mysql-errors/8.4/en/server-error-reference.html",
+        "https://pkg.go.dev/github.com/go-sql-driver/mysql#MySQLError"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "InnoDB reports a deadlock victim. Verify whole-transaction rollback before replay.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-MYSQL-004",
+      "evidence": null
+    },
+    {
+      "id": "mysql-1205-Timeout",
+      "errorId": "GOEF-IO-0002",
+      "engineVersionRange": "MySQL 8.4.x InnoDB documentation target",
+      "driver": "github.com/go-sql-driver/mysql",
+      "driverVersion": null,
+      "driverField": "*mysql.MySQLError.Number",
+      "native": {
+        "type": "nativeCode",
+        "value": "1205"
+      },
+      "requiredContext": "InnoDB lock wait expires with live caller context. Inspect rollback configuration and transaction state.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrTimeout",
+      "errorsIs": [
+        "ErrTimeout"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://dev.mysql.com/doc/mysql-errors/8.4/en/server-error-reference.html",
+        "https://pkg.go.dev/github.com/go-sql-driver/mysql#MySQLError"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "InnoDB lock wait expires with live caller context. Inspect rollback configuration and transaction state.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-MYSQL-005",
+      "evidence": null
+    }
+  ],
+  "gaps": [
+    "SQLSTATE 23000 alone is ambiguous. Test lock timeout with both rollback-on-timeout modes, cancellation and pre/post-dispatch disconnects.",
+    "Unmatched native codes return ErrUnknownDriver before commit; unresolved commit uses ErrCommitOutcomeUnknown. Every rule awaits a real-engine positive and a contextual negative."
+  ]
+}

@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "provider": "sqlserver",
+  "mappings": [
+    {
+      "id": "sqlserver-2627-UniqueViolation",
+      "errorId": "GOEF-CONS-0001",
+      "engineVersionRange": "SQL Server 17.x documentation target; record database compatibility level",
+      "driver": "github.com/microsoft/go-mssqldb",
+      "driverVersion": null,
+      "driverField": "mssql.Error.Number",
+      "native": {
+        "type": "nativeCode",
+        "value": "2627"
+      },
+      "requiredContext": "A write violates a primary key or unique constraint.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrUniqueViolation",
+      "errorsIs": [
+        "ErrUniqueViolation"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://learn.microsoft.com/en-us/sql/relational-databases/errors-events/database-engine-events-and-errors-2000-to-2999?view=sql-server-ver16",
+        "https://pkg.go.dev/github.com/microsoft/go-mssqldb#Error"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "Insert a duplicate key into the isolated fixture.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-SQLSERVER-001",
+      "evidence": null
+    },
+    {
+      "id": "sqlserver-2601-UniqueViolation",
+      "errorId": "GOEF-CONS-0001",
+      "engineVersionRange": "SQL Server 17.x documentation target; record database compatibility level",
+      "driver": "github.com/microsoft/go-mssqldb",
+      "driverVersion": null,
+      "driverField": "mssql.Error.Number",
+      "native": {
+        "type": "nativeCode",
+        "value": "2601"
+      },
+      "requiredContext": "A write duplicates the key of a unique index.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrUniqueViolation",
+      "errorsIs": [
+        "ErrUniqueViolation"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://learn.microsoft.com/en-us/sql/relational-databases/errors-events/database-engine-events-and-errors-2000-to-2999?view=sql-server-ver16",
+        "https://pkg.go.dev/github.com/microsoft/go-mssqldb#Error"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "Insert a duplicate key into the isolated fixture.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-SQLSERVER-002",
+      "evidence": null
+    },
+    {
+      "id": "sqlserver-547-ForeignKeyViolation",
+      "errorId": "GOEF-CONS-0002",
+      "engineVersionRange": "SQL Server 17.x documentation target; record database compatibility level",
+      "driver": "github.com/microsoft/go-mssqldb",
+      "driverVersion": null,
+      "driverField": "mssql.Error.Number",
+      "native": {
+        "type": "nativeCode",
+        "value": "547"
+      },
+      "requiredContext": "DML plus verified schema isolates foreign key as the only possible constraint source.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrForeignKeyViolation",
+      "errorsIs": [
+        "ErrForeignKeyViolation"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://learn.microsoft.com/en-us/sql/relational-databases/errors-events/database-engine-events-and-errors-0-to-999?view=sql-server-ver16",
+        "https://pkg.go.dev/github.com/microsoft/go-mssqldb#Error"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "Violate the isolated FK with a controlled parent/child write.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-SQLSERVER-003",
+      "evidence": null
+    },
+    {
+      "id": "sqlserver-547-CheckViolation",
+      "errorId": "GOEF-CONS-0004",
+      "engineVersionRange": "SQL Server 17.x documentation target; record database compatibility level",
+      "driver": "github.com/microsoft/go-mssqldb",
+      "driverVersion": null,
+      "driverField": "mssql.Error.Number",
+      "native": {
+        "type": "nativeCode",
+        "value": "547"
+      },
+      "requiredContext": "DML plus verified schema isolates a check as the only possible constraint source.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrCheckViolation",
+      "errorsIs": [
+        "ErrCheckViolation"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://learn.microsoft.com/en-us/sql/relational-databases/errors-events/database-engine-events-and-errors-0-to-999?view=sql-server-ver16",
+        "https://pkg.go.dev/github.com/microsoft/go-mssqldb#Error"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "DML plus verified schema isolates a check as the only possible constraint source.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-SQLSERVER-004",
+      "evidence": null
+    },
+    {
+      "id": "sqlserver-1205-Deadlock",
+      "errorId": "GOEF-CONC-0002",
+      "engineVersionRange": "SQL Server 17.x documentation target; record database compatibility level",
+      "driver": "github.com/microsoft/go-mssqldb",
+      "driverVersion": null,
+      "driverField": "mssql.Error.Number",
+      "native": {
+        "type": "nativeCode",
+        "value": "1205"
+      },
+      "requiredContext": "Engine identifies the victim. Verify rollback and exclude lost commit acknowledgements.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrDeadlock",
+      "errorsIs": [
+        "ErrDeadlock"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "transaction_safe",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://learn.microsoft.com/en-us/sql/relational-databases/errors-events/mssqlserver-1205-database-engine-error?view=sql-server-ver16",
+        "https://pkg.go.dev/github.com/microsoft/go-mssqldb#Error"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "Engine identifies the victim. Verify rollback and exclude lost commit acknowledgements.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-SQLSERVER-005",
+      "evidence": null
+    }
+  ],
+  "gaps": [
+    "Number 547 with multiple viable constraint sources stays unknown. Reproduce cancellation, XACT_STATE under XACT_ABORT and lock timeout separately.",
+    "Unmatched native codes return ErrUnknownDriver before commit; unresolved commit uses ErrCommitOutcomeUnknown. Every rule awaits a real-engine positive and a contextual negative."
+  ]
+}

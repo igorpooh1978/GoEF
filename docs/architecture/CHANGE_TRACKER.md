@@ -1,0 +1,22 @@
+# Change tracking and unit of work
+
+Proposed contract. One context owns the tracked entity pointers, identity map and original snapshots for a single unit of work. A composite key includes the model's entity/key identity and ordered, codec-normalized components. A reversible tuple encoding or a value comparer must distinguish component boundaries. Temporary generated keys have a separate identity namespace until the provider returns the final key.
+
+| Event | Before → after | Observable behavior |
+| --- | --- | --- |
+| Tracked read or attach existing | Detached → Unchanged | Repeated tracked reads of a key return the same pointer. Attaching a different live pointer for that key reports an identity conflict. |
+| Add new | Detached → Added | Track the caller's pointer and mark generated values provisional. |
+| Detect or mark change | Unchanged → Modified | Keep original values for comparison and the concurrency predicate. Mutable fields need independent snapshots and structural comparers. |
+| Remove | Unchanged/Modified → Deleted, Added → Detached | Deleting a never-persisted addition removes its pending insert. Relationship fixup updates inverse navigation and orphan/cascade state according to metadata. |
+| Accept confirmed write | Added/Modified → Unchanged, Deleted → Detached | Replace snapshots from acknowledged values and propagate confirmed principal keys into dependent identity and FK entries. |
+| Clear or detach | Tracked → Detached | Release references. A no-tracking read does not populate this map. Query-local identity resolution discards its map after enumeration. |
+
+**Saving.** Detect changes, sort dependent modifications by key and foreign-key requirements, create a journal of pending tracker changes, and execute on the bound transaction. Resolve cycles only via an explicitly supported strategy. Insert-generated keys may be needed by later commands in the same transaction. Stage them and dependent key changes together. On confirmed commit, publish staged values and apply acceptance according to the save option. With deferred acceptance, keep sufficient state to call `AcceptAllChanges` once without issuing duplicate writes.
+
+**Transactions.** A successful save inside an externally controlled transaction is provisional. An explicit transaction owner must notify the context of commit or rollback, or dispose and reload the context if the outcome cannot be supplied. A confirmed rollback restores provisional values, identity keys and snapshots so the application can inspect and retry known-safe work. Do not report entries accepted after a failed commit. An indeterminate commit blocks automatic replay and further saves until reconciliation establishes the persisted outcome.
+
+**ERR-CONCURRENCY-001.** For a tracked update or delete include the original concurrency token and key in the predicate. If a single expected row is absent, return a typed conflict with a safe entry reference and operation. Preserve proposed edits and original token for an explicit reload/merge decision. Disambiguate an unknown affected-row count using a proven provider strategy before classifying it as a conflict. A concurrency conflict alone does not authorize replay.
+
+**Evidence gate.** Verify pointer identity across reads, composite-key collisions, mutation of slices after a snapshot, fixup of both relationship sides, key propagation, graph save order and state after command failure, rollback and ambiguous commit. The two-context conflict fixture must inspect durable values with an independent context, then exercise explicit merge/reload and a successful save. W000 contains design evidence only. [W001 contract fixtures](https://github.com/igorpooh1978/GoEF/issues/12)
+
+EF's `StateManager` and `IdentityMap.TryGetEntry` supply behavioral reference points. The pinned specification exercises conflict handling when a foreign key is also a concurrency token. GoEF's staged acceptance for caller-owned transactions is a proposed safety policy requiring a documented comparison to EF before release. [StateManager](https://github.com/dotnet/efcore/blob/b34c0e9d7e768aa808ded44f19e7f871bea6869f/src/EFCore/ChangeTracking/Internal/StateManager.cs) · [IdentityMap](https://github.com/dotnet/efcore/blob/b34c0e9d7e768aa808ded44f19e7f871bea6869f/src/EFCore/ChangeTracking/Internal/IdentityMap.cs) · [Concurrency specification](https://github.com/dotnet/efcore/blob/b34c0e9d7e768aa808ded44f19e7f871bea6869f/test/EFCore.Specification.Tests/OptimisticConcurrencyTestBase.cs)

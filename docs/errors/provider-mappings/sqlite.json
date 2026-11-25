@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "provider": "sqlite",
+  "mappings": [
+    {
+      "id": "sqlite-2067-UniqueViolation",
+      "errorId": "GOEF-CONS-0001",
+      "engineVersionRange": "SQLite 3.x extended result-code documentation target; test chosen runtime",
+      "driver": "modernc.org/sqlite",
+      "driverVersion": null,
+      "driverField": "*sqlite.Error.Code()",
+      "native": {
+        "type": "extendedCode",
+        "value": "2067"
+      },
+      "requiredContext": "SQLITE_CONSTRAINT_UNIQUE from an enforced unique index.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrUniqueViolation",
+      "errorsIs": [
+        "ErrUniqueViolation"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://www.sqlite.org/rescode.html",
+        "https://pkg.go.dev/modernc.org/sqlite#Error.Code"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "Insert a duplicate key into the isolated fixture.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-SQLITE-001",
+      "evidence": null
+    },
+    {
+      "id": "sqlite-1555-UniqueViolation",
+      "errorId": "GOEF-CONS-0001",
+      "engineVersionRange": "SQLite 3.x extended result-code documentation target; test chosen runtime",
+      "driver": "modernc.org/sqlite",
+      "driverVersion": null,
+      "driverField": "*sqlite.Error.Code()",
+      "native": {
+        "type": "extendedCode",
+        "value": "1555"
+      },
+      "requiredContext": "SQLITE_CONSTRAINT_PRIMARYKEY from duplicate primary key.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrUniqueViolation",
+      "errorsIs": [
+        "ErrUniqueViolation"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://www.sqlite.org/rescode.html",
+        "https://pkg.go.dev/modernc.org/sqlite#Error.Code"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "Insert a duplicate key into the isolated fixture.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-SQLITE-002",
+      "evidence": null
+    },
+    {
+      "id": "sqlite-787-ForeignKeyViolation",
+      "errorId": "GOEF-CONS-0002",
+      "engineVersionRange": "SQLite 3.x extended result-code documentation target; test chosen runtime",
+      "driver": "modernc.org/sqlite",
+      "driverVersion": null,
+      "driverField": "*sqlite.Error.Code()",
+      "native": {
+        "type": "extendedCode",
+        "value": "787"
+      },
+      "requiredContext": "Foreign-key enforcement enabled on the writing connection.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrForeignKeyViolation",
+      "errorsIs": [
+        "ErrForeignKeyViolation"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://www.sqlite.org/rescode.html",
+        "https://pkg.go.dev/modernc.org/sqlite#Error.Code"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "Violate the isolated FK with a controlled parent/child write.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-SQLITE-003",
+      "evidence": null
+    },
+    {
+      "id": "sqlite-1299-NotNullViolation",
+      "errorId": "GOEF-CONS-0003",
+      "engineVersionRange": "SQLite 3.x extended result-code documentation target; test chosen runtime",
+      "driver": "modernc.org/sqlite",
+      "driverVersion": null,
+      "driverField": "*sqlite.Error.Code()",
+      "native": {
+        "type": "extendedCode",
+        "value": "1299"
+      },
+      "requiredContext": "SQLITE_CONSTRAINT_NOTNULL from a required column.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrNotNullViolation",
+      "errorsIs": [
+        "ErrNotNullViolation"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://www.sqlite.org/rescode.html",
+        "https://pkg.go.dev/modernc.org/sqlite#Error.Code"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "SQLITE_CONSTRAINT_NOTNULL from a required column.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-SQLITE-004",
+      "evidence": null
+    },
+    {
+      "id": "sqlite-275-CheckViolation",
+      "errorId": "GOEF-CONS-0004",
+      "engineVersionRange": "SQLite 3.x extended result-code documentation target; test chosen runtime",
+      "driver": "modernc.org/sqlite",
+      "driverVersion": null,
+      "driverField": "*sqlite.Error.Code()",
+      "native": {
+        "type": "extendedCode",
+        "value": "275"
+      },
+      "requiredContext": "SQLITE_CONSTRAINT_CHECK from an enforced check.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrCheckViolation",
+      "errorsIs": [
+        "ErrCheckViolation"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://www.sqlite.org/rescode.html",
+        "https://pkg.go.dev/modernc.org/sqlite#Error.Code"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "SQLITE_CONSTRAINT_CHECK from an enforced check.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-SQLITE-005",
+      "evidence": null
+    },
+    {
+      "id": "sqlite-517-SerializationFailure",
+      "errorId": "GOEF-CONC-0003",
+      "engineVersionRange": "SQLite 3.x extended result-code documentation target; test chosen runtime",
+      "driver": "modernc.org/sqlite",
+      "driverVersion": null,
+      "driverField": "*sqlite.Error.Code()",
+      "native": {
+        "type": "extendedCode",
+        "value": "517"
+      },
+      "requiredContext": "SQLITE_BUSY_SNAPSHOT during WAL read-to-write upgrade. Roll back the old snapshot before any retry.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrSerializationFailure",
+      "errorsIs": [
+        "ErrSerializationFailure"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "transaction_safe",
+      "outcome": "inspect_transaction",
+      "officialSources": [
+        "https://www.sqlite.org/rescode.html",
+        "https://pkg.go.dev/modernc.org/sqlite#Error.Code"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "SQLITE_BUSY_SNAPSHOT during WAL read-to-write upgrade. Roll back the old snapshot before any retry.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-SQLITE-006",
+      "evidence": null
+    },
+    {
+      "id": "sqlite-5-LockUnavailable",
+      "errorId": "GOEF-CONC-0004",
+      "engineVersionRange": "SQLite 3.x extended result-code documentation target; test chosen runtime",
+      "driver": "modernc.org/sqlite",
+      "driverVersion": null,
+      "driverField": "*sqlite.Error.Code()",
+      "native": {
+        "type": "extendedCode",
+        "value": "5"
+      },
+      "requiredContext": "Exact SQLITE_BUSY only. An extended code is compared first and never masked to this match.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrLockUnavailable",
+      "errorsIs": [
+        "ErrLockUnavailable"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "no_commit_attempted",
+      "officialSources": [
+        "https://www.sqlite.org/rescode.html",
+        "https://pkg.go.dev/modernc.org/sqlite#Error.Code"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "Exact SQLITE_BUSY only. An extended code is compared first and never masked to this match.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-SQLITE-007",
+      "evidence": null
+    },
+    {
+      "id": "sqlite-6-LockUnavailable",
+      "errorId": "GOEF-CONC-0004",
+      "engineVersionRange": "SQLite 3.x extended result-code documentation target; test chosen runtime",
+      "driver": "modernc.org/sqlite",
+      "driverVersion": null,
+      "driverField": "*sqlite.Error.Code()",
+      "native": {
+        "type": "extendedCode",
+        "value": "6"
+      },
+      "requiredContext": "Exact SQLITE_LOCKED only. Inspect connection/shared-cache conflicts before choosing recovery.",
+      "priority": 100,
+      "disambiguation": "Compare the full structured code and require this context. Zero or multiple applicable rules select ErrUnknownDriver. Commit acknowledgement loss takes precedence.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrLockUnavailable",
+      "errorsIs": [
+        "ErrLockUnavailable"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "no_commit_attempted",
+      "officialSources": [
+        "https://www.sqlite.org/rescode.html",
+        "https://pkg.go.dev/modernc.org/sqlite#Error.Code"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "Exact SQLITE_LOCKED only. Inspect connection/shared-cache conflicts before choosing recovery.",
+        "observed": null,
+        "reason": "No pinned driver/engine fixture or actual native reproduction in W000."
+      },
+      "testId": "TEST-MAP-SQLITE-008",
+      "evidence": null
+    }
+  ],
+  "gaps": [
+    "Primary SQLITE_CONSTRAINT alone cannot identify a constraint subtype. Record chosen SQLite runtime build, extended-code settings, driver and WAL mode.",
+    "Unmatched native codes return ErrUnknownDriver before commit; unresolved commit uses ErrCommitOutcomeUnknown. Every rule awaits a real-engine positive and a contextual negative."
+  ]
+}

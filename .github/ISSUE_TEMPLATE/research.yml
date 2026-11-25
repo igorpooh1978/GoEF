@@ -1,0 +1,79 @@
+name: Research
+description: Request pinned upstream, toolchain, or provider research.
+body:
+- type: markdown
+  attributes:
+    value: Write the issue in English. Use synthetic examples and redacted output. For security vulnerabilities,
+      follow the [security policy](https://github.com/igorpooh1978/GoEF/security/policy).
+- type: checkboxes
+  id: existing_issue
+  attributes:
+    label: Related issues
+    options:
+    - label: I searched the GoEF issue tracker for matching work.
+      required: true
+- type: textarea
+  id: objective
+  attributes:
+    label: Objective and scope
+    description: Describe the outcome and non-goals. Link the wave parent, related issues and dependencies.
+  validations:
+    required: true
+- type: textarea
+  id: deliverables
+  attributes:
+    label: Research deliverables
+    description: List questions, specific sources or paths to compare, expected artifacts, measurable exit criteria
+      and unresolved inputs to record.
+  validations:
+    required: true
+- type: textarea
+  id: upstream
+  attributes:
+    label: Upstream evidence
+    description: Give pinned repo/tag/SHA and API, implementation and test permalinks. For a provider, include versioned
+      vendor/driver sources and documentation MCP evidence. State what evidence is pending or why this does not
+      apply.
+  validations:
+    required: true
+- type: textarea
+  id: traceability
+  attributes:
+    label: Feature, error and scenario references
+    description: Link affected feature/operator IDs, proposed or existing error IDs, and Gherkin scenarios. Explain
+      any inapplicable references.
+  validations:
+    required: true
+- type: textarea
+  id: versions
+  attributes:
+    label: Provider and version scope
+    description: List affected Go, engine and driver versions, relevant settings and known version boundaries. Explain
+      any inapplicable providers.
+  validations:
+    required: true
+- type: textarea
+  id: ownership
+  attributes:
+    label: Delivery scope and ownership
+    description: Name the owner, allowed paths, dependency issues, required repository Skills and target wave or
+      release.
+  validations:
+    required: true
+- type: textarea
+  id: verification
+  attributes:
+    label: Acceptance and evidence
+    description: List observable positive and negative outcomes, including cancellation, concurrency and recovery
+      where relevant. Provide baseline/RED/GREEN and conformance commands, evidence links or prerequisites for running
+      them.
+  validations:
+    required: true
+- type: textarea
+  id: documentation
+  attributes:
+    label: Documentation and safety impact
+    description: List affected Godoc, guides and examples, registry/capability rows, compatibility, deployment or
+      migration risks, and security considerations. Explain any inapplicable impacts.
+  validations:
+    required: true

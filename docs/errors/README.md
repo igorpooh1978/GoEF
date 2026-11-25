@@ -1,0 +1,24 @@
+# Error registry and native mapping governance
+
+[registry.json](registry.json) allocates portable IDs. [registry.schema.json](registry.schema.json) describes both the registry and provider table documents using JSON Schema Draft 2020-12. The initial catalog reserves 41 proposed kinds. Its four tables contain documented candidate native rules. Every reproduction is blocked pending the real engine, selected driver build, and the corresponding adapter. No native behavior has been observed in GoEF.
+
+| Provider table | Seed and next experiment |
+| --- | --- |
+| [PostgreSQL](provider-mappings/postgres.json) | SQLSTATE from pgconn, including 23505, 23503, 40001 and 40P01. Coordinate two sessions to identify transactional disposition and rollback. [PostgreSQL SQLSTATE table](https://www.postgresql.org/docs/18/errcodes-appendix.html) |
+| [SQLite](provider-mappings/sqlite.json) | Extended codes identify primary-key, unique, FK, check, required column and snapshot cases. Test extended values before exact primary BUSY/LOCKED matches in a shared file. [SQLite result codes](https://www.sqlite.org/rescode.html) |
+| [SQL Server](provider-mappings/sqlserver.json) | Verify unique constraint/index numbers, deadlock victim, and both contextual uses of 547. If two constraint types could explain the same statement, return unknown. [Microsoft catalog](https://learn.microsoft.com/en-us/sql/relational-databases/errors-events/database-engine-events-and-errors-0-to-999?view=sql-server-ver16) |
+| [MySQL](provider-mappings/mysql.json) | Match InnoDB native error numbers. Distinguish duplicate key, FK child/parent, deadlock and lock wait timeout. Record rollback-on-timeout and sql_mode. [MySQL server error reference](https://dev.mysql.com/doc/mysql-errors/8.4/en/server-error-reference.html) |
+
+## Read a record
+
+Each portable entry declares its trigger, phase, outcome policy, retry class and preconditions, allowlisted metadata, redaction, lifecycle, issue, scenario, planned test identifiers and primary sources. `firstVersion: null` means no released implementation. A policy such as `inspect_transaction` requires runtime evidence before reporting a disposition. `providerMappings` references native rules by ID within the named table. Empty lists mean no seeded native rule; many errors originate entirely in model validation, cardinality or transaction state. `testIds` reserve future case names. The [specifications](../../specs/features/errors/) define intended outcomes and the [public error contract](../architecture/ERROR_CONTRACT.md) defines wrapping, display and CLI behavior.
+
+Mappings specify the intended engine range, proposed driver family, structured field, required condition, priority and expected Go classification. A null driver version means pinning is pending. The `reproduction` object separates the planned trigger from actual observed details. An evidence object on a verified rule names exact engine and driver versions, the serialized fixture/evidence location, negative control, actual test ID and full integrated SHA. Keep native data redacted. Resolving an existing record's `testId` and `evidence.testId` must identify the same test.
+
+## Make a change
+
+The error-registry owner allocates the next unused category ID against an English issue and reviewed scenario. Preserve IDs and semantics across releases, reserve tombstones indefinitely, and record deprecation, replacement if available, first version and any incompatible migration in release documentation. Changing the message does not authorize a semantic change. Review new native contexts, conflicting candidates and uncovered codes with the provider owner. [Bootstrap issue](https://github.com/igorpooh1978/GoEF/issues/2)
+
+Validate schema shape, stable IDs/sentinels, test ID uniqueness, issue/scenario/docs resolution, bidirectional mapping links and provider names. Evaluate changes against the previous registry to prevent deletion, ID reuse or silent reclassification. Match versioned typed fields plus operation context. Use priority only after filtering by scope; reject ambiguous top matches and require an explicit unknown-path test. Do not promote based on text parsing, synthetic driver errors, documentation or proposed test names.
+
+Promotion needs a released/planned-to-release implementation with first version recorded, deterministic positive/negative tests, reviewed integrated evidence, causal cancellation, redaction and retry/outcome assertions. Native claims additionally require pinned real server/driver versions and observed native codes. Record unavailable tests as blocked. For commit response ambiguity inject a controlled acknowledgement failure against a real transaction and verify durable business data from a fresh authoritative connection. [Conformance protocol](../../test/conformance/transactions/README.md)

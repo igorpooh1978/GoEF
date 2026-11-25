@@ -1,0 +1,23 @@
+# Model engine
+
+Proposed contract for the first model fixtures. Code First consumes explicit registrations, struct tags and fluent mappings. Database First interprets inspected columns, constraints, indexes and provider annotations. Model First consumes declarations. Each produces one logical model and a separate physical mapping for a particular provider. A scaffold writes generated files deterministically and keeps user-owned files separate. [W001 contract fixtures](https://github.com/igorpooh1978/GoEF/issues/12)
+
+| Feature | Input and rule | First acceptance example |
+| --- | --- | --- |
+| MODEL-MAP-001 | Resolve each facet independently. Fluent configuration overrides tags, which override conventions. Conflicting declarations at equal precedence report both source locations. | A fluent column name changes only that facet while a tag-supplied length survives. Duplicate mapped columns fail unless a supported shared-table mapping is declared. |
+| MODEL-NULL-001 | Track store nullability, Go representation, defaults and generated values independently. Nullable pointers or an explicit optional codec preserve presence. | Round-trip NULL, zero and empty string as distinct inputs when the chosen provider and codec support those distinctions. Reject a required foreign key whose read codec admits NULL without an explicit policy. |
+| MODEL-REL-001 | Declare principal/dependent, ordered key members, cardinality, optionality, inverse navigation and delete behavior. Check alternate/composite key counts, order and codec compatibility. | Resolve a two-column foreign key to the declared composite key. Reject an ambiguous inverse or a type mismatch before opening a connection. |
+| MODEL-TYPE-001 | Map logical scalars and value objects through explicit converters, comparers, snapshot strategy and provider codecs. Configure precision, scale, time policy, collation, UUID layout and generation per property/model. | Decimal and timestamp values must satisfy a documented round-trip policy. Reject an unrepresentable mapping or require an explicit conversion with documented loss. |
+| MODEL-VALID-001 | Validate graph, unique names and key identities, generated values, concurrency tokens, mappings and capabilities before publishing immutable metadata. | Reordered registrations produce identical stable IDs, serialized bytes and logical hash. Invalid input yields a source-located error without a partial cached model. |
+
+## Freeze and resolve
+
+1. Collect declarations with provenance. Conventions resolve only remaining facets. Preserve provider extension annotations in a versioned namespace.
+2. Validate the logical graph. Self-references are legal relationships. Diagnose cycles that violate a specific rule, such as an unresolved required insertion dependency. Keyless read models cannot enter a tracked identity map.
+3. Assign stable identifiers by canonical model identity and ordered member paths. Specify a versioned encoding with sorted unordered lists and explicit ordering for composite keys. Hash the canonical serialization. Read-only published metadata must be independent of caller-owned slices and maps.
+4. Resolve schema, store type, length limits, quoting policy, identity strategy, converters and constraints against provider capabilities. Cache the resolved mapping by logical hash, provider identity, capabilities and model-affecting options. Unknown namespaced annotations yield a diagnostic before execution.
+5. Derive typed field/navigation descriptors, query materialization and migration snapshots from these same identities. The physical snapshot additionally records provider identity, mapping format and the resolved physical facets.
+
+Many-to-many joins, complex/owned types, JSON, views, inheritance strategies and other EF extensions need separate fixtures. For inheritance, specify composition, discriminator and permitted concrete mappings. Preserve existing keys, including historical UUIDs. Generation strategy belongs to the model.
+
+EF’s `FinalizeModel` and `ModelValidator.Validate` provide distinct freeze and validation landmarks. The test `Detects_shadow_key_referenced_by_foreign_key_by_convention` captures one relationship validation case to adapt. [Model finalization](https://github.com/dotnet/efcore/blob/b34c0e9d7e768aa808ded44f19e7f871bea6869f/src/EFCore/Metadata/Internal/Model.cs) · [Model validation](https://github.com/dotnet/efcore/blob/b34c0e9d7e768aa808ded44f19e7f871bea6869f/src/EFCore/Infrastructure/ModelValidator.cs) · [Pinned validation tests](https://github.com/dotnet/efcore/blob/b34c0e9d7e768aa808ded44f19e7f871bea6869f/test/EFCore.Tests/Infrastructure/ModelValidatorTest.cs)

@@ -1,0 +1,20 @@
+# Query translation and execution
+
+W000 proposal for QUERY-PARAM-001 and QUERY-UNSUPPORTED-001. A database expression contains a schema-bound field reference, typed value or parameter slot, operator and result type. The runtime DSL composes these nodes. A design-time frontend type-checks explicitly marked declarations and emits ordinary, named Go entry points that construct the same nodes. A local LINQ callback runs only in the independent Objects package after an explicit client boundary. [Generics ADR](../adr/0003-go-linq-and-generics.md)
+
+| Stage | Contract and failure point |
+| --- | --- |
+| Bind | Check entity owner, field type, alias identity, join scope, model version and projection shape. Go types catch owner mismatches. A self-join also needs distinct runtime scope IDs. |
+| Normalize | Expand navigations, compose mandatory scope predicates, assign deterministic parameter slots, derive nullability and validate cardinality. Preserve observable ordering, duplicates and null semantics. |
+| Lower | Build a provider-neutral relational plan with typed column references and result slots. Require an order with a unique tie-breaker for stable pagination. Apply capability checks by operator and server version. |
+| Compile and bind | The provider produces SQL with quoted identifiers and driver placeholders. Data and context-dependent filter values bind to slots on **each execution**. Execution-specific parameters stay outside the plan cache. |
+| Execute | Bind to the current connection or explicit transaction. Propagate cancellation and deadlines, map early/late driver failures and release rows on success, error or early break. |
+| Materialize | Match ordered result slots to declared types and codecs. Apply tracking rules only for entity shapes. Materialization and terminal cardinality errors remain distinguishable. |
+
+**QUERY-PARAM-001.** Two executions with the same shape and different thresholds should reuse compilation and bind their own thresholds. Test concurrent execution on separate contexts. Cache identity includes model hash, query shape, provider/dialect and capability versions, type/size shape where it affects translation, and semantic options such as null semantics and tracking/materialization mode. Use a bounded cache and deduplicate concurrent compilation. Dynamic filters derive immutable branches. Values, credentials, entity objects and transaction handles stay outside cached plans.
+
+**QUERY-UNSUPPORTED-001.** A valid expression that requires an unavailable capability fails with a typed unsupported-feature error before sending any SQL. An invalid scope/type fails validation. Capture the operator, capability, provider/version and source span when present. Scanning rows into a callback requires explicit materialization or streaming by the application. Separate raw SQL has its own explicit binding contract.
+
+**Generator gate.** Use Go syntax, type and source-position information for designated declarations. Emit a typed entry point, binder and materializer, and check generated output for freshness. Verify captures bind at documented call time, repeated invocations see updated inputs, generic projections preserve result type, and unsupported constructs identify the exact expression. Restrict evaluation to the declared expression vocabulary. Arbitrary Go functions have no runtime expression-tree contract. The W000 fixture exercises only the type shape.
+
+The EF query compiler extracts parameters in `QueryCompiler.ExtractParameters`. Its upstream `Where_simple` case filters customers by city. Adapt it with explicit typed descriptors and two bound values. Four-provider results must additionally cover NULL compensation, decimal arithmetic, collation, empty collections, ordering, pagination and zero/multiple-result terminals. [Pinned compiler](https://github.com/dotnet/efcore/blob/b34c0e9d7e768aa808ded44f19e7f871bea6869f/src/EFCore/Query/Internal/QueryCompiler.cs) · [Pinned query specification](https://github.com/dotnet/efcore/blob/b34c0e9d7e768aa808ded44f19e7f871bea6869f/test/EFCore.Specification.Tests/Query/NorthwindWhereQueryTestBase.cs)

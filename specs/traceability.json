@@ -1,0 +1,948 @@
+{
+  "schemaVersion": 1,
+  "scenarios": [
+    {
+      "featureId": "DOC-EXAMPLE-001",
+      "scenarioId": "DOC-EXAMPLE-001-S01",
+      "spec": "specs/features/documentation/doc-example-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/14"
+      ],
+      "docs": [
+        "docs/development/DOCUMENTATION_POLICY.md",
+        "examples/README.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "DOC-FRESH-001",
+      "scenarioId": "DOC-FRESH-001-S01",
+      "spec": "specs/features/documentation/doc-fresh-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/14"
+      ],
+      "docs": [
+        "docs/development/DOCUMENTATION_POLICY.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "ERR-CANCEL-001",
+      "scenarioId": "ERR-CANCEL-001-S01",
+      "spec": "specs/features/errors/err-cancel-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/user/ERROR_HANDLING.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "ERR-CANCEL-001",
+      "scenarioId": "ERR-CANCEL-001-S02",
+      "spec": "specs/features/errors/err-cancel-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/user/ERROR_HANDLING.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "ERR-CANCEL-001",
+      "scenarioId": "ERR-CANCEL-001-S03",
+      "spec": "specs/features/errors/err-cancel-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/user/ERROR_HANDLING.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "ERR-CONCURRENCY-001",
+      "scenarioId": "ERR-CONCURRENCY-001-S01",
+      "spec": "specs/features/errors/err-concurrency-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/user/ERROR_HANDLING.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "ERR-CONSTRAINT-001",
+      "scenarioId": "ERR-CONSTRAINT-001-S01",
+      "spec": "specs/features/errors/err-constraint-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/user/ERROR_HANDLING.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "ERR-CONSTRAINT-001",
+      "scenarioId": "ERR-CONSTRAINT-001-S02",
+      "spec": "specs/features/errors/err-constraint-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/user/ERROR_HANDLING.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "ERR-CONTRACT-001",
+      "scenarioId": "ERR-CONTRACT-001-S01",
+      "spec": "specs/features/errors/err-contract-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/user/ERROR_HANDLING.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "ERR-CONTRACT-001",
+      "scenarioId": "ERR-CONTRACT-001-S02",
+      "spec": "specs/features/errors/err-contract-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/user/ERROR_HANDLING.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "ERR-CONTRACT-001",
+      "scenarioId": "ERR-CONTRACT-001-S03",
+      "spec": "specs/features/errors/err-contract-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/user/ERROR_HANDLING.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-BOUNDARY-001",
+      "scenarioId": "LINQ-BOUNDARY-001-S01",
+      "spec": "specs/features/linq/boundary.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/user/LINQ_CLIENT_SERVER_BOUNDARY.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-BOUNDARY-001",
+      "scenarioId": "LINQ-BOUNDARY-001-S02",
+      "spec": "specs/features/linq/boundary.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/user/LINQ_CLIENT_SERVER_BOUNDARY.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-BOUNDARY-001",
+      "scenarioId": "LINQ-BOUNDARY-001-S03",
+      "spec": "specs/features/linq/boundary.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/user/LINQ_CLIENT_SERVER_BOUNDARY.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-BOUNDARY-001",
+      "scenarioId": "LINQ-BOUNDARY-001-S04",
+      "spec": "specs/features/linq/boundary.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/user/LINQ_CLIENT_SERVER_BOUNDARY.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-CONFORMANCE-001",
+      "scenarioId": "LINQ-CONFORMANCE-001-S01",
+      "spec": "specs/features/linq/conformance.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "test/conformance/linq/README.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-CONFORMANCE-001",
+      "scenarioId": "LINQ-CONFORMANCE-001-S02",
+      "spec": "specs/features/linq/conformance.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "test/conformance/linq/README.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-CONFORMANCE-001",
+      "scenarioId": "LINQ-CONFORMANCE-001-S03",
+      "spec": "specs/features/linq/conformance.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "test/conformance/linq/README.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-EXPRESSION-001",
+      "scenarioId": "LINQ-EXPRESSION-001-S01",
+      "spec": "specs/features/linq/expressions.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_EXPRESSIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-EXPRESSION-001",
+      "scenarioId": "LINQ-EXPRESSION-001-S02",
+      "spec": "specs/features/linq/expressions.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_EXPRESSIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-EXPRESSION-001",
+      "scenarioId": "LINQ-EXPRESSION-001-S03",
+      "spec": "specs/features/linq/expressions.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_EXPRESSIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-OBJECTS-001",
+      "scenarioId": "LINQ-OBJECTS-001-S01",
+      "spec": "specs/features/linq/objects.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_OBJECTS.md",
+        "docs/user/LINQ_OBJECTS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-OBJECTS-001",
+      "scenarioId": "LINQ-OBJECTS-001-S02",
+      "spec": "specs/features/linq/objects.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_OBJECTS.md",
+        "docs/user/LINQ_OBJECTS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-OBJECTS-001",
+      "scenarioId": "LINQ-OBJECTS-001-S03",
+      "spec": "specs/features/linq/objects.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_OBJECTS.md",
+        "docs/user/LINQ_OBJECTS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-OBJECTS-001",
+      "scenarioId": "LINQ-OBJECTS-001-S04",
+      "spec": "specs/features/linq/objects.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_OBJECTS.md",
+        "docs/user/LINQ_OBJECTS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-QUERYABLE-001",
+      "scenarioId": "LINQ-QUERYABLE-001-S01",
+      "spec": "specs/features/linq/queryable.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_QUERYABLE.md",
+        "docs/user/LINQ_TO_ENTITIES.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-QUERYABLE-001",
+      "scenarioId": "LINQ-QUERYABLE-001-S02",
+      "spec": "specs/features/linq/queryable.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_QUERYABLE.md",
+        "docs/user/LINQ_TO_ENTITIES.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-QUERYABLE-001",
+      "scenarioId": "LINQ-QUERYABLE-001-S03",
+      "spec": "specs/features/linq/queryable.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_QUERYABLE.md",
+        "docs/user/LINQ_TO_ENTITIES.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-API-001",
+      "scenarioId": "MIG-API-001-S01",
+      "spec": "specs/features/migrations/mig-api-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/MIGRATION_ENGINE.md",
+        "docs/user/MIGRATIONS_IN_GO.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-API-001",
+      "scenarioId": "MIG-API-001-S02",
+      "spec": "specs/features/migrations/mig-api-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/MIGRATION_ENGINE.md",
+        "docs/user/MIGRATIONS_IN_GO.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-API-001",
+      "scenarioId": "MIG-API-001-S03",
+      "spec": "specs/features/migrations/mig-api-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/MIGRATION_ENGINE.md",
+        "docs/user/MIGRATIONS_IN_GO.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-DRIFT-001",
+      "scenarioId": "MIG-DRIFT-001-S01",
+      "spec": "specs/features/migrations/mig-drift-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/MIGRATION_ENGINE.md",
+        "docs/user/MIGRATIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-DRIFT-001",
+      "scenarioId": "MIG-DRIFT-001-S02",
+      "spec": "specs/features/migrations/mig-drift-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/MIGRATION_ENGINE.md",
+        "docs/user/MIGRATIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-LOCK-001",
+      "scenarioId": "MIG-LOCK-001-S01",
+      "spec": "specs/features/migrations/mig-lock-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/MIGRATION_ENGINE.md",
+        "docs/user/MIGRATIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-LOCK-001",
+      "scenarioId": "MIG-LOCK-001-S02",
+      "spec": "specs/features/migrations/mig-lock-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/MIGRATION_ENGINE.md",
+        "docs/user/MIGRATIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-MYSQL-001",
+      "scenarioId": "MIG-MYSQL-001-S01",
+      "spec": "specs/features/migrations/mig-mysql-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/MIGRATION_ENGINE.md",
+        "docs/user/MIGRATIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-MYSQL-001",
+      "scenarioId": "MIG-MYSQL-001-S02",
+      "spec": "specs/features/migrations/mig-mysql-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/MIGRATION_ENGINE.md",
+        "docs/user/MIGRATIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-RECOVERY-001",
+      "scenarioId": "MIG-RECOVERY-001-S01",
+      "spec": "specs/features/migrations/mig-recovery-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/MIGRATION_ENGINE.md",
+        "docs/user/MIGRATIONS_UPGRADE_AND_RECOVERY.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-RECOVERY-001",
+      "scenarioId": "MIG-RECOVERY-001-S02",
+      "spec": "specs/features/migrations/mig-recovery-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/MIGRATION_ENGINE.md",
+        "docs/user/MIGRATIONS_UPGRADE_AND_RECOVERY.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-RENAME-001",
+      "scenarioId": "MIG-RENAME-001-S01",
+      "spec": "specs/features/migrations/mig-rename-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/MIGRATION_ENGINE.md",
+        "docs/user/MIGRATIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-RENAME-001",
+      "scenarioId": "MIG-RENAME-001-S02",
+      "spec": "specs/features/migrations/mig-rename-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/MIGRATION_ENGINE.md",
+        "docs/user/MIGRATIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-SQLITE-001",
+      "scenarioId": "MIG-SQLITE-001-S01",
+      "spec": "specs/features/migrations/mig-sqlite-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/MIGRATION_ENGINE.md",
+        "docs/user/MIGRATIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-SQLITE-001",
+      "scenarioId": "MIG-SQLITE-001-S02",
+      "spec": "specs/features/migrations/mig-sqlite-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/MIGRATION_ENGINE.md",
+        "docs/user/MIGRATIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MODEL-MAP-001",
+      "scenarioId": "MODEL-MAP-001-S01",
+      "spec": "specs/features/model/model-map-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/3"
+      ],
+      "docs": [
+        "docs/user/MODELS_CODE_FIRST.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MODEL-NULL-001",
+      "scenarioId": "MODEL-NULL-001-S01",
+      "spec": "specs/features/model/model-null-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/3"
+      ],
+      "docs": [
+        "docs/user/MODELS_CODE_FIRST.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MODEL-REL-001",
+      "scenarioId": "MODEL-REL-001-S01",
+      "spec": "specs/features/model/model-rel-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/3"
+      ],
+      "docs": [
+        "docs/user/MODELS_CODE_FIRST.md",
+        "docs/user/RELATIONSHIPS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MODEL-TYPE-001",
+      "scenarioId": "MODEL-TYPE-001-S01",
+      "spec": "specs/features/model/model-type-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/3"
+      ],
+      "docs": [
+        "docs/user/MODELS_CODE_FIRST.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MODEL-VALID-001",
+      "scenarioId": "MODEL-VALID-001-S01",
+      "spec": "specs/features/model/model-valid-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/3"
+      ],
+      "docs": [
+        "docs/user/MODELS_CODE_FIRST.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "QUERY-PARAM-001",
+      "scenarioId": "QUERY-PARAM-001-S01",
+      "spec": "specs/features/query/query-param-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/3"
+      ],
+      "docs": [
+        "docs/user/QUERYING.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "QUERY-UNSUPPORTED-001",
+      "scenarioId": "QUERY-UNSUPPORTED-001-S01",
+      "spec": "specs/features/query/query-unsupported-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/3"
+      ],
+      "docs": [
+        "docs/user/QUERYING.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-AFFINITY-001",
+      "scenarioId": "TX-AFFINITY-001-S01",
+      "spec": "specs/features/transactions/tx-affinity-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-AFFINITY-001",
+      "scenarioId": "TX-AFFINITY-001-S02",
+      "spec": "specs/features/transactions/tx-affinity-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-ISOLATION-001",
+      "scenarioId": "TX-ISOLATION-001-S01",
+      "spec": "specs/features/transactions/tx-isolation-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-ISOLATION-001",
+      "scenarioId": "TX-ISOLATION-001-S02",
+      "spec": "specs/features/transactions/tx-isolation-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-OUTCOME-001",
+      "scenarioId": "TX-OUTCOME-001-S01",
+      "spec": "specs/features/transactions/tx-outcome-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-OUTCOME-001",
+      "scenarioId": "TX-OUTCOME-001-S02",
+      "spec": "specs/features/transactions/tx-outcome-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-OWN-001",
+      "scenarioId": "TX-OWN-001-S01",
+      "spec": "specs/features/transactions/tx-own-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-OWN-001",
+      "scenarioId": "TX-OWN-001-S02",
+      "spec": "specs/features/transactions/tx-own-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-OWN-001",
+      "scenarioId": "TX-OWN-001-S03",
+      "spec": "specs/features/transactions/tx-own-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-RETRY-001",
+      "scenarioId": "TX-RETRY-001-S01",
+      "spec": "specs/features/transactions/tx-retry-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-RETRY-001",
+      "scenarioId": "TX-RETRY-001-S02",
+      "spec": "specs/features/transactions/tx-retry-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-RETRY-001",
+      "scenarioId": "TX-RETRY-001-S03",
+      "spec": "specs/features/transactions/tx-retry-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-SAVEPOINT-001",
+      "scenarioId": "TX-SAVEPOINT-001-S01",
+      "spec": "specs/features/transactions/tx-savepoint-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-SAVEPOINT-001",
+      "scenarioId": "TX-SAVEPOINT-001-S02",
+      "spec": "specs/features/transactions/tx-savepoint-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": null,
+      "evidence": null,
+      "status": "SPECIFIED"
+    }
+  ]
+}

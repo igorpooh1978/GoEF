@@ -1,0 +1,2283 @@
+{
+  "schemaVersion": 1,
+  "errors": [
+    {
+      "id": "GOEF-MODEL-0001",
+      "kind": "InvalidModel",
+      "sentinel": "ErrInvalidModel",
+      "detailType": "*ErrorDetail",
+      "category": "model",
+      "message": "Model validation failed.",
+      "trigger": "A model contains incompatible key, relationship or mapping declarations.",
+      "phase": "validate-model",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONTRACT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONTRACT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-MODEL-0001"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/modeling/"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-MODEL-0002",
+      "kind": "Validation",
+      "sentinel": "ErrValidation",
+      "detailType": "*ErrorDetail",
+      "category": "model",
+      "message": "A request failed validation.",
+      "trigger": "Arguments violate the documented public operation preconditions.",
+      "phase": "validate-input",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONTRACT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONTRACT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-MODEL-0002"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/modeling/"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-QUERY-0001",
+      "kind": "NotFound",
+      "sentinel": "ErrNotFound",
+      "detailType": "*ErrorDetail",
+      "category": "query",
+      "message": "No matching entity was found.",
+      "trigger": "An operation that requires one result observes zero rows.",
+      "phase": "read-cardinality",
+      "outcome": "inspect_transaction",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONTRACT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONTRACT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-QUERY-0001"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/querying/how-query-works",
+        "https://learn.microsoft.com/en-us/ef/core/querying/client-eval"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-QUERY-0002",
+      "kind": "MultipleResults",
+      "sentinel": "ErrMultipleResults",
+      "detailType": "*ErrorDetail",
+      "category": "query",
+      "message": "More than one result matched.",
+      "trigger": "An operation limited to one result observes a second row.",
+      "phase": "read-cardinality",
+      "outcome": "inspect_transaction",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONTRACT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONTRACT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-QUERY-0002"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/querying/how-query-works",
+        "https://learn.microsoft.com/en-us/ef/core/querying/client-eval"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-QUERY-0003",
+      "kind": "QueryTranslation",
+      "sentinel": "ErrQueryTranslation",
+      "detailType": "*ErrorDetail",
+      "category": "query",
+      "message": "The expression cannot be translated.",
+      "trigger": "The query compiler cannot represent a requested expression on the selected execution target.",
+      "phase": "translate",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONTRACT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONTRACT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-QUERY-0003"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/querying/how-query-works",
+        "https://learn.microsoft.com/en-us/ef/core/querying/client-eval"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-QUERY-0004",
+      "kind": "InvalidQuery",
+      "sentinel": "ErrInvalidQuery",
+      "detailType": "*ErrorDetail",
+      "category": "query",
+      "message": "The query is invalid.",
+      "trigger": "Validation detects an ill-typed expression or an invalid query shape.",
+      "phase": "validate-query",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONTRACT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONTRACT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-QUERY-0004"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/querying/how-query-works",
+        "https://learn.microsoft.com/en-us/ef/core/querying/client-eval"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-QUERY-0005",
+      "kind": "Materialization",
+      "sentinel": "ErrMaterialization",
+      "detailType": "*ErrorDetail",
+      "category": "query",
+      "message": "A result could not be materialized.",
+      "trigger": "A returned value cannot be converted to the model representation.",
+      "phase": "materialize",
+      "outcome": "inspect_transaction",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONTRACT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONTRACT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-QUERY-0005"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/querying/how-query-works",
+        "https://learn.microsoft.com/en-us/ef/core/querying/client-eval"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-CAP-0001",
+      "kind": "UnsupportedFeature",
+      "sentinel": "ErrUnsupportedFeature",
+      "detailType": "*ErrorDetail",
+      "category": "capability",
+      "message": "The requested capability is unavailable.",
+      "trigger": "A requested operation or option lacks an enabled provider capability.",
+      "phase": "preflight",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "TX-ISOLATION-001"
+      ],
+      "scenarioIds": [
+        "TX-ISOLATION-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-CAP-0001"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/providers/sqlite/limitations"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-STATE-0001",
+      "kind": "InvalidState",
+      "sentinel": "ErrInvalidState",
+      "detailType": "*ErrorDetail",
+      "category": "lifetime",
+      "message": "The operation is invalid in the current state.",
+      "trigger": "A completed transaction handle is used or an incompatible handle is enlisted.",
+      "phase": "preflight",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "TX-OWN-001"
+      ],
+      "scenarioIds": [
+        "TX-OWN-001-S02"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-STATE-0001"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/saving/transactions",
+        "https://learn.microsoft.com/en-us/ef/core/dbcontext-configuration/"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-STATE-0002",
+      "kind": "ContextBusy",
+      "sentinel": "ErrContextBusy",
+      "detailType": "*ErrorDetail",
+      "category": "lifetime",
+      "message": "The context is already in use.",
+      "trigger": "A second operation starts while a query, stream or write owns the context.",
+      "phase": "acquire",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "TX-AFFINITY-001"
+      ],
+      "scenarioIds": [
+        "TX-AFFINITY-001-S02"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-STATE-0002"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/saving/transactions",
+        "https://learn.microsoft.com/en-us/ef/core/dbcontext-configuration/"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-STATE-0003",
+      "kind": "ContextClosed",
+      "sentinel": "ErrContextClosed",
+      "detailType": "*ErrorDetail",
+      "category": "lifetime",
+      "message": "The context is closed.",
+      "trigger": "An operation targets a disposed context.",
+      "phase": "acquire",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "TX-AFFINITY-001"
+      ],
+      "scenarioIds": [
+        "TX-AFFINITY-001-S02"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-STATE-0003"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/saving/transactions",
+        "https://learn.microsoft.com/en-us/ef/core/dbcontext-configuration/"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-CONS-0001",
+      "kind": "UniqueViolation",
+      "sentinel": "ErrUniqueViolation",
+      "detailType": "*ErrorDetail",
+      "category": "constraint",
+      "message": "A uniqueness constraint was violated.",
+      "trigger": "A write duplicates an enforced primary or unique key.",
+      "phase": "write",
+      "outcome": "inspect_transaction",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "nativeCode",
+        "constraintAlias"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONSTRAINT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONSTRAINT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-CONS-0001"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://www.postgresql.org/docs/18/errcodes-appendix.html"
+      ],
+      "providerMappings": {
+        "postgres": [
+          "postgres-23505-UniqueViolation"
+        ],
+        "sqlite": [
+          "sqlite-2067-UniqueViolation",
+          "sqlite-1555-UniqueViolation"
+        ],
+        "sqlserver": [
+          "sqlserver-2627-UniqueViolation",
+          "sqlserver-2601-UniqueViolation"
+        ],
+        "mysql": [
+          "mysql-1062-UniqueViolation"
+        ]
+      }
+    },
+    {
+      "id": "GOEF-CONS-0002",
+      "kind": "ForeignKeyViolation",
+      "sentinel": "ErrForeignKeyViolation",
+      "detailType": "*ErrorDetail",
+      "category": "constraint",
+      "message": "A foreign key constraint was violated.",
+      "trigger": "A referenced row is absent or a restricted parent change would orphan rows.",
+      "phase": "write",
+      "outcome": "inspect_transaction",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "nativeCode",
+        "constraintAlias"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONSTRAINT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONSTRAINT-001-S02"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-CONS-0002"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://www.postgresql.org/docs/18/errcodes-appendix.html"
+      ],
+      "providerMappings": {
+        "postgres": [
+          "postgres-23503-ForeignKeyViolation"
+        ],
+        "sqlite": [
+          "sqlite-787-ForeignKeyViolation"
+        ],
+        "sqlserver": [
+          "sqlserver-547-ForeignKeyViolation"
+        ],
+        "mysql": [
+          "mysql-1452-ForeignKeyViolation",
+          "mysql-1451-ForeignKeyViolation"
+        ]
+      }
+    },
+    {
+      "id": "GOEF-CONS-0003",
+      "kind": "NotNullViolation",
+      "sentinel": "ErrNotNullViolation",
+      "detailType": "*ErrorDetail",
+      "category": "constraint",
+      "message": "A required column received NULL.",
+      "trigger": "The server rejects a NULL value for a required column.",
+      "phase": "write",
+      "outcome": "inspect_transaction",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "nativeCode",
+        "constraintAlias"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONTRACT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONTRACT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-CONS-0003"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://www.postgresql.org/docs/18/errcodes-appendix.html"
+      ],
+      "providerMappings": {
+        "postgres": [
+          "postgres-23502-NotNullViolation"
+        ],
+        "sqlite": [
+          "sqlite-1299-NotNullViolation"
+        ],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-CONS-0004",
+      "kind": "CheckViolation",
+      "sentinel": "ErrCheckViolation",
+      "detailType": "*ErrorDetail",
+      "category": "constraint",
+      "message": "A check constraint was violated.",
+      "trigger": "A write fails a declared check constraint identified by the adapter.",
+      "phase": "write",
+      "outcome": "inspect_transaction",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "nativeCode",
+        "constraintAlias"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONTRACT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONTRACT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-CONS-0004"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://www.postgresql.org/docs/18/errcodes-appendix.html"
+      ],
+      "providerMappings": {
+        "postgres": [
+          "postgres-23514-CheckViolation"
+        ],
+        "sqlite": [
+          "sqlite-275-CheckViolation"
+        ],
+        "sqlserver": [
+          "sqlserver-547-CheckViolation"
+        ],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-CONS-0005",
+      "kind": "ValueOutOfRange",
+      "sentinel": "ErrValueOutOfRange",
+      "detailType": "*ErrorDetail",
+      "category": "constraint",
+      "message": "A value is outside the supported range.",
+      "trigger": "The requested value falls outside a target column or conversion range.",
+      "phase": "write",
+      "outcome": "inspect_transaction",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "nativeCode",
+        "constraintAlias"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONTRACT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONTRACT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-CONS-0005"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://www.postgresql.org/docs/18/errcodes-appendix.html"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-CONC-0001",
+      "kind": "ConcurrencyConflict",
+      "sentinel": "ErrConcurrencyConflict",
+      "detailType": "*ErrorDetail",
+      "category": "concurrency",
+      "message": "The stored entity changed.",
+      "trigger": "A version-guarded mutation affects fewer rows than its declared expectation.",
+      "phase": "write",
+      "outcome": "inspect_transaction",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "nativeCode"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONCURRENCY-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONCURRENCY-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-CONC-0001"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/saving/concurrency"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-CONC-0002",
+      "kind": "Deadlock",
+      "sentinel": "ErrDeadlock",
+      "detailType": "*ErrorDetail",
+      "category": "concurrency",
+      "message": "The transaction encountered a deadlock.",
+      "trigger": "The engine identifies the operation as a deadlock victim.",
+      "phase": "execute",
+      "outcome": "inspect_transaction",
+      "retryClass": "transaction_safe",
+      "retryPreconditions": "Only after a confirmed full rollback, a fresh transaction and tracker, an explicit replay-safe unit, remaining attempts and a live caller deadline.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "nativeCode"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "TX-RETRY-001"
+      ],
+      "scenarioIds": [
+        "TX-RETRY-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-CONC-0002"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/saving/concurrency",
+        "https://www.postgresql.org/docs/18/errcodes-appendix.html",
+        "https://www.sqlite.org/rescode.html"
+      ],
+      "providerMappings": {
+        "postgres": [
+          "postgres-40P01-Deadlock"
+        ],
+        "sqlite": [],
+        "sqlserver": [
+          "sqlserver-1205-Deadlock"
+        ],
+        "mysql": [
+          "mysql-1213-Deadlock"
+        ]
+      }
+    },
+    {
+      "id": "GOEF-CONC-0003",
+      "kind": "SerializationFailure",
+      "sentinel": "ErrSerializationFailure",
+      "detailType": "*ErrorDetail",
+      "category": "concurrency",
+      "message": "The transaction could not be serialized.",
+      "trigger": "The engine reports an isolation conflict that prevents a serializable execution.",
+      "phase": "execute",
+      "outcome": "inspect_transaction",
+      "retryClass": "transaction_safe",
+      "retryPreconditions": "Only after a confirmed full rollback, a fresh transaction and tracker, an explicit replay-safe unit, remaining attempts and a live caller deadline.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "nativeCode"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "TX-RETRY-001"
+      ],
+      "scenarioIds": [
+        "TX-RETRY-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-CONC-0003"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/saving/concurrency",
+        "https://www.postgresql.org/docs/18/errcodes-appendix.html",
+        "https://www.sqlite.org/rescode.html"
+      ],
+      "providerMappings": {
+        "postgres": [
+          "postgres-40001-SerializationFailure"
+        ],
+        "sqlite": [
+          "sqlite-517-SerializationFailure"
+        ],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-CONC-0004",
+      "kind": "LockUnavailable",
+      "sentinel": "ErrLockUnavailable",
+      "detailType": "*ErrorDetail",
+      "category": "concurrency",
+      "message": "A required database lock is unavailable.",
+      "trigger": "The adapter identifies contention at a lock boundary without sufficient evidence for a deadlock.",
+      "phase": "lock",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "nativeCode"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONTRACT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONTRACT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-CONC-0004"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/saving/concurrency",
+        "https://www.postgresql.org/docs/18/errcodes-appendix.html",
+        "https://www.sqlite.org/rescode.html"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [
+          "sqlite-5-LockUnavailable",
+          "sqlite-6-LockUnavailable"
+        ],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-IO-0001",
+      "kind": "ConnectionUnavailable",
+      "sentinel": "ErrConnectionUnavailable",
+      "detailType": "*ErrorDetail",
+      "category": "connection",
+      "message": "The database connection is unavailable.",
+      "trigger": "Connection establishment or pre-commit transport fails.",
+      "phase": "connect",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "nativeCode"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONTRACT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONTRACT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-IO-0001"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://pkg.go.dev/database/sql",
+        "https://pkg.go.dev/context"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-IO-0002",
+      "kind": "Timeout",
+      "sentinel": "ErrTimeout",
+      "detailType": "*ErrorDetail",
+      "category": "connection",
+      "message": "The database operation timed out.",
+      "trigger": "A driver or server time budget expires independently of a caller context deadline.",
+      "phase": "execute",
+      "outcome": "inspect_transaction",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "nativeCode"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CANCEL-001"
+      ],
+      "scenarioIds": [
+        "ERR-CANCEL-001-S02"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-IO-0002"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://pkg.go.dev/database/sql",
+        "https://pkg.go.dev/context"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": [
+          "mysql-1205-Timeout"
+        ]
+      }
+    },
+    {
+      "id": "GOEF-IO-0003",
+      "kind": "Canceled",
+      "sentinel": "ErrCanceled",
+      "detailType": "*ErrorDetail",
+      "category": "connection",
+      "message": "The operation was canceled.",
+      "trigger": "The supplied context causes the operation to stop.",
+      "phase": "execute",
+      "outcome": "inspect_transaction",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "nativeCode"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CANCEL-001"
+      ],
+      "scenarioIds": [
+        "ERR-CANCEL-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-IO-0003"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://pkg.go.dev/database/sql",
+        "https://pkg.go.dev/context"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-IO-0004",
+      "kind": "DeadlineExceeded",
+      "sentinel": "ErrDeadlineExceeded",
+      "detailType": "*ErrorDetail",
+      "category": "connection",
+      "message": "The caller deadline expired.",
+      "trigger": "The supplied context deadline causes the operation to stop.",
+      "phase": "execute",
+      "outcome": "inspect_transaction",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "nativeCode"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CANCEL-001"
+      ],
+      "scenarioIds": [
+        "ERR-CANCEL-001-S02"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-IO-0004"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://pkg.go.dev/database/sql",
+        "https://pkg.go.dev/context"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-IO-0005",
+      "kind": "PermissionDenied",
+      "sentinel": "ErrPermissionDenied",
+      "detailType": "*ErrorDetail",
+      "category": "connection",
+      "message": "Permission was denied.",
+      "trigger": "An authenticated principal lacks the privilege to perform the operation.",
+      "phase": "authorize",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "nativeCode"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONTRACT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONTRACT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-IO-0005"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://pkg.go.dev/database/sql",
+        "https://pkg.go.dev/context"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-IO-0006",
+      "kind": "AuthenticationFailed",
+      "sentinel": "ErrAuthenticationFailed",
+      "detailType": "*ErrorDetail",
+      "category": "connection",
+      "message": "Authentication failed.",
+      "trigger": "The server rejects supplied connection credentials.",
+      "phase": "connect",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "nativeCode"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONTRACT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONTRACT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-IO-0006"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://pkg.go.dev/database/sql",
+        "https://pkg.go.dev/context"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-IO-0007",
+      "kind": "UnknownDriver",
+      "sentinel": "ErrUnknownDriver",
+      "detailType": "*ErrorDetail",
+      "category": "connection",
+      "message": "An unclassified database error occurred.",
+      "trigger": "No reviewed mapping matches the structured provider fields and execution phase.",
+      "phase": "classify",
+      "outcome": "inspect_transaction",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "nativeCode"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONTRACT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONTRACT-001-S02"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-IO-0007"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://pkg.go.dev/database/sql",
+        "https://pkg.go.dev/context"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-TX-0001",
+      "kind": "CommitOutcomeUnknown",
+      "sentinel": "ErrCommitOutcomeUnknown",
+      "detailType": "*ErrorDetail",
+      "category": "transaction",
+      "message": "The commit outcome is unknown.",
+      "trigger": "A commit was dispatched and its durable result cannot be proved.",
+      "phase": "commit",
+      "outcome": "unknown",
+      "retryClass": "resolve_outcome",
+      "retryPreconditions": "Require explicit authoritative reconciliation before any new decision.",
+      "severity": "critical",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "TX-OUTCOME-001"
+      ],
+      "scenarioIds": [
+        "TX-OUTCOME-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-TX-0001"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/saving/transactions",
+        "https://learn.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-TX-0002",
+      "kind": "SavepointFailed",
+      "sentinel": "ErrSavepointFailed",
+      "detailType": "*ErrorDetail",
+      "category": "transaction",
+      "message": "The savepoint operation failed.",
+      "trigger": "A supported savepoint cannot be created, released or restored during execution.",
+      "phase": "savepoint",
+      "outcome": "inspect_transaction",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "TX-SAVEPOINT-001"
+      ],
+      "scenarioIds": [
+        "TX-SAVEPOINT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-TX-0002"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/saving/transactions",
+        "https://learn.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-TX-0003",
+      "kind": "RollbackFailed",
+      "sentinel": "ErrRollbackFailed",
+      "detailType": "*ErrorDetail",
+      "category": "transaction",
+      "message": "Transaction rollback could not be confirmed.",
+      "trigger": "Rollback or cleanup fails before the adapter confirms a known terminal state.",
+      "phase": "rollback",
+      "outcome": "rollback_unconfirmed",
+      "retryClass": "resolve_outcome",
+      "retryPreconditions": "Require explicit authoritative reconciliation before any new decision.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CANCEL-001"
+      ],
+      "scenarioIds": [
+        "ERR-CANCEL-001-S03"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-TX-0003"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/saving/transactions",
+        "https://learn.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-MIG-0001",
+      "kind": "PendingModelChanges",
+      "sentinel": "ErrPendingModelChanges",
+      "detailType": "*ErrorDetail",
+      "category": "migration",
+      "message": "The model has unscaffolded changes.",
+      "trigger": "The desired model differs from the last registered snapshot during the pending-model check.",
+      "phase": "diff",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "migrationId",
+        "operationId"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "MIG-API-001"
+      ],
+      "scenarioIds": [
+        "MIG-API-001-S02"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-MIG-0001"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/managing"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-MIG-0002",
+      "kind": "MigrationConflict",
+      "sentinel": "ErrMigrationConflict",
+      "detailType": "*ErrorDetail",
+      "category": "migration",
+      "message": "Migration history conflicts with the registered set.",
+      "trigger": "A digest, predecessor or migration identity conflicts with the applied lineage.",
+      "phase": "verify-history",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "migrationId",
+        "operationId"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "MIG-DRIFT-001"
+      ],
+      "scenarioIds": [
+        "MIG-DRIFT-001-S02"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-MIG-0002"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/managing"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-MIG-0003",
+      "kind": "MigrationLocked",
+      "sentinel": "ErrMigrationLocked",
+      "detailType": "*ErrorDetail",
+      "category": "migration",
+      "message": "The migration lock could not be acquired.",
+      "trigger": "Another migrator holds the lock until the configured acquisition budget expires.",
+      "phase": "lock",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "migrationId",
+        "operationId"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "MIG-LOCK-001"
+      ],
+      "scenarioIds": [
+        "MIG-LOCK-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-MIG-0003"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/managing"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-MIG-0004",
+      "kind": "SchemaDrift",
+      "sentinel": "ErrSchemaDrift",
+      "detailType": "*ErrorDetail",
+      "category": "migration",
+      "message": "The live schema differs from the expected schema.",
+      "trigger": "Inspection under lock does not match the expected applied snapshot.",
+      "phase": "inspect",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "migrationId",
+        "operationId"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "MIG-DRIFT-001"
+      ],
+      "scenarioIds": [
+        "MIG-DRIFT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-MIG-0004"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/managing"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-MIG-0005",
+      "kind": "DestructiveMigration",
+      "sentinel": "ErrDestructiveMigration",
+      "detailType": "*ErrorDetail",
+      "category": "migration",
+      "message": "The plan requires destructive-change approval.",
+      "trigger": "A destructive operation lacks authorization bound to the reviewed plan and target.",
+      "phase": "approve",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "migrationId",
+        "operationId"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "MIG-RENAME-001"
+      ],
+      "scenarioIds": [
+        "MIG-RENAME-001-S02"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-MIG-0005"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/managing"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-MIG-0006",
+      "kind": "MigrationRecoveryRequired",
+      "sentinel": "ErrMigrationRecoveryRequired",
+      "detailType": "*ErrorDetail",
+      "category": "migration",
+      "message": "Migration recovery is required.",
+      "trigger": "An interrupted command has ambiguous or conflicting durable postconditions.",
+      "phase": "recover",
+      "outcome": "inspect_durable_effects",
+      "retryClass": "resolve_outcome",
+      "retryPreconditions": "Require explicit authoritative reconciliation before any new decision.",
+      "severity": "critical",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "migrationId",
+        "operationId"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "MIG-RECOVERY-001"
+      ],
+      "scenarioIds": [
+        "MIG-RECOVERY-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-MIG-0006"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/managing"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-MIG-0007",
+      "kind": "IrreversibleMigration",
+      "sentinel": "ErrIrreversibleMigration",
+      "detailType": "*ErrorDetail",
+      "category": "migration",
+      "message": "The migration cannot be reversed safely.",
+      "trigger": "A requested downgrade crosses a forward-only or unverified reversal.",
+      "phase": "plan",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome",
+        "migrationId",
+        "operationId"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "MIG-API-001"
+      ],
+      "scenarioIds": [
+        "MIG-API-001-S03"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-MIG-0007"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/managing"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-TOOL-0001",
+      "kind": "DesignTime",
+      "sentinel": "ErrDesignTime",
+      "detailType": "*ErrorDetail",
+      "category": "tooling",
+      "message": "Design-time model discovery failed.",
+      "trigger": "The selected model cannot be loaded in the design-time execution context.",
+      "phase": "discover-model",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONTRACT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONTRACT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-TOOL-0001"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/cli/dbcontext-creation",
+        "https://learn.microsoft.com/en-us/ef/core/cli/dotnet"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-TOOL-0002",
+      "kind": "Generation",
+      "sentinel": "ErrGeneration",
+      "detailType": "*ErrorDetail",
+      "category": "tooling",
+      "message": "Artifact generation failed.",
+      "trigger": "A validated input cannot be rendered to an agreed generated artifact.",
+      "phase": "generate",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONTRACT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONTRACT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-TOOL-0002"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/cli/dbcontext-creation",
+        "https://learn.microsoft.com/en-us/ef/core/cli/dotnet"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-TOOL-0003",
+      "kind": "CLIUsage",
+      "sentinel": "ErrCLIUsage",
+      "detailType": "*ErrorDetail",
+      "category": "tooling",
+      "message": "The command arguments are invalid.",
+      "trigger": "The CLI adapter receives incompatible options or a missing required target.",
+      "phase": "parse-options",
+      "outcome": "no_commit_attempted",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONTRACT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONTRACT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-TOOL-0003"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/cli/dbcontext-creation",
+        "https://learn.microsoft.com/en-us/ef/core/cli/dotnet"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
+      "id": "GOEF-INTERNAL-0001",
+      "kind": "InternalInvariant",
+      "sentinel": "ErrInternalInvariant",
+      "detailType": "*ErrorDetail",
+      "category": "invariant",
+      "message": "An internal invariant failed.",
+      "trigger": "An impossible internal state prevents further safe execution.",
+      "phase": "internal",
+      "outcome": "inspect_transaction",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "critical",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "ERR-CONTRACT-001"
+      ],
+      "scenarioIds": [
+        "ERR-CONTRACT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-INTERNAL-0001"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    }
+  ]
+}

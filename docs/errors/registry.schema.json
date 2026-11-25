@@ -1,0 +1,659 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GoEF canonical error registry and native mapping tables",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/registry"
+    },
+    {
+      "$ref": "#/$defs/providerTable"
+    }
+  ],
+  "$defs": {
+    "registry": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/error"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "errors"
+      ],
+      "additionalProperties": false
+    },
+    "error": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^GOEF-[A-Z]+-[0-9]{4}$"
+        },
+        "kind": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Za-z0-9]+$"
+        },
+        "sentinel": {
+          "type": "string",
+          "pattern": "^Err[A-Z][A-Za-z0-9]+$"
+        },
+        "detailType": {
+          "const": "*ErrorDetail"
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trigger": {
+          "type": "string",
+          "minLength": 1
+        },
+        "phase": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outcome": {
+          "enum": [
+            "unknown",
+            "inspect_durable_effects",
+            "rollback_unconfirmed",
+            "no_commit_attempted",
+            "inspect_transaction"
+          ]
+        },
+        "retryClass": {
+          "enum": [
+            "never",
+            "statement_safe",
+            "transaction_safe",
+            "resolve_outcome"
+          ]
+        },
+        "retryPreconditions": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "enum": [
+            "error",
+            "critical",
+            "warning"
+          ]
+        },
+        "safeMetadata": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "redaction": {
+          "type": "string",
+          "minLength": 1
+        },
+        "firstVersion": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "enum": [
+            "PROPOSED",
+            "VERIFIED",
+            "DEPRECATED"
+          ]
+        },
+        "deprecated": {
+          "type": "boolean"
+        },
+        "replacement": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^GOEF-[A-Z]+-[0-9]{4}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^https://github\\.com/igorpooh1978/GoEF/issues/[1-9][0-9]*$"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "featureIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z]+(-[A-Z]+)+-[0-9]{3}$"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "scenarioIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z]+(-[A-Z]+)+-[0-9]{3}-S[0-9]{2}$"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "docs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "testIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^TEST-[A-Z0-9-]+$"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "upstreamSources": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^https://[^ ]+$"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "providerMappings": {
+          "type": "object",
+          "properties": {
+            "postgres": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0,
+              "uniqueItems": true
+            },
+            "sqlite": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0,
+              "uniqueItems": true
+            },
+            "sqlserver": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0,
+              "uniqueItems": true
+            },
+            "mysql": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0,
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "postgres",
+            "sqlite",
+            "sqlserver",
+            "mysql"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "sentinel",
+        "detailType",
+        "category",
+        "message",
+        "trigger",
+        "phase",
+        "outcome",
+        "retryClass",
+        "retryPreconditions",
+        "severity",
+        "safeMetadata",
+        "redaction",
+        "firstVersion",
+        "status",
+        "deprecated",
+        "replacement",
+        "issues",
+        "featureIds",
+        "scenarioIds",
+        "docs",
+        "testIds",
+        "upstreamSources",
+        "providerMappings"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "DEPRECATED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "deprecated": {
+                "const": true
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "VERIFIED",
+                  "DEPRECATED"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "firstVersion": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "providerTable": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "provider": {
+          "enum": [
+            "postgres",
+            "sqlite",
+            "sqlserver",
+            "mysql"
+          ]
+        },
+        "mappings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/mapping"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "gaps": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "provider",
+        "mappings",
+        "gaps"
+      ],
+      "additionalProperties": false
+    },
+    "mapping": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "errorId": {
+          "type": "string",
+          "pattern": "^GOEF-[A-Z]+-[0-9]{4}$"
+        },
+        "engineVersionRange": {
+          "type": "string",
+          "minLength": 1
+        },
+        "driver": {
+          "type": "string",
+          "minLength": 1
+        },
+        "driverVersion": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "driverField": {
+          "type": "string",
+          "minLength": 1
+        },
+        "native": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "enum": [
+                "sqlstate",
+                "nativeCode",
+                "extendedCode",
+                "typedError"
+              ]
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        "requiredContext": {
+          "type": "string",
+          "minLength": 1
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "disambiguation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "PROPOSED",
+            "VERIFIED",
+            "DEPRECATED"
+          ]
+        },
+        "expectedGoError": {
+          "type": "string",
+          "minLength": 1
+        },
+        "errorsIs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "errorsAs": {
+          "type": "string",
+          "minLength": 1
+        },
+        "retryClass": {
+          "enum": [
+            "never",
+            "statement_safe",
+            "transaction_safe",
+            "resolve_outcome"
+          ]
+        },
+        "outcome": {
+          "enum": [
+            "unknown",
+            "inspect_durable_effects",
+            "rollback_unconfirmed",
+            "no_commit_attempted",
+            "inspect_transaction"
+          ]
+        },
+        "officialSources": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^https://[^ ]+$"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "reproduction": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "BLOCKED",
+                "OBSERVED"
+              ]
+            },
+            "planned": {
+              "type": "string",
+              "minLength": 1
+            },
+            "observed": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "reason": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "status",
+            "planned",
+            "observed",
+            "reason"
+          ],
+          "additionalProperties": false
+        },
+        "testId": {
+          "type": "string",
+          "pattern": "^TEST-[A-Z0-9-]+$"
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "sha": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{40}$"
+                },
+                "testId": {
+                  "type": "string",
+                  "pattern": "^TEST-[A-Z0-9-]+$"
+                },
+                "engineVersion": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "driverVersion": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "fixture": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "negativeControl": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "sha",
+                "testId",
+                "engineVersion",
+                "driverVersion",
+                "fixture",
+                "negativeControl"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "errorId",
+        "engineVersionRange",
+        "driver",
+        "driverVersion",
+        "driverField",
+        "native",
+        "requiredContext",
+        "priority",
+        "disambiguation",
+        "status",
+        "expectedGoError",
+        "errorsIs",
+        "errorsAs",
+        "retryClass",
+        "outcome",
+        "officialSources",
+        "reproduction",
+        "testId",
+        "evidence"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "VERIFIED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "driverVersion": {
+                "type": "string",
+                "minLength": 1
+              },
+              "evidence": {
+                "$ref": "#/$defs/evidence"
+              },
+              "reproduction": {
+                "properties": {
+                  "status": {
+                    "const": "OBSERVED"
+                  },
+                  "observed": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "testId": {
+          "type": "string",
+          "pattern": "^TEST-[A-Z0-9-]+$"
+        },
+        "engineVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "driverVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fixture": {
+          "type": "string",
+          "minLength": 1
+        },
+        "negativeControl": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "sha",
+        "testId",
+        "engineVersion",
+        "driverVersion",
+        "fixture",
+        "negativeControl"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

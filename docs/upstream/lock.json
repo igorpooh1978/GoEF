@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 1,
+  "sources": [
+    {
+      "id": "efcore",
+      "repository": "https://github.com/dotnet/efcore",
+      "tag": "v10.0.15",
+      "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+      "role": "baseline",
+      "commitUrl": "https://github.com/dotnet/efcore/commit/b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+      "verification": {
+        "status": "VERIFIED",
+        "observedOn": "2026-11-25",
+        "method": "git-ls-remote",
+        "command": "git ls-remote https://github.com/dotnet/efcore.git refs/tags/v10.0.15 refs/tags/v10.0.15^{}",
+        "evidenceUrl": "https://api.github.com/repos/dotnet/efcore/git/ref/tags/v10.0.15"
+      },
+      "license": {
+        "spdx": "MIT",
+        "path": "LICENSE.txt",
+        "blobSha": "a616ed188dfce68ee308f674350ad242d8588c2b",
+        "url": "https://github.com/dotnet/efcore/blob/b34c0e9d7e768aa808ded44f19e7f871bea6869f/LICENSE.txt"
+      },
+      "noticeReview": {
+        "status": "NO_CONVENTIONAL_NOTICE_FOUND_IN_TREE",
+        "files": [],
+        "source": "https://api.github.com/repos/dotnet/efcore/git/trees/b34c0e9d7e768aa808ded44f19e7f871bea6869f?recursive=1"
+      }
+    },
+    {
+      "id": "dotnet-runtime",
+      "repository": "https://github.com/dotnet/runtime",
+      "tag": "v10.0.0",
+      "sha": "60629d14374c56f1cb51819049ad1fa529307f8d",
+      "role": "baseline",
+      "commitUrl": "https://github.com/dotnet/runtime/commit/60629d14374c56f1cb51819049ad1fa529307f8d",
+      "verification": {
+        "status": "VERIFIED",
+        "observedOn": "2026-11-25",
+        "method": "git-ls-remote",
+        "command": "git ls-remote https://github.com/dotnet/runtime.git refs/tags/v10.0.0 refs/tags/v10.0.0^{}",
+        "evidenceUrl": "https://api.github.com/repos/dotnet/runtime/git/ref/tags/v10.0.0"
+      },
+      "license": {
+        "spdx": "MIT",
+        "path": "LICENSE.TXT",
+        "blobSha": "984713a49622a96da110443c15477613bc12656b",
+        "url": "https://github.com/dotnet/runtime/blob/60629d14374c56f1cb51819049ad1fa529307f8d/LICENSE.TXT"
+      },
+      "noticeReview": {
+        "status": "FOUND",
+        "files": [
+          {
+            "path": "THIRD-PARTY-NOTICES.TXT",
+            "blobSha": "1e194f3b353a4fa1b369e843975a1e94ba90addc",
+            "url": "https://github.com/dotnet/runtime/blob/60629d14374c56f1cb51819049ad1fa529307f8d/THIRD-PARTY-NOTICES.TXT"
+          }
+        ],
+        "source": "https://api.github.com/repos/dotnet/runtime/contents?ref=60629d14374c56f1cb51819049ad1fa529307f8d"
+      }
+    },
+    {
+      "id": "go-linq-stable",
+      "repository": "https://github.com/ahmetb/go-linq",
+      "tag": "v5.0.0",
+      "sha": "6ebc43b7c971a8a4cb9e38742f6cb491d4032cbb",
+      "role": "baseline",
+      "commitUrl": "https://github.com/ahmetb/go-linq/commit/6ebc43b7c971a8a4cb9e38742f6cb491d4032cbb",
+      "verification": {
+        "status": "VERIFIED",
+        "observedOn": "2026-11-25",
+        "method": "git-ls-remote",
+        "command": "git ls-remote https://github.com/ahmetb/go-linq.git refs/tags/v5.0.0 refs/tags/v5.0.0^{}",
+        "evidenceUrl": "https://api.github.com/repos/ahmetb/go-linq/git/ref/tags/v5.0.0"
+      },
+      "license": {
+        "spdx": "Apache-2.0",
+        "path": "LICENSE",
+        "blobSha": "c1ab55f3a44973f512767a3cc11a0cb54123ad3f",
+        "url": "https://github.com/ahmetb/go-linq/blob/6ebc43b7c971a8a4cb9e38742f6cb491d4032cbb/LICENSE"
+      },
+      "noticeReview": {
+        "status": "NO_CONVENTIONAL_NOTICE_FOUND_IN_TREE",
+        "files": [],
+        "source": "https://api.github.com/repos/ahmetb/go-linq/git/trees/6ebc43b7c971a8a4cb9e38742f6cb491d4032cbb?recursive=1"
+      }
+    },
+    {
+      "id": "go-linq-research",
+      "repository": "https://github.com/ahmetb/go-linq",
+      "tag": null,
+      "sha": "91b0fe50132dbf3efddb832376e3fe3d8daa06d9",
+      "role": "research",
+      "commitUrl": "https://github.com/ahmetb/go-linq/commit/91b0fe50132dbf3efddb832376e3fe3d8daa06d9",
+      "verification": {
+        "status": "VERIFIED",
+        "observedOn": "2026-11-25",
+        "method": "github-git-commit",
+        "command": "GET https://api.github.com/repos/ahmetb/go-linq/git/commits/91b0fe50132dbf3efddb832376e3fe3d8daa06d9",
+        "evidenceUrl": "https://api.github.com/repos/ahmetb/go-linq/git/commits/91b0fe50132dbf3efddb832376e3fe3d8daa06d9"
+      },
+      "license": {
+        "spdx": "Apache-2.0",
+        "path": "LICENSE",
+        "blobSha": "c1ab55f3a44973f512767a3cc11a0cb54123ad3f",
+        "url": "https://github.com/ahmetb/go-linq/blob/91b0fe50132dbf3efddb832376e3fe3d8daa06d9/LICENSE"
+      },
+      "noticeReview": {
+        "status": "NO_CONVENTIONAL_NOTICE_FOUND_IN_TREE",
+        "files": [],
+        "source": "https://api.github.com/repos/ahmetb/go-linq/git/trees/91b0fe50132dbf3efddb832376e3fe3d8daa06d9?recursive=1"
+      }
+    },
+    {
+      "id": "npgsql-efcore",
+      "repository": "https://github.com/npgsql/efcore.pg",
+      "tag": "v10.0.4",
+      "sha": "fe1109ecf52646ed6fc718a9a233353ef2e7baf9",
+      "role": "provider-baseline",
+      "commitUrl": "https://github.com/npgsql/efcore.pg/commit/fe1109ecf52646ed6fc718a9a233353ef2e7baf9",
+      "verification": {
+        "status": "VERIFIED",
+        "observedOn": "2026-11-25",
+        "method": "git-ls-remote",
+        "command": "git ls-remote https://github.com/npgsql/efcore.pg.git refs/tags/v10.0.4 refs/tags/v10.0.4^{}",
+        "evidenceUrl": "https://api.github.com/repos/npgsql/efcore.pg/git/ref/tags/v10.0.4"
+      },
+      "license": {
+        "spdx": "PostgreSQL",
+        "path": "LICENSE",
+        "blobSha": "b102b0e3884e3ba7757f6994a68a80c746e68dc2",
+        "url": "https://github.com/npgsql/efcore.pg/blob/fe1109ecf52646ed6fc718a9a233353ef2e7baf9/LICENSE"
+      },
+      "noticeReview": {
+        "status": "NO_CONVENTIONAL_NOTICE_FOUND_AT_ROOT",
+        "files": [],
+        "source": "https://api.github.com/repos/npgsql/efcore.pg/contents?ref=fe1109ecf52646ed6fc718a9a233353ef2e7baf9"
+      },
+      "efCoreCompatibility": {
+        "status": "RANGE_MATCH",
+        "declaredEfCoreRange": "[10.0.15,11.0.0)",
+        "targetEfCoreTag": "v10.0.15",
+        "driver": "Npgsql 10.0.4",
+        "metadataUrl": "https://github.com/npgsql/efcore.pg/blob/fe1109ecf52646ed6fc718a9a233353ef2e7baf9/Directory.Packages.props",
+        "metadataBlobSha": "c26eb45fb3ea23d54331ad9a8d5febd0766eb399",
+        "executionEvidence": "NOT_RUN"
+      }
+    },
+    {
+      "id": "pomelo-efcore",
+      "repository": "https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql",
+      "tag": "9.0.0",
+      "sha": "58dd6883cb9616fe49f671b943a826b459c0117f",
+      "role": "research",
+      "commitUrl": "https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql/commit/58dd6883cb9616fe49f671b943a826b459c0117f",
+      "verification": {
+        "status": "VERIFIED",
+        "observedOn": "2026-11-25",
+        "method": "git-ls-remote",
+        "command": "git ls-remote https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql.git refs/tags/9.0.0 refs/tags/9.0.0^{}",
+        "evidenceUrl": "https://api.github.com/repos/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql/git/ref/tags/9.0.0"
+      },
+      "license": {
+        "spdx": "MIT",
+        "path": "LICENSE",
+        "blobSha": "73e60c9b654b1ffe97a7df4308659fae1b61fca8",
+        "url": "https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql/blob/58dd6883cb9616fe49f671b943a826b459c0117f/LICENSE"
+      },
+      "noticeReview": {
+        "status": "NO_CONVENTIONAL_NOTICE_FOUND_AT_ROOT",
+        "files": [],
+        "source": "https://api.github.com/repos/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql/contents?ref=58dd6883cb9616fe49f671b943a826b459c0117f"
+      },
+      "efCoreCompatibility": {
+        "status": "RANGE_MISMATCH",
+        "declaredEfCoreRange": "[9.0.0,9.0.999]",
+        "targetEfCoreTag": "v10.0.15",
+        "driver": "MySqlConnector 2.4.0",
+        "metadataUrl": "https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql/blob/58dd6883cb9616fe49f671b943a826b459c0117f/Directory.Packages.props",
+        "metadataBlobSha": "c4e17801f2f6df9d6a4544c1af55e18987297709",
+        "executionEvidence": "NOT_RUN"
+      }
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "pomelo-efcore10",
+      "repository": "https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql",
+      "tag": null,
+      "sha": null,
+      "status": "BLOCKED",
+      "reason": "No upstream 10.x release tag was found on 2026-11-25. The verified 9.0.0 tag excludes EF Core 10.0.15.",
+      "evidence": [
+        "https://api.github.com/repos/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql/releases?per_page=15",
+        "git ls-remote --tags --refs https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql.git refs/tags/10* refs/tags/v10*"
+      ],
+      "issues": [
+        7
+      ]
+    },
+    {
+      "id": "efcore-main",
+      "repository": "https://github.com/dotnet/efcore",
+      "tag": null,
+      "sha": null,
+      "status": "PROPOSED",
+      "reason": "Track post-baseline research separately and pin the exact commit in the research wave.",
+      "evidence": [],
+      "issues": [
+        7
+      ]
+    }
+  ]
+}

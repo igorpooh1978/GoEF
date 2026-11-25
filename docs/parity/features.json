@@ -1,0 +1,3888 @@
+{
+  "schemaVersion": 1,
+  "features": [
+    {
+      "id": "MODEL-MAP-001",
+      "family": "model",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Relational/Extensions/RelationalPropertyBuilderExtensions.cs",
+          "symbol": "HasColumnName",
+          "testPath": "test/EFCore.Relational.Tests/Metadata/RelationalModelTest.cs",
+          "testSymbol": "Can_use_relational_model_with_tables",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Resolve one entity and its field names to explicit table and column names in a deterministic physical model.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Immutable model descriptor with explicit table and column mappings."
+      },
+      "wave": "W003",
+      "issues": [
+        3
+      ],
+      "dependencies": [],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "MODEL-MAP-001-S01"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/MODELS_CODE_FIRST.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "MODEL-NULL-001",
+      "family": "model",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/Metadata/Builders/PropertyBuilder.cs",
+          "symbol": "IsRequired",
+          "testPath": "test/EFCore.Specification.Tests/DataAnnotationTestBase.cs",
+          "testSymbol": "RequiredAttribute_for_property_throws_while_inserting_null_value",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Represent an optional scalar distinctly from its zero value and a required scalar distinctly from absent input.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Nullable field types in the logical model, validated against the physical type."
+      },
+      "wave": "W003",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "MODEL-MAP-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "MODEL-NULL-001-S01"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/MODELS_CODE_FIRST.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "MODEL-REL-001",
+      "family": "model",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/Metadata/Builders/ReferenceCollectionBuilder.cs",
+          "symbol": "HasForeignKey",
+          "testPath": "test/EFCore.Specification.Tests/ModelBuilding/ModelBuilderTest.OneToMany.cs",
+          "testSymbol": "Creates_both_navigations_and_uses_specified_FK_even_if_found_by_convention",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Bind a one-to-many association to an explicitly declared foreign key and retain its cardinality.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Typed entity relationship descriptor with explicit key mappings."
+      },
+      "wave": "W010",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "MODEL-MAP-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "MODEL-REL-001-S01"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/MODELS_CODE_FIRST.md",
+        "docs/user/RELATIONSHIPS.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "MODEL-TYPE-001",
+      "family": "model",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Relational/Storage/RelationalTypeMappingSource.cs",
+          "symbol": "FindMapping",
+          "testPath": "test/EFCore.SqlServer.Tests/Storage/SqlServerTypeMappingTest.cs",
+          "testSymbol": "Create_and_clone_SQL_Server_DateTime_mappings_with_converter",
+          "relation": "analogue"
+        }
+      ],
+      "contract": "Round-trip a supported scalar comparison and value without losing precision under a declared provider type mapping.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Provider type mapping and codec resolved from logical type and facets."
+      },
+      "wave": "W005",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "MODEL-MAP-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "MODEL-TYPE-001-S01"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/MODELS_CODE_FIRST.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "MODEL-VALID-001",
+      "family": "model",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/Infrastructure/ModelValidator.cs",
+          "symbol": "Validate",
+          "testPath": "test/EFCore.Tests/Infrastructure/ModelValidatorTest.cs",
+          "testSymbol": "Detects_key_property_which_cannot_be_compared",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Reject an invalid declared entity model before database IO and identify the invalid property or key.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Model build or freeze returns a typed validation error with a model path."
+      },
+      "wave": "W003",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "MODEL-MAP-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "MODEL-VALID-001-S01"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/MODELS_CODE_FIRST.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "QUERY-PARAM-001",
+      "family": "query",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/Query/Internal/ExpressionTreeFuncletizer.cs",
+          "symbol": "ExtractParameters",
+          "testPath": "test/EFCore.Specification.Tests/Query/NorthwindWhereQueryTestBase.cs",
+          "testSymbol": "Where_simple_closure_via_query_cache",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Bind user values separately from statement text. Re-execution of the same predicate shape with different values yields the right rows.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Typed query parameter nodes and provider argument binding."
+      },
+      "wave": "W008",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "MODEL-MAP-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "QUERY-PARAM-001-S01"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/QUERYING.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "QUERY-UNSUPPORTED-001",
+      "family": "query",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/Query/QueryableMethodTranslatingExpressionVisitor.cs",
+          "symbol": "Translate",
+          "testPath": "test/EFCore.Specification.Tests/Query/NorthwindWhereQueryTestBase.cs",
+          "testSymbol": "Where_client",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Fail an unsupported server-side predicate before database dispatch with a typed error.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Query compilation returns typed unsupported with the failing expression location."
+      },
+      "wave": "W008",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "QUERY-PARAM-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "QUERY-UNSUPPORTED-001-S01"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/QUERYING.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "ERR-CONCURRENCY-001",
+      "family": "errors",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/DbContext.cs",
+          "symbol": "SaveChangesAsync",
+          "testPath": "test/EFCore.Specification.Tests/OptimisticConcurrencyTestBase.cs",
+          "testSymbol": "Simple_concurrency_exception_can_be_resolved_with_store_values",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Classify a stale concurrency-token write when the expected row count is missing. The winning committed change survives.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Typed optimistic concurrency error with safe affected-entry metadata."
+      },
+      "wave": "W011",
+      "issues": [
+        2
+      ],
+      "dependencies": [
+        "MODEL-MAP-001",
+        "ERR-CONTRACT-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "ERR-CONCURRENCY-001-S01"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/ERROR_HANDLING.md",
+        "docs/architecture/ERROR_CONTRACT.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "ERR-CONSTRAINT-001",
+      "family": "errors",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/DbUpdateException.cs",
+          "symbol": "DbUpdateException",
+          "testPath": "test/EFCore.Relational.Specification.Tests/TransactionTestBase.cs",
+          "testSymbol": "SaveChanges_can_be_used_with_AutoTransactionBehavior_Never",
+          "relation": "analogue"
+        }
+      ],
+      "contract": "Classify unique and foreign-key violations using provider codes and operation context and preserve safe error chaining.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Provider error mapping returns the corresponding public constraint kind."
+      },
+      "wave": "W005",
+      "issues": [
+        2
+      ],
+      "dependencies": [
+        "ERR-CONTRACT-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "ERR-CONSTRAINT-001-S01",
+        "ERR-CONSTRAINT-001-S02"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [
+        "Upstream exception type supplies context but does not establish the GoEF native-code taxonomy."
+      ],
+      "adr": null,
+      "docs": [
+        "docs/user/ERROR_HANDLING.md",
+        "docs/architecture/ERROR_CONTRACT.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "ERR-CANCEL-001",
+      "family": "errors",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Relational/Storage/RelationalCommand.cs",
+          "symbol": "ExecuteReaderAsync",
+          "testPath": "test/Microsoft.Data.Sqlite.Tests/SqliteCommandTest.cs",
+          "testSymbol": "Cancel_does_nothing",
+          "relation": "analogue"
+        },
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/DbContext.cs",
+          "symbol": "SaveChangesAsync",
+          "testPath": "test/EFCore.Tests/DbContextTest.cs",
+          "testSymbol": "SaveChangesAsync_with_canceled_token",
+          "relation": "analogue"
+        }
+      ],
+      "contract": "Report cancellation or causal deadline, release query resources with bounded cleanup and preserve an independent cleanup failure.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Context-aware query execution with stable classification and joined cleanup errors."
+      },
+      "wave": "W005",
+      "issues": [
+        2
+      ],
+      "dependencies": [
+        "ERR-CONTRACT-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "ERR-CANCEL-001-S01",
+        "ERR-CANCEL-001-S02",
+        "ERR-CANCEL-001-S03"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [
+        "The SQLite reference test shows a driver Cancel method with no effect. It supplies a distinction, not proof of GoEF cancellation."
+      ],
+      "adr": null,
+      "docs": [
+        "docs/user/ERROR_HANDLING.md",
+        "docs/architecture/ERROR_CONTRACT.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "ERR-CONTRACT-001",
+      "family": "errors",
+      "origin": "GOEF_EXTENSION",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/DbUpdateException.cs",
+          "symbol": "DbUpdateException",
+          "testPath": null,
+          "testSymbol": null,
+          "relation": "analogue"
+        }
+      ],
+      "contract": "Round-trip a public error kind with errors.Is and errors.As. An unknown native code has stable unknown classification.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Public Kind and Error with safe diagnostics and errors.Is and errors.As behavior."
+      },
+      "wave": "W002",
+      "issues": [
+        2
+      ],
+      "dependencies": [],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "ERR-CONTRACT-001-S01",
+        "ERR-CONTRACT-001-S02",
+        "ERR-CONTRACT-001-S03"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [
+        "Go error chains, safe metadata and mapping proof are GoEF contracts."
+      ],
+      "adr": null,
+      "docs": [
+        "docs/user/ERROR_HANDLING.md",
+        "docs/architecture/ERROR_CONTRACT.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "MIG-API-001",
+      "family": "migrations",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Relational/Extensions/RelationalDatabaseFacadeExtensions.cs",
+          "symbol": "Migrate",
+          "testPath": "test/EFCore.Relational.Specification.Tests/Migrations/MigrationsInfrastructureTestBase.cs",
+          "testSymbol": "Can_apply_range_of_migrations",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Plan and apply a registered DDL operation programmatically with deterministic preview and an explicit baseline and downgrade contract.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Programmatic migration registry, planner, preview and executor."
+      },
+      "wave": "W004",
+      "issues": [
+        2
+      ],
+      "dependencies": [
+        "MODEL-MAP-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "MIG-API-001-S01",
+        "MIG-API-001-S02",
+        "MIG-API-001-S03"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/architecture/MIGRATION_ENGINE.md",
+        "docs/user/MIGRATIONS_IN_GO.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "MIG-RENAME-001",
+      "family": "migrations",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Relational/Migrations/Operations/RenameColumnOperation.cs",
+          "symbol": "RenameColumnOperation",
+          "testPath": "test/EFCore.Relational.Specification.Tests/Migrations/MigrationsTestBase.cs",
+          "testSymbol": "Rename_column",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "An explicitly named column rename preserves rows and mapped dependencies. Ambiguous intent stops planning.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Typed RenameColumn operation and explicit planner rename metadata."
+      },
+      "wave": "W006",
+      "issues": [
+        2
+      ],
+      "dependencies": [
+        "MIG-API-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "MIG-RENAME-001-S01",
+        "MIG-RENAME-001-S02"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/MIGRATIONS.md",
+        "docs/architecture/MIGRATION_ENGINE.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "MIG-DRIFT-001",
+      "family": "migrations",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Relational/Migrations/Internal/Migrator.cs",
+          "symbol": "ValidateMigrations",
+          "testPath": "test/EFCore.Relational.Specification.Tests/Migrations/MigrationsInfrastructureTestBase.cs",
+          "testSymbol": "Can_apply_all_migrations",
+          "relation": "analogue"
+        }
+      ],
+      "contract": "Reject execution when schema or migration history differs from the plan preconditions.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Planner precondition digests and history verification."
+      },
+      "wave": "W006",
+      "issues": [
+        2
+      ],
+      "dependencies": [
+        "MIG-API-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "MIG-DRIFT-001-S01",
+        "MIG-DRIFT-001-S02"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [
+        "GoEF adds database preconditions and migration content digests to its own plan."
+      ],
+      "adr": null,
+      "docs": [
+        "docs/user/MIGRATIONS.md",
+        "docs/architecture/MIGRATION_ENGINE.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "MIG-LOCK-001",
+      "family": "migrations",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Relational/Migrations/HistoryRepository.cs",
+          "symbol": "AcquireDatabaseLock",
+          "testPath": "test/EFCore.Relational.Specification.Tests/Migrations/MigrationsInfrastructureTestBase.cs",
+          "testSymbol": "Can_apply_one_migration_in_parallel_async",
+          "relation": "behavior"
+        },
+        {
+          "lockId": "npgsql-efcore",
+          "repository": "https://github.com/npgsql/efcore.pg",
+          "tag": "v10.0.4",
+          "sha": "fe1109ecf52646ed6fc718a9a233353ef2e7baf9",
+          "path": "src/EFCore.PG/Migrations/Internal/NpgsqlHistoryRepository.cs",
+          "symbol": "AcquireDatabaseLock",
+          "testPath": null,
+          "testSymbol": null,
+          "relation": "analogue"
+        }
+      ],
+      "contract": "Deny concurrent execution of the same migration scope and preserve history when a waiting migrator is canceled.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Migration lock acquisition with scoped connection affinity and context."
+      },
+      "wave": "W006",
+      "issues": [
+        2
+      ],
+      "dependencies": [
+        "MIG-API-001",
+        "TX-AFFINITY-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "MIG-LOCK-001-S01",
+        "MIG-LOCK-001-S02"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/MIGRATIONS.md",
+        "docs/architecture/MIGRATION_ENGINE.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "MIG-RECOVERY-001",
+      "family": "migrations",
+      "origin": "GOEF_EXTENSION",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Relational/Migrations/Internal/MigrationCommandExecutor.cs",
+          "symbol": "ExecuteNonQuery",
+          "testPath": "test/EFCore.Relational.Tests/Migrations/MigrationCommandExecutorTest.cs",
+          "testSymbol": "Disposes_transaction_on_exception",
+          "relation": "analogue"
+        }
+      ],
+      "contract": "After interruption, reconcile the observed step and validated postconditions before marking migration history complete.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Executor status inspection and recovery procedure tied to step identity."
+      },
+      "wave": "W006",
+      "issues": [
+        2
+      ],
+      "dependencies": [
+        "MIG-DRIFT-001",
+        "MIG-LOCK-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "MIG-RECOVERY-001-S01",
+        "MIG-RECOVERY-001-S02"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/architecture/MIGRATION_ENGINE.md",
+        "docs/user/MIGRATIONS_UPGRADE_AND_RECOVERY.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "MIG-SQLITE-001",
+      "family": "migrations",
+      "origin": "EF_CORE",
+      "scope": "SPECIALIZED",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Sqlite.Core/Migrations/SqliteMigrationsSqlGenerator.cs",
+          "symbol": "RewriteOperations",
+          "testPath": "test/EFCore.Sqlite.FunctionalTests/Migrations/SqliteMigrationsSqlGeneratorTest.cs",
+          "testSymbol": "DropColumn_throws_when_no_model",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Rebuild a SQLite table using an explicit writable projection and reject unrecognized dependent objects before mutation.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "SQLite rebuild planning with dependency inspection."
+      },
+      "wave": "W006",
+      "issues": [
+        2
+      ],
+      "dependencies": [
+        "MIG-API-001",
+        "MIG-DRIFT-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This contract exercises SQLite table rebuild semantics.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This contract exercises SQLite table rebuild semantics.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This contract exercises SQLite table rebuild semantics.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "MIG-SQLITE-001-S01",
+        "MIG-SQLITE-001-S02"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/MIGRATIONS.md",
+        "docs/architecture/MIGRATION_ENGINE.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "MIG-MYSQL-001",
+      "family": "migrations",
+      "origin": "GOEF_EXTENSION",
+      "scope": "SPECIALIZED",
+      "upstream": [
+        {
+          "lockId": "pomelo-efcore",
+          "repository": "https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql",
+          "tag": "9.0.0",
+          "sha": "58dd6883cb9616fe49f671b943a826b459c0117f",
+          "path": "src/EFCore.MySql/Migrations/Internal/MySqlMigrator.cs",
+          "symbol": "GenerateScript",
+          "testPath": "test/EFCore.MySql.FunctionalTests/FullMigrationsMySqlTest.cs",
+          "testSymbol": "Drop_primary_key_with_recreating_foreign_keys",
+          "relation": "analogue"
+        }
+      ],
+      "contract": "After losing a checkpoint for a MySQL DDL step, reconcile a proven postcondition without replaying the DDL. Conflicting postconditions halt recovery.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "MySQL per-step migration journal and postcondition inspection."
+      },
+      "wave": "W006",
+      "issues": [
+        2
+      ],
+      "dependencies": [
+        "MIG-RECOVERY-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This contract exercises MySQL implicit-commit DDL recovery.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This contract exercises MySQL implicit-commit DDL recovery.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This contract exercises MySQL implicit-commit DDL recovery.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "MIG-MYSQL-001-S01",
+        "MIG-MYSQL-001-S02"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [
+        "Pomelo 9.0.0 is research-only for comparison. The GoEF recovery journal is a proposed extension."
+      ],
+      "adr": null,
+      "docs": [
+        "docs/user/MIGRATIONS.md",
+        "docs/architecture/MIGRATION_ENGINE.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "TX-OWN-001",
+      "family": "transactions",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Relational/Storage/RelationalTransaction.cs",
+          "symbol": "Dispose",
+          "testPath": "test/EFCore.Relational.Specification.Tests/TransactionTestBase.cs",
+          "testSymbol": "UseTransaction_will_not_dispose_external_transaction",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Only a transaction owner may complete or dispose its handle. A failed atomic save rolls its own changes back.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Explicit owned and externally enlisted transaction handles."
+      },
+      "wave": "W005",
+      "issues": [
+        2
+      ],
+      "dependencies": [
+        "ERR-CONTRACT-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "TX-OWN-001-S01",
+        "TX-OWN-001-S02",
+        "TX-OWN-001-S03"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/TRANSACTIONS.md",
+        "docs/architecture/TRANSACTION_ENGINE.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "TX-AFFINITY-001",
+      "family": "transactions",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Relational/Storage/RelationalConnection.cs",
+          "symbol": "UseTransaction",
+          "testPath": "test/EFCore.Relational.Specification.Tests/TransactionTestBase.cs",
+          "testSymbol": "UseTransaction_throws_if_mismatched_connection",
+          "relation": "behavior"
+        },
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Relational/Storage/RelationalConnection.cs",
+          "symbol": "UseTransaction",
+          "testPath": "test/EFCore.Relational.Specification.Tests/TransactionTestBase.cs",
+          "testSymbol": "Query_uses_explicit_transaction",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Bind all statements in a transactional operation to its physical connection. Reject mismatched enlistment and unsafe concurrent use.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Transaction-bound context and executor with physical connection identity."
+      },
+      "wave": "W005",
+      "issues": [
+        2
+      ],
+      "dependencies": [
+        "TX-OWN-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "TX-AFFINITY-001-S01",
+        "TX-AFFINITY-001-S02"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/TRANSACTIONS.md",
+        "docs/architecture/TRANSACTION_ENGINE.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "TX-ISOLATION-001",
+      "family": "transactions",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Relational/Storage/RelationalConnection.cs",
+          "symbol": "BeginTransaction",
+          "testPath": "test/EFCore.Relational.Specification.Tests/TransactionTestBase.cs",
+          "testSymbol": "BeginTransaction_throws_if_another_transaction_started",
+          "relation": "analogue"
+        }
+      ],
+      "contract": "Apply the requested advertised isolation or return typed unsupported without starting work. Handle nesting explicitly.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Begin with named isolation and read-only options plus capability check."
+      },
+      "wave": "W009",
+      "issues": [
+        2
+      ],
+      "dependencies": [
+        "TX-AFFINITY-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "TX-ISOLATION-001-S01",
+        "TX-ISOLATION-001-S02"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/TRANSACTIONS.md",
+        "docs/architecture/TRANSACTION_ENGINE.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "TX-SAVEPOINT-001",
+      "family": "transactions",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Relational/Storage/RelationalTransaction.cs",
+          "symbol": "RollbackToSavepoint",
+          "testPath": "test/EFCore.Relational.Specification.Tests/TransactionTestBase.cs",
+          "testSymbol": "Savepoint_can_be_rolled_back",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Roll a failed nested save back to its savepoint while preserving a preceding outer write. Reject unsafe caller-owned operation before dispatch.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Savepoint, rollback-to-savepoint and release on capable transaction handles."
+      },
+      "wave": "W009",
+      "issues": [
+        2
+      ],
+      "dependencies": [
+        "TX-AFFINITY-001",
+        "TX-ISOLATION-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "TX-SAVEPOINT-001-S01",
+        "TX-SAVEPOINT-001-S02"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/TRANSACTIONS.md",
+        "docs/architecture/TRANSACTION_ENGINE.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "TX-RETRY-001",
+      "family": "transactions",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/Storage/ExecutionStrategy.cs",
+          "symbol": "ExecuteImplementation",
+          "testPath": "test/EFCore.SqlServer.FunctionalTests/ExecutionStrategyTest.cs",
+          "testSymbol": "Retries_SaveChanges_on_execution_failure",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Replay eligible work on a fresh transaction only after confirmed rollback. Honor retry budget and reject non-transient or unsafe retries.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Bounded opt-in transaction runner using a provider classifier and replay contract."
+      },
+      "wave": "W009",
+      "issues": [
+        2
+      ],
+      "dependencies": [
+        "TX-OUTCOME-001",
+        "ERR-CONSTRAINT-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "TX-RETRY-001-S01",
+        "TX-RETRY-001-S02",
+        "TX-RETRY-001-S03"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/TRANSACTIONS.md",
+        "docs/architecture/TRANSACTION_ENGINE.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "TX-OUTCOME-001",
+      "family": "transactions",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/Storage/ExecutionStrategyExtensions.cs",
+          "symbol": "ExecuteInTransaction",
+          "testPath": "test/EFCore.SqlServer.FunctionalTests/ExecutionStrategyTest.cs",
+          "testSymbol": "Handles_commit_failure_async",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "When commit acknowledgement is lost, preserve an unknown outcome unless independent verification proves the committed state.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Typed transaction outcome with operation identity and optional verification."
+      },
+      "wave": "W009",
+      "issues": [
+        2
+      ],
+      "dependencies": [
+        "TX-OWN-001",
+        "ERR-CONTRACT-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "TX-OUTCOME-001-S01",
+        "TX-OUTCOME-001-S02"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/TRANSACTIONS.md",
+        "docs/architecture/TRANSACTION_ENGINE.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "DOC-EXAMPLE-001",
+      "family": "documentation",
+      "origin": "GOEF_EXTENSION",
+      "scope": "PORTABLE",
+      "upstream": [],
+      "contract": "Check that a published example compiles and that a database example exercises its claimed behavior on its declared provider.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Isolated example checks in documentation acceptance."
+      },
+      "wave": "W002",
+      "issues": [
+        14
+      ],
+      "dependencies": [],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "DOC-EXAMPLE-001-S01"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "examples/README.md",
+        "docs/development/DOCUMENTATION_POLICY.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "DOC-FRESH-001",
+      "family": "documentation",
+      "origin": "GOEF_EXTENSION",
+      "scope": "SPECIALIZED",
+      "upstream": [],
+      "contract": "Fail documentation acceptance when a generated or documented contract artifact is stale against its canonical source.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Deterministic generation or executable validation of derived documentation."
+      },
+      "wave": "W002",
+      "issues": [
+        14
+      ],
+      "dependencies": [],
+      "providers": {
+        "postgres": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Documentation freshness is checked without a database.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Documentation freshness is checked without a database.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Documentation freshness is checked without a database.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Documentation freshness is checked without a database.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "DOC-FRESH-001-S01"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/development/DOCUMENTATION_POLICY.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "LINQ-OBJECTS-001",
+      "family": "linq-objects",
+      "origin": "DOTNET_LINQ",
+      "scope": "SPECIALIZED",
+      "upstream": [
+        {
+          "lockId": "dotnet-runtime",
+          "repository": "https://github.com/dotnet/runtime",
+          "tag": "v10.0.0",
+          "sha": "60629d14374c56f1cb51819049ad1fa529307f8d",
+          "path": "src/libraries/System.Linq/src/System/Linq/Where.cs",
+          "symbol": "Enumerable.Where",
+          "testPath": "src/libraries/System.Linq/tests/WhereTests.cs",
+          "testSymbol": "Where_Array_ExecutionIsDeferred",
+          "relation": "behavior"
+        },
+        {
+          "lockId": "go-linq-stable",
+          "repository": "https://github.com/ahmetb/go-linq",
+          "tag": "v5.0.0",
+          "sha": "6ebc43b7c971a8a4cb9e38742f6cb491d4032cbb",
+          "path": "where.go",
+          "symbol": "Query.Where",
+          "testPath": "where_test.go",
+          "testSymbol": "TestWhere",
+          "relation": "analogue"
+        },
+        {
+          "lockId": "go-linq-research",
+          "repository": "https://github.com/ahmetb/go-linq",
+          "tag": null,
+          "sha": "91b0fe50132dbf3efddb832376e3fe3d8daa06d9",
+          "path": "where.go",
+          "symbol": "Query.Where",
+          "testPath": "where_test.go",
+          "testSymbol": "TestWhere",
+          "relation": "analogue"
+        }
+      ],
+      "contract": "Filter values through a lazy in-memory iterator. Consume in source order and stop upstream once the consumer stops.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Typed iterator query with local Go predicates."
+      },
+      "wave": "W008",
+      "issues": [
+        4
+      ],
+      "dependencies": [],
+      "providers": {
+        "postgres": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "LINQ to Objects evaluates Go values without a SQL provider.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "LINQ to Objects evaluates Go values without a SQL provider.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "LINQ to Objects evaluates Go values without a SQL provider.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "LINQ to Objects evaluates Go values without a SQL provider.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "LINQ-OBJECTS-001-S01",
+        "LINQ-OBJECTS-001-S02",
+        "LINQ-OBJECTS-001-S03",
+        "LINQ-OBJECTS-001-S04"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/architecture/LINQ_OBJECTS.md",
+        "docs/user/LINQ_OBJECTS.md",
+        "docs/parity/linq-operators.json"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "LINQ-EXPRESSION-001",
+      "family": "linq-expressions",
+      "origin": "DOTNET_LINQ",
+      "scope": "SPECIALIZED",
+      "upstream": [
+        {
+          "lockId": "dotnet-runtime",
+          "repository": "https://github.com/dotnet/runtime",
+          "tag": "v10.0.0",
+          "sha": "60629d14374c56f1cb51819049ad1fa529307f8d",
+          "path": "src/libraries/System.Linq.Expressions/src/System/Linq/Expressions/ParameterExpression.cs",
+          "symbol": "Expression.Parameter",
+          "testPath": "src/libraries/System.Linq.Expressions/tests/Variables/ParameterTests.cs",
+          "testSymbol": "OpenGenericType_ThrowsArgumentException",
+          "relation": "analogue"
+        }
+      ],
+      "contract": "Validate expression operator types and bindings and reject unregistered operations with a diagnostic before execution.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "One typed expression representation shared by explicit builders and generated query entry points."
+      },
+      "wave": "W013",
+      "issues": [
+        4
+      ],
+      "dependencies": [],
+      "providers": {
+        "postgres": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "The expression construction and validation contract is independent of execution.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "The expression construction and validation contract is independent of execution.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "The expression construction and validation contract is independent of execution.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "The expression construction and validation contract is independent of execution.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "LINQ-EXPRESSION-001-S01",
+        "LINQ-EXPRESSION-001-S02",
+        "LINQ-EXPRESSION-001-S03"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/architecture/LINQ_EXPRESSIONS.md",
+        "docs/parity/linq-operators.json"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "LINQ-QUERYABLE-001",
+      "family": "linq-queryable",
+      "origin": "DOTNET_LINQ",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "dotnet-runtime",
+          "repository": "https://github.com/dotnet/runtime",
+          "tag": "v10.0.0",
+          "sha": "60629d14374c56f1cb51819049ad1fa529307f8d",
+          "path": "src/libraries/System.Linq.Queryable/src/System/Linq/Queryable.cs",
+          "symbol": "Queryable.Where",
+          "testPath": "src/libraries/System.Linq.Queryable/tests/WhereTests.cs",
+          "testSymbol": "ReturnsExpectedValues_True",
+          "relation": "analogue"
+        },
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/Query/QueryableMethodTranslatingExpressionVisitor.cs",
+          "symbol": "Translate",
+          "testPath": "test/EFCore.Specification.Tests/Query/NorthwindWhereQueryTestBase.cs",
+          "testSymbol": "Where_simple",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Compose a server-backed filter as data and execute the composed query with bound values on the selected provider.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Typed queryable facade over one query compiler and provider executor."
+      },
+      "wave": "W008",
+      "issues": [
+        4
+      ],
+      "dependencies": [
+        "QUERY-PARAM-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "LINQ-QUERYABLE-001-S01",
+        "LINQ-QUERYABLE-001-S02",
+        "LINQ-QUERYABLE-001-S03"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/architecture/LINQ_QUERYABLE.md",
+        "docs/user/LINQ_TO_ENTITIES.md",
+        "docs/parity/linq-operators.json"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "LINQ-BOUNDARY-001",
+      "family": "linq-boundary",
+      "origin": "GOEF_EXTENSION",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/Query/QueryableMethodTranslatingExpressionVisitor.cs",
+          "symbol": "Translate",
+          "testPath": "test/EFCore.Specification.Tests/Query/NorthwindWhereQueryTestBase.cs",
+          "testSymbol": "Where_client",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Require explicit materialization or streaming when converting a server query to local callback processing. Reject silent fallback.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Explicit queryable-to-objects conversion with caller-visible lifetime."
+      },
+      "wave": "W008",
+      "issues": [
+        4
+      ],
+      "dependencies": [
+        "LINQ-QUERYABLE-001",
+        "LINQ-OBJECTS-001",
+        "QUERY-UNSUPPORTED-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "LINQ-BOUNDARY-001-S01",
+        "LINQ-BOUNDARY-001-S02",
+        "LINQ-BOUNDARY-001-S03",
+        "LINQ-BOUNDARY-001-S04"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [
+        "Go callbacks cannot be recovered as expression trees. An explicit boundary also avoids silently adopting upstream top-level client projection behavior."
+      ],
+      "adr": "docs/adr/0007-linq-execution-boundaries.md",
+      "docs": [
+        "docs/user/LINQ_CLIENT_SERVER_BOUNDARY.md",
+        "docs/parity/linq-operators.json"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "LINQ-CONFORMANCE-001",
+      "family": "linq-conformance",
+      "origin": "GOEF_EXTENSION",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "dotnet-runtime",
+          "repository": "https://github.com/dotnet/runtime",
+          "tag": "v10.0.0",
+          "sha": "60629d14374c56f1cb51819049ad1fa529307f8d",
+          "path": "src/libraries/System.Linq/src/System/Linq/Where.cs",
+          "symbol": "Enumerable.Where",
+          "testPath": "src/libraries/System.Linq/tests/WhereTests.cs",
+          "testSymbol": "Where_IEnumerable_ExecutionIsDeferred",
+          "relation": "analogue"
+        },
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/Query/QueryableMethodTranslatingExpressionVisitor.cs",
+          "symbol": "Translate",
+          "testPath": "test/EFCore.Specification.Tests/Query/NorthwindWhereQueryTestBase.cs",
+          "testSymbol": "Where_client",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Run executable comparisons against matching upstream semantics, including real SQL behavior where applicable. Report missing environment or oracle as a gap.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Independent local, expression and provider conformance fixtures."
+      },
+      "wave": "W002",
+      "issues": [
+        4
+      ],
+      "dependencies": [],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "LINQ-CONFORMANCE-001-S01",
+        "LINQ-CONFORMANCE-001-S02",
+        "LINQ-CONFORMANCE-001-S03"
+      ],
+      "tests": [],
+      "status": "SPECIFIED",
+      "deviations": [],
+      "adr": "docs/adr/0007-linq-execution-boundaries.md",
+      "docs": [
+        "docs/parity/linq-operators.json",
+        "test/conformance/linq/README.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "CTX-FIND-001",
+      "family": "context",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/DbContext.cs",
+          "symbol": "Find",
+          "testPath": "test/EFCore.Specification.Tests/FindTestBase.cs",
+          "testSymbol": "Find_int_key_tracked",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Find an entity by key and reuse its tracked instance when it is already present.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Typed context lookup by entity and key."
+      },
+      "wave": "W008",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "MODEL-MAP-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [],
+      "tests": [],
+      "status": "DISCOVERED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/upstream/RESEARCH_INDEX.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "CTX-LIFETIME-001",
+      "family": "context",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/DbContext.cs",
+          "symbol": "Dispose",
+          "testPath": "test/EFCore.Tests/DbContextTest.cs",
+          "testSymbol": "It_throws_object_disposed_exception",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "After disposal, fail further context use deterministically.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Context Close and explicit lifecycle checks."
+      },
+      "wave": "W008",
+      "issues": [
+        3
+      ],
+      "dependencies": [],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [],
+      "tests": [],
+      "status": "DISCOVERED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/upstream/RESEARCH_INDEX.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "MODEL-COMPLEX-001",
+      "family": "model",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/Metadata/Builders/EntityTypeBuilder.cs",
+          "symbol": "ComplexProperty",
+          "testPath": "test/EFCore.Specification.Tests/ModelBuilding/ModelBuilderTest.ComplexType.cs",
+          "testSymbol": "Can_set_complex_property_annotation",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "A mapped complex member carries property facets without gaining its own entity identity.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Inline complex model descriptor."
+      },
+      "wave": "W014",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "MODEL-MAP-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [],
+      "tests": [],
+      "status": "DISCOVERED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/MODELS_CODE_FIRST.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "MODEL-OWNED-001",
+      "family": "model",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/Metadata/Builders/EntityTypeBuilder.cs",
+          "symbol": "OwnsOne",
+          "testPath": "test/EFCore.Specification.Tests/ModelBuilding/ModelBuilderTest.OwnedTypes.cs",
+          "testSymbol": "Can_configure_one_to_one_owned_type_with_fields",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "An owned one-to-one member retains its ownership association and separate mapping metadata.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Explicit owned relationship and component mapping."
+      },
+      "wave": "W014",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "MODEL-REL-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [],
+      "tests": [],
+      "status": "DISCOVERED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/MODELS_CODE_FIRST.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "MODEL-CONVERTER-001",
+      "family": "model",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/Metadata/Builders/PropertyBuilder.cs",
+          "symbol": "HasConversion",
+          "testPath": "test/EFCore.SqlServer.Tests/Storage/SqlServerTypeMappingTest.cs",
+          "testSymbol": "Create_and_clone_SQL_Server_DateTime_mappings_with_converter",
+          "relation": "analogue"
+        }
+      ],
+      "contract": "Apply a configured value conversion without losing the mapping facets used by the provider.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Type-safe encode and decode functions on a mapping."
+      },
+      "wave": "W014",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "MODEL-TYPE-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [],
+      "tests": [],
+      "status": "DISCOVERED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/MODELS_CODE_FIRST.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "QUERY-NULL-EQUAL-001",
+      "family": "query",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Relational/Query/SqlNullabilityProcessor.cs",
+          "symbol": "Process",
+          "testPath": "test/EFCore.Relational.Specification.Tests/Query/NullSemanticsQueryTestBase.cs",
+          "testSymbol": "Where_equal_nullable_with_null_value_parameter",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Evaluate a nullable equality predicate with an explicitly selected null semantics mode.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Select portable null semantics or reviewed relational behavior."
+      },
+      "wave": "W012",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "QUERY-PARAM-001",
+        "MODEL-NULL-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [],
+      "tests": [],
+      "status": "DISCOVERED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/QUERYING.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "QUERY-FILTER-001",
+      "family": "query",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/Metadata/Builders/EntityTypeBuilder.cs",
+          "symbol": "HasQueryFilter",
+          "testPath": "test/EFCore.Specification.Tests/Query/NorthwindQueryFiltersQueryTestBase.cs",
+          "testSymbol": "Count_query",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Apply a model-wide filter to a query aggregate over that entity.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Model-scoped typed predicate with explicit bypass controls."
+      },
+      "wave": "W012",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "QUERY-PARAM-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [],
+      "tests": [],
+      "status": "DISCOVERED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/QUERYING.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "MAT-CONSTRUCTOR-001",
+      "family": "materialization",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/Query/Internal/StructuralTypeMaterializerSource.cs",
+          "symbol": "GetMaterializer",
+          "testPath": "test/EFCore.Tests/Query/EntityMaterializerSourceTest.cs",
+          "testSymbol": "Can_create_materializer_for_entity_with_constructor_properties",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Materialize projected fields through an explicitly selected constructor or factory in the correct field order.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Validated row materializer and constructor adapter."
+      },
+      "wave": "W008",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "MODEL-MAP-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [],
+      "tests": [],
+      "status": "DISCOVERED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/upstream/RESEARCH_INDEX.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "TRACK-IDENTITY-001",
+      "family": "tracking",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/ChangeTracking/Internal/StateManager.cs",
+          "symbol": "TryGetEntry",
+          "testPath": "test/EFCore.Specification.Tests/FindTestBase.cs",
+          "testSymbol": "Find_composite_key_tracked",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Reuse the tracked instance for an identical composite key.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Context-local identity map over ordered typed composite keys."
+      },
+      "wave": "W010",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "CTX-FIND-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [],
+      "tests": [],
+      "status": "DISCOVERED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/upstream/RESEARCH_INDEX.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "TRACK-SNAPSHOT-001",
+      "family": "tracking",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/ChangeTracking/ChangeTracker.cs",
+          "symbol": "DetectChanges",
+          "testPath": "test/EFCore.Tests/ChangeTracking/ChangeTrackerTest.cs",
+          "testSymbol": "Detect_property_change_is_logged",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Detect and record a changed tracked property against its original snapshot.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Change tracker DetectChanges with field equality."
+      },
+      "wave": "W011",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "TRACK-IDENTITY-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [],
+      "tests": [],
+      "status": "DISCOVERED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/upstream/RESEARCH_INDEX.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "TOOL-SCAFFOLD-001",
+      "family": "tooling",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Design/Scaffolding/Internal/ReverseEngineerScaffolder.cs",
+          "symbol": "Save",
+          "testPath": "test/EFCore.Design.Tests/Scaffolding/Internal/ReverseEngineerScaffolderTest.cs",
+          "testSymbol": "Save_throws_when_existing_files",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Generate a model from an introspected schema and refuse overwriting existing files without explicit selection.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Database-first scaffold, preview and explicit overwrite policy."
+      },
+      "wave": "W007",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "MODEL-MAP-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [],
+      "tests": [],
+      "status": "DISCOVERED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/MODELS_DATABASE_FIRST.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "TOOL-COMPILED-MODEL-001",
+      "family": "tooling",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Design/Scaffolding/Internal/CompiledModelScaffolder.cs",
+          "symbol": "ScaffoldModel",
+          "testPath": "test/EFCore.Specification.Tests/Scaffolding/CompiledModelTestBase.cs",
+          "testSymbol": "SimpleModel",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Load deterministic precomputed model metadata with the same supported mappings as a runtime model.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Generated model descriptor with compatibility and freshness validation."
+      },
+      "wave": "W017",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "TOOL-SCAFFOLD-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [],
+      "tests": [],
+      "status": "DISCOVERED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/upstream/RESEARCH_INDEX.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "DIAG-COMMAND-001",
+      "family": "diagnostics",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Relational/Diagnostics/DbCommandInterceptor.cs",
+          "symbol": "ReaderExecuting",
+          "testPath": "test/EFCore.Relational.Specification.Tests/CommandInterceptionTestBase.cs",
+          "testSymbol": "Intercept_query_passively",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "A command interceptor receives one before-execution signal for an ordinary reader command.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Provider-neutral command interception with sensitive argument redaction."
+      },
+      "wave": "W017",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "QUERY-PARAM-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [],
+      "tests": [],
+      "status": "DISCOVERED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/upstream/RESEARCH_INDEX.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "REL-LAZY-001",
+      "family": "query",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Proxies/Proxies/Internal/LazyLoadingInterceptor.cs",
+          "symbol": "Intercept",
+          "testPath": "test/EFCore.Proxies.Tests/LazyLoadingProxyTests.cs",
+          "testSymbol": "Throws_if_non_virtual_navigation_to_non_owned_type",
+          "relation": "analogue"
+        }
+      ],
+      "contract": "Recognize lazy navigation access as a bounded operation tied to a live context.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Explicit lazy-navigation loader with lease and transaction affinity."
+      },
+      "wave": "W017",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "MODEL-REL-001",
+        "TX-AFFINITY-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [],
+      "tests": [],
+      "status": "DISCOVERED",
+      "deviations": [
+        "C# subclass proxy interception has no direct Go counterpart. The explicit loader is a proposed equivalent."
+      ],
+      "adr": null,
+      "docs": [
+        "docs/user/QUERYING.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "REL-BULK-DELETE-001",
+      "family": "query",
+      "origin": "EF_CORE",
+      "scope": "PORTABLE",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Relational/Query/RelationalQueryableMethodTranslatingExpressionVisitor.ExecuteDelete.cs",
+          "symbol": "TranslateExecuteDelete",
+          "testPath": "test/EFCore.Relational.Specification.Tests/BulkUpdates/NorthwindBulkUpdatesRelationalTestBase.cs",
+          "testSymbol": "Delete_non_entity_projection",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Execute one translated delete over an eligible entity selection and reject non-entity projections.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Typed set deletion with affected-row count."
+      },
+      "wave": "W015",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "QUERY-UNSUPPORTED-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        }
+      },
+      "scenarios": [],
+      "tests": [],
+      "status": "DISCOVERED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/user/QUERYING.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "SQLSERVER-TEMPORAL-001",
+      "family": "provider-specific",
+      "origin": "EF_CORE",
+      "scope": "SPECIALIZED",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.SqlServer/Extensions/SqlServerTableBuilderExtensions.cs",
+          "symbol": "IsTemporal",
+          "testPath": "test/EFCore.SqlServer.FunctionalTests/Query/TemporalTableSqlServerTest.cs",
+          "testSymbol": "Temporal_owned_basic",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Express a historical point query against a SQL Server system-versioned table.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "SQL Server-only temporal table option and query extension."
+      },
+      "wave": "W015",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "QUERY-PARAM-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This contract concerns SQL Server system-versioned tables and its temporal query API.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This contract concerns SQL Server system-versioned tables and its temporal query API.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This contract concerns SQL Server system-versioned tables and its temporal query API.",
+          "evidence": null
+        }
+      },
+      "scenarios": [],
+      "tests": [],
+      "status": "DISCOVERED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/upstream/RESEARCH_INDEX.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "SQLSERVER-HIERARCHY-001",
+      "family": "provider-specific",
+      "origin": "EF_CORE",
+      "scope": "SPECIALIZED",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.SqlServer.Abstractions/HierarchyId.cs",
+          "symbol": "Parse",
+          "testPath": "test/EFCore.SqlServer.HierarchyId.Tests/HierarchyIdJsonConverterTest.cs",
+          "testSymbol": "Read_works_when_null",
+          "relation": "behavior"
+        }
+      ],
+      "contract": "Round-trip a SQL Server hierarchy path including null representation.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "SQL Server hierarchy type and codec."
+      },
+      "wave": "W015",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "MODEL-TYPE-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "HierarchyId is a SQL Server-specific storage type.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "HierarchyId is a SQL Server-specific storage type.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Engine and Go driver versions are pending real conformance.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "HierarchyId is a SQL Server-specific storage type.",
+          "evidence": null
+        }
+      },
+      "scenarios": [],
+      "tests": [],
+      "status": "DISCOVERED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/upstream/RESEARCH_INDEX.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "STORE-MEMORY-COMPLEX-001",
+      "family": "nonrelational",
+      "origin": "EF_CORE",
+      "scope": "SPECIALIZED",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.InMemory/Storage/Internal/InMemoryStore.cs",
+          "symbol": "ExecuteTransaction",
+          "testPath": "test/EFCore.InMemory.FunctionalTests/ComplexTypesTrackingInMemoryTest.cs",
+          "testSymbol": "Can_null_complex_property_with_default_values_and_multiple_properties",
+          "relation": "analogue"
+        }
+      ],
+      "contract": "Track a change to an optional complex property in a separately specified in-memory store.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Non-SQL store interface with an independent capability profile."
+      },
+      "wave": "W018",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "MODEL-COMPLEX-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This behavior belongs to a non-SQL in-memory store.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This behavior belongs to a non-SQL in-memory store.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This behavior belongs to a non-SQL in-memory store.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This behavior belongs to a non-SQL in-memory store.",
+          "evidence": null
+        }
+      },
+      "scenarios": [],
+      "tests": [],
+      "status": "DISCOVERED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/upstream/RESEARCH_INDEX.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "STORE-DOCUMENT-ETAG-001",
+      "family": "nonrelational",
+      "origin": "EF_CORE",
+      "scope": "SPECIALIZED",
+      "upstream": [
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Cosmos/Extensions/CosmosEntityTypeBuilderExtensions.cs",
+          "symbol": "HasPartitionKey",
+          "testPath": "test/EFCore.Cosmos.FunctionalTests/CosmosConcurrencyTest.cs",
+          "testSymbol": "Etag_is_updated_in_entity_after_SaveChanges",
+          "relation": "analogue"
+        }
+      ],
+      "contract": "Refresh a document concurrency token after a successful version-checked write.",
+      "goApi": {
+        "status": "PROPOSED",
+        "description": "Document store provider with explicit partition and concurrency metadata."
+      },
+      "wave": "W018",
+      "issues": [
+        3
+      ],
+      "dependencies": [
+        "ERR-CONCURRENCY-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This behavior concerns Cosmos document ETags and a separate provider capability profile.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This behavior concerns Cosmos document ETags and a separate provider capability profile.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This behavior concerns Cosmos document ETags and a separate provider capability profile.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This behavior concerns Cosmos document ETags and a separate provider capability profile.",
+          "evidence": null
+        }
+      },
+      "scenarios": [],
+      "tests": [],
+      "status": "DISCOVERED",
+      "deviations": [],
+      "adr": null,
+      "docs": [
+        "docs/upstream/RESEARCH_INDEX.md"
+      ],
+      "evidence": null
+    }
+  ]
+}

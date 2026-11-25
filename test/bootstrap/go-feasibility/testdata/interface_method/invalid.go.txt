@@ -1,0 +1,5 @@
+package invalid
+
+type invalid interface {
+	Set[T any]() T
+}

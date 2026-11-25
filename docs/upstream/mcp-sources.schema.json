@@ -1,0 +1,317 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GoEF W000 provider documentation MCP source record",
+  "type": "object",
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "trackingIssue",
+    "evidenceReport",
+    "servers",
+    "providers"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "const": "mcp-sources.schema.json"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "trackingIssue": {
+      "$ref": "#/$defs/issueUri"
+    },
+    "evidenceReport": {
+      "$ref": "#/$defs/text"
+    },
+    "servers": {
+      "type": "object",
+      "required": [
+        "context7",
+        "microsoftLearn"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "context7": {
+          "$ref": "#/$defs/server"
+        },
+        "microsoftLearn": {
+          "$ref": "#/$defs/server"
+        }
+      }
+    },
+    "providers": {
+      "type": "object",
+      "required": [
+        "postgres",
+        "sqlite",
+        "sqlserver",
+        "mysql"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "postgres": {
+          "$ref": "#/$defs/provider"
+        },
+        "sqlite": {
+          "$ref": "#/$defs/provider"
+        },
+        "sqlserver": {
+          "$ref": "#/$defs/provider"
+        },
+        "mysql": {
+          "$ref": "#/$defs/provider"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "httpsUri": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "issueUri": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://github\\.com/igorpooh1978/GoEF/issues/[1-9][0-9]*$"
+    },
+    "server": {
+      "type": "object",
+      "required": [
+        "publisher",
+        "endpoint",
+        "purpose",
+        "transport",
+        "advertisedServerVersion",
+        "negotiatedProtocolVersion",
+        "discovery",
+        "audit",
+        "configuration",
+        "handshake",
+        "discoveredTools",
+        "allowedTools",
+        "auditSources",
+        "auditScope"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "publisher": {
+          "$ref": "#/$defs/text"
+        },
+        "endpoint": {
+          "$ref": "#/$defs/httpsUri"
+        },
+        "purpose": {
+          "const": "documentation"
+        },
+        "transport": {
+          "const": "streamable_http"
+        },
+        "advertisedServerVersion": {
+          "$ref": "#/$defs/text"
+        },
+        "negotiatedProtocolVersion": {
+          "type": "string",
+          "format": "date"
+        },
+        "discovery": {
+          "const": "DISCOVERED"
+        },
+        "audit": {
+          "enum": [
+            "AUDITED",
+            "BLOCKED"
+          ]
+        },
+        "configuration": {
+          "enum": [
+            "NOT_CONFIGURED",
+            "CONFIGURED",
+            "BLOCKED"
+          ]
+        },
+        "handshake": {
+          "enum": [
+            "HANDSHAKE_PASS",
+            "BLOCKED"
+          ]
+        },
+        "discoveredTools": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/text"
+          }
+        },
+        "allowedTools": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/text"
+          }
+        },
+        "auditSources": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/httpsUri"
+          }
+        },
+        "auditScope": {
+          "$ref": "#/$defs/text"
+        }
+      }
+    },
+    "provider": {
+      "type": "object",
+      "required": [
+        "issue",
+        "server",
+        "engineVersion",
+        "driver",
+        "lastVerified",
+        "lookup",
+        "tool",
+        "selector",
+        "versionMatch",
+        "topicEvidence",
+        "versionEvidence",
+        "fallback"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "issue": {
+          "$ref": "#/$defs/issueUri"
+        },
+        "server": {
+          "enum": [
+            "context7",
+            "microsoftLearn"
+          ]
+        },
+        "engineVersion": {
+          "$ref": "#/$defs/text"
+        },
+        "driver": {
+          "type": "object",
+          "required": [
+            "module",
+            "version"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "module": {
+              "$ref": "#/$defs/text"
+            },
+            "version": {
+              "type": "string",
+              "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
+            }
+          }
+        },
+        "lastVerified": {
+          "type": "string",
+          "format": "date"
+        },
+        "lookup": {
+          "enum": [
+            "DOC_LOOKUP_PASS",
+            "BLOCKED"
+          ]
+        },
+        "tool": {
+          "$ref": "#/$defs/text"
+        },
+        "selector": {
+          "$ref": "#/$defs/text"
+        },
+        "versionMatch": {
+          "enum": [
+            "VERSION_MATCH_PASS",
+            "BLOCKED"
+          ]
+        },
+        "topicEvidence": {
+          "$ref": "#/$defs/text"
+        },
+        "versionEvidence": {
+          "$ref": "#/$defs/text"
+        },
+        "blocker": {
+          "$ref": "#/$defs/text"
+        },
+        "fallback": {
+          "type": "object",
+          "required": [
+            "topic",
+            "release",
+            "driver"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "topic": {
+              "$ref": "#/$defs/httpsUri"
+            },
+            "release": {
+              "$ref": "#/$defs/httpsUri"
+            },
+            "driver": {
+              "$ref": "#/$defs/httpsUri"
+            }
+          }
+        },
+        "additionalSources": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/httpsUri"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "versionMatch": {
+                "const": "BLOCKED"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "blocker"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "lookup": {
+                "const": "BLOCKED"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "blocker"
+            ],
+            "properties": {
+              "versionMatch": {
+                "const": "BLOCKED"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,819 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GoEF parity feature registry",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "features"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/feature"
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "featureId": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9]*(?:-[A-Z][A-Z0-9]*)+-[0-9]{3,}$"
+    },
+    "scenarioId": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9]*(?:-[A-Z][A-Z0-9]*)+-[0-9]{3,}-S[0-9]{2,}$"
+    },
+    "repoPath": {
+      "type": "string",
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[^\\\\\\s]+$"
+    },
+    "wave": {
+      "type": "string",
+      "pattern": "^W[0-9]{3}\\+?$"
+    },
+    "sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "uri": {
+      "type": "string",
+      "format": "uri"
+    },
+    "evidence": {
+      "type": "object",
+      "required": [
+        "sha",
+        "results",
+        "independentReview"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sha": {
+          "$ref": "#/$defs/sha"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/uri"
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "independentReview": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "upstream": {
+      "type": "object",
+      "required": [
+        "lockId",
+        "repository",
+        "tag",
+        "sha",
+        "path",
+        "symbol",
+        "testPath",
+        "testSymbol",
+        "relation"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "lockId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repository": {
+          "$ref": "#/$defs/uri"
+        },
+        "tag": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sha": {
+          "$ref": "#/$defs/sha"
+        },
+        "path": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "symbol": {
+          "type": "string",
+          "minLength": 1
+        },
+        "testPath": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/repoPath"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "testSymbol": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relation": {
+          "enum": [
+            "behavior",
+            "analogue",
+            "divergence"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "testPath": {
+                "enum": [
+                  null
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "testSymbol": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "testPath": {
+                "type": "string"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "testSymbol": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "provider": {
+      "type": "object",
+      "required": [
+        "status",
+        "capability",
+        "engineVersions",
+        "driverVersions",
+        "reason",
+        "evidence"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "NOT_RUN",
+            "BLOCKED",
+            "PASS",
+            "FAIL",
+            "NOT_APPLICABLE",
+            "VERIFIED_UNSUPPORTED"
+          ]
+        },
+        "capability": {
+          "enum": [
+            "PROPOSED",
+            "SUPPORTED",
+            "UNSUPPORTED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "engineVersions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "driverVersions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/evidence"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "PASS",
+                  "FAIL",
+                  "VERIFIED_UNSUPPORTED"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "$ref": "#/$defs/evidence"
+              },
+              "engineVersions": {
+                "minItems": 1
+              },
+              "driverVersions": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "NOT_RUN",
+                  "NOT_APPLICABLE"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "NOT_APPLICABLE"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "capability": {
+                "const": "NOT_APPLICABLE"
+              },
+              "engineVersions": {
+                "maxItems": 0
+              },
+              "driverVersions": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "BLOCKED",
+                  "VERIFIED_UNSUPPORTED"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "PASS"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "capability": {
+                "enum": [
+                  "SUPPORTED"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "VERIFIED_UNSUPPORTED"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "capability": {
+                "enum": [
+                  "UNSUPPORTED"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "feature": {
+      "type": "object",
+      "required": [
+        "id",
+        "family",
+        "origin",
+        "scope",
+        "upstream",
+        "contract",
+        "goApi",
+        "wave",
+        "issues",
+        "dependencies",
+        "providers",
+        "scenarios",
+        "tests",
+        "status",
+        "deviations",
+        "adr",
+        "docs",
+        "evidence"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/featureId"
+        },
+        "family": {
+          "type": "string",
+          "minLength": 1
+        },
+        "origin": {
+          "enum": [
+            "EF_CORE",
+            "DOTNET_LINQ",
+            "GOEF_EXTENSION"
+          ]
+        },
+        "scope": {
+          "enum": [
+            "PORTABLE",
+            "SPECIALIZED"
+          ]
+        },
+        "upstream": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/upstream"
+          },
+          "uniqueItems": true
+        },
+        "contract": {
+          "type": "string",
+          "minLength": 1
+        },
+        "goApi": {
+          "type": "object",
+          "required": [
+            "status",
+            "description"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "PROPOSED",
+                "IMPLEMENTED"
+              ]
+            },
+            "description": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "wave": {
+          "$ref": "#/$defs/wave"
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/featureId"
+          },
+          "uniqueItems": true
+        },
+        "providers": {
+          "type": "object",
+          "required": [
+            "postgres",
+            "sqlite",
+            "sqlserver",
+            "mysql"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "postgres": {
+              "$ref": "#/$defs/provider"
+            },
+            "sqlite": {
+              "$ref": "#/$defs/provider"
+            },
+            "sqlserver": {
+              "$ref": "#/$defs/provider"
+            },
+            "mysql": {
+              "$ref": "#/$defs/provider"
+            }
+          }
+        },
+        "scenarios": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/scenarioId"
+          },
+          "uniqueItems": true
+        },
+        "tests": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "status": {
+          "enum": [
+            "DISCOVERED",
+            "SPECIFIED",
+            "RED",
+            "IMPLEMENTING",
+            "GREEN",
+            "VERIFIED",
+            "PARTIAL",
+            "BLOCKED",
+            "NOT_APPLICABLE",
+            "DEFERRED"
+          ]
+        },
+        "deviations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "adr": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/repoPath"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "docs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/repoPath"
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/evidence"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "DISCOVERED",
+                  "SPECIFIED",
+                  "IMPLEMENTING"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "SPECIFIED",
+                  "RED",
+                  "IMPLEMENTING",
+                  "GREEN",
+                  "VERIFIED"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "scenarios": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "RED",
+                  "GREEN",
+                  "VERIFIED"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "tests": {
+                "minItems": 1
+              },
+              "evidence": {
+                "$ref": "#/$defs/evidence"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "VERIFIED"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/evidence"
+                  },
+                  {
+                    "properties": {
+                      "independentReview": {
+                        "$ref": "#/$defs/uri"
+                      }
+                    }
+                  }
+                ]
+              },
+              "providers": {
+                "properties": {
+                  "postgres": {
+                    "properties": {
+                      "status": {
+                        "enum": [
+                          "PASS",
+                          "VERIFIED_UNSUPPORTED",
+                          "NOT_APPLICABLE"
+                        ]
+                      }
+                    }
+                  },
+                  "sqlite": {
+                    "properties": {
+                      "status": {
+                        "enum": [
+                          "PASS",
+                          "VERIFIED_UNSUPPORTED",
+                          "NOT_APPLICABLE"
+                        ]
+                      }
+                    }
+                  },
+                  "sqlserver": {
+                    "properties": {
+                      "status": {
+                        "enum": [
+                          "PASS",
+                          "VERIFIED_UNSUPPORTED",
+                          "NOT_APPLICABLE"
+                        ]
+                      }
+                    }
+                  },
+                  "mysql": {
+                    "properties": {
+                      "status": {
+                        "enum": [
+                          "PASS",
+                          "VERIFIED_UNSUPPORTED",
+                          "NOT_APPLICABLE"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "PARTIAL",
+                  "BLOCKED",
+                  "NOT_APPLICABLE",
+                  "DEFERRED"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "deviations": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "origin": {
+                "enum": [
+                  "EF_CORE",
+                  "DOTNET_LINQ"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "upstream": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "scope": {
+                "enum": [
+                  "PORTABLE"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "providers": {
+                "properties": {
+                  "postgres": {
+                    "properties": {
+                      "status": {
+                        "not": {
+                          "const": "NOT_APPLICABLE"
+                        }
+                      }
+                    }
+                  },
+                  "sqlite": {
+                    "properties": {
+                      "status": {
+                        "not": {
+                          "const": "NOT_APPLICABLE"
+                        }
+                      }
+                    }
+                  },
+                  "sqlserver": {
+                    "properties": {
+                      "status": {
+                        "not": {
+                          "const": "NOT_APPLICABLE"
+                        }
+                      }
+                    }
+                  },
+                  "mysql": {
+                    "properties": {
+                      "status": {
+                        "not": {
+                          "const": "NOT_APPLICABLE"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

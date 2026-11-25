@@ -1,0 +1,153 @@
+{
+  "$schema": "mcp-sources.schema.json",
+  "schemaVersion": 1,
+  "trackingIssue": "https://github.com/igorpooh1978/GoEF/issues/1",
+  "evidenceReport": "../evidence/W000/MCP_REPORT.md",
+  "servers": {
+    "context7": {
+      "publisher": "Upstash",
+      "endpoint": "https://mcp.context7.com/mcp",
+      "purpose": "documentation",
+      "transport": "streamable_http",
+      "advertisedServerVersion": "4.7.3",
+      "negotiatedProtocolVersion": "2025-06-18",
+      "discovery": "DISCOVERED",
+      "audit": "AUDITED",
+      "configuration": "NOT_CONFIGURED",
+      "handshake": "HANDSHAKE_PASS",
+      "discoveredTools": [
+        "resolve-library-id",
+        "query-docs"
+      ],
+      "allowedTools": [
+        "resolve-library-id",
+        "query-docs"
+      ],
+      "auditSources": [
+        "https://github.com/upstash/context7/blob/master/docs/clients/codex.mdx",
+        "https://github.com/upstash/context7/releases",
+        "https://github.com/upstash/context7/security"
+      ],
+      "auditScope": "Public endpoint, maintenance and security references, live documentation tool schema, anonymous HTTPS probe with public queries. Hosted implementation and local artifact supply chain remain outside this probe."
+    },
+    "microsoftLearn": {
+      "publisher": "Microsoft",
+      "endpoint": "https://learn.microsoft.com/api/mcp",
+      "purpose": "documentation",
+      "transport": "streamable_http",
+      "advertisedServerVersion": "1.0.0",
+      "negotiatedProtocolVersion": "2025-06-18",
+      "discovery": "DISCOVERED",
+      "audit": "AUDITED",
+      "configuration": "NOT_CONFIGURED",
+      "handshake": "HANDSHAKE_PASS",
+      "discoveredTools": [
+        "microsoft_docs_search",
+        "microsoft_code_sample_search",
+        "microsoft_docs_fetch"
+      ],
+      "allowedTools": [
+        "microsoft_docs_search",
+        "microsoft_docs_fetch"
+      ],
+      "auditSources": [
+        "https://learn.microsoft.com/en-us/training/support/mcp-developer-reference",
+        "https://learn.microsoft.com/en-us/training/support/mcp-release-notes",
+        "https://learn.microsoft.com/en-us/training/support/mcp-faq"
+      ],
+      "auditScope": "First-party endpoint, developer reference, release notes and live tool schema; allowlisted docs search and fetch. Hosted implementation remains outside this probe."
+    }
+  },
+  "providers": {
+    "postgres": {
+      "issue": "https://github.com/igorpooh1978/GoEF/issues/10",
+      "server": "context7",
+      "engineVersion": "18.7",
+      "driver": {
+        "module": "github.com/jackc/pgx/v5",
+        "version": "v5.13.0"
+      },
+      "lastVerified": "2026-11-25",
+      "lookup": "DOC_LOOKUP_PASS",
+      "tool": "query-docs",
+      "selector": "/websites/postgresql/18",
+      "versionMatch": "BLOCKED",
+      "topicEvidence": "The PostgreSQL 18 CREATE INDEX manual section returned and agreed with the direct section on concurrent builds and transaction blocks.",
+      "versionEvidence": "The returned release appendix listed 18.6 as its newest entry. The direct official archive lists 18.7.",
+      "blocker": "Exact PostgreSQL 18.7 release provenance is missing from the sampled Context7 corpus.",
+      "fallback": {
+        "topic": "https://www.postgresql.org/docs/18/sql-createindex.html#SQL-CREATEINDEX-CONCURRENTLY",
+        "release": "https://www.postgresql.org/docs/release/18.7/",
+        "driver": "https://github.com/jackc/pgx/blob/v5.13.0/README.md"
+      }
+    },
+    "sqlite": {
+      "issue": "https://github.com/igorpooh1978/GoEF/issues/8",
+      "server": "context7",
+      "engineVersion": "3.54.1",
+      "driver": {
+        "module": "modernc.org/sqlite",
+        "version": "v1.63.0"
+      },
+      "lastVerified": "2026-11-25",
+      "lookup": "DOC_LOOKUP_PASS",
+      "tool": "query-docs",
+      "selector": "/websites/sqlite_docs",
+      "versionMatch": "VERSION_MATCH_PASS",
+      "topicEvidence": "The SQLite PRAGMA reference corroborates that changing foreign_keys has no effect in a transaction.",
+      "versionEvidence": "The C API version constants included 3054001 and the same source ID as the official SQLite 3.54.1 reference: 2026-10-16 14:45:20 555e07ef33f69a0957d24d8e555b702464a131d6f1607f4c3c1e4551e8e6ca76.",
+      "fallback": {
+        "topic": "https://www.sqlite.org/pragma.html#pragma_foreign_keys",
+        "release": "https://www.sqlite.org/releaselog/3_54_1.html",
+        "driver": "https://pkg.go.dev/modernc.org/sqlite@v1.63.0"
+      },
+      "additionalSources": [
+        "https://www.sqlite.org/capi3ref.html#SQLITE_VERSION",
+        "https://www.sqlite.org/lang_altertable.html#making_other_kinds_of_table_schema_changes"
+      ]
+    },
+    "sqlserver": {
+      "issue": "https://github.com/igorpooh1978/GoEF/issues/6",
+      "server": "microsoftLearn",
+      "engineVersion": "2022 CU28 (16.0.4325.4)",
+      "driver": {
+        "module": "github.com/microsoft/go-mssqldb",
+        "version": "v1.11.0"
+      },
+      "lastVerified": "2026-11-25",
+      "lookup": "DOC_LOOKUP_PASS",
+      "tool": "microsoft_docs_fetch",
+      "selector": "https://learn.microsoft.com/en-us/sql/t-sql/language-elements/save-transaction-transact-sql?view=sql-server-ver16",
+      "versionMatch": "VERSION_MATCH_PASS",
+      "topicEvidence": "The SQL Server 16.x SAVE TRANSACTION topic corroborates the savepoint naming limits and restrictions on distributed transactions.",
+      "versionEvidence": "The separate official build table returned CU28, 16.0.4325.4, KB5125472 and 2026-11-12, matching the direct release listing.",
+      "fallback": {
+        "topic": "https://learn.microsoft.com/en-us/sql/t-sql/language-elements/save-transaction-transact-sql?view=sql-server-ver16#remarks",
+        "release": "https://learn.microsoft.com/en-us/troubleshoot/sql/releases/sqlserver-2022/build-versions#sql-server-2022-cumulative-update-cu-builds",
+        "driver": "https://github.com/microsoft/go-mssqldb/blob/v1.11.0/README.md"
+      }
+    },
+    "mysql": {
+      "issue": "https://github.com/igorpooh1978/GoEF/issues/11",
+      "server": "context7",
+      "engineVersion": "8.4.13.1",
+      "driver": {
+        "module": "github.com/go-sql-driver/mysql",
+        "version": "v1.10.0"
+      },
+      "lastVerified": "2026-11-25",
+      "lookup": "DOC_LOOKUP_PASS",
+      "tool": "query-docs",
+      "selector": "/websites/dev_mysql_doc_refman_en/8.4",
+      "versionMatch": "BLOCKED",
+      "topicEvidence": "The Oracle MySQL 8.4 implicit commit section matched the direct manual on DDL boundaries.",
+      "versionEvidence": "The MCP response cited the 8.4 family manual and the four-part version notation introduced in 8.4.13. It did not return evidence for 8.4.13.1.",
+      "blocker": "Exact MySQL 8.4.13.1 release provenance is missing from the sampled MCP results.",
+      "fallback": {
+        "topic": "https://dev.mysql.com/doc/refman/8.4/en/implicit-commit.html",
+        "release": "https://dev.mysql.com/doc/relnotes/mysql/8.4/en/news-8-4-13-1.html",
+        "driver": "https://github.com/go-sql-driver/mysql/blob/v1.10.0/README.md"
+      }
+    }
+  }
+}
