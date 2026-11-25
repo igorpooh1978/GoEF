@@ -1,6 +1,6 @@
 # Required provider matrix
 
-Tracked by [W000 #1](https://github.com/igorpooh1978/GoEF/issues/1). This is the W000 plan for **four mandatory real-engine cells**, with provisional documentation candidates for W001 selection. Runtime conformance has passed in **0 of 4** cells. No test image, package dependency, exact runner or driver operating mode is approved by this matrix.
+Tracked by [W000 #1](https://github.com/igorpooh1978/GoEF/issues/1). This is the W000 plan for **four mandatory real-engine cells**, with provisional documentation candidates for W001 selection. Runtime conformance has passed in **0 of 4** cells. The [native-client smoke lab](../evidence/W002/LAB_SMOKE.md) passed **4 of 4** isolated engine cells. No test image, package dependency, exact runner or driver operating mode is approved by this matrix.
 
 | Engine and provisional version | Candidate Go driver | Required fixture and identity | Documentation MCP smoke | Runtime |
 | --- | --- | --- | --- | --- |

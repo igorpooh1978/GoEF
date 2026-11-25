@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Freeze the driver-free provider execution SPI v1 and add an independent external Go fixture ([#12](https://github.com/igorpooh1978/GoEF/issues/12)).
+- Implement the disposable four-engine CLI smoke lab with strict artifact identity, rollback and constraint checks ([#13](https://github.com/igorpooh1978/GoEF/issues/13), [#19](https://github.com/igorpooh1978/GoEF/issues/19)).
+
 - Describe the W001 module and public contracts and verify typed GoLINQ query compilation in an isolated module. Track the work in [#12](https://github.com/igorpooh1978/GoEF/issues/12) and [#17](https://github.com/igorpooh1978/GoEF/issues/17).
 - Recheck PostgreSQL and MySQL documentation sources, audit the published W000 baseline, and design the isolated four-engine lab. Track the work in [#10](https://github.com/igorpooh1978/GoEF/issues/10), [#11](https://github.com/igorpooh1978/GoEF/issues/11), [#18](https://github.com/igorpooh1978/GoEF/issues/18), and [#16](https://github.com/igorpooh1978/GoEF/issues/16).
 

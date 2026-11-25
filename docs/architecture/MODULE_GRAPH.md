@@ -1,10 +1,10 @@
 # Candidate module and import graph
 
-W001 proposes using `github.com/igorpooh1978/GoEF` as the module path and `goef` as its root package. Reuse the exact case of the Git remote in every import. The offline experiment exercises this spelling with a local replacement. Publication, proxy resolution, release tags and a supported provider version matrix still require separate evidence. [Issue #12](https://github.com/igorpooh1978/GoEF/issues/12) · [ADR 0002](../adr/0002-module-and-provider-boundaries.md) · [Experiment](../evidence/W001/ARCHITECTURE.md)
+W001 adopts `github.com/igorpooh1978/GoEF` as the module path and `goef` as its root package. Reuse the exact case of the Git remote in every import. The offline experiment exercises this spelling with a local replacement. Publication, proxy resolution, release tags and a supported provider version matrix still require separate evidence. [Issue #12](https://github.com/igorpooh1978/GoEF/issues/12) · [ADR 0002](../adr/0002-module-and-provider-boundaries.md) · [Experiment](../evidence/W001/ARCHITECTURE.md)
 
 ## Who imports whom
 
-Paths in this table are relative to the candidate module root. Each row lists direct project dependencies relevant to the design. Each provider directory is a module boundary, including when several providers live in the same checkout.
+Paths in this table are relative to the adopted module root. The provider execution package exists. The remaining packages describe the planned dependency graph. Each row lists direct project dependencies relevant to the design. Each provider directory is a module boundary, including when several providers live in the same checkout.
 
 | Importer | Proposed imports | Reason |
 | --- | --- | --- |
@@ -22,11 +22,11 @@ Paths in this table are relative to the candidate module root. Each row lists di
 
 ## Crossing the provider boundary
 
-The factory checks the adapter's SPI major and required capabilities against the selected target. An incompatible version fails before user-command dispatch. Plan negotiation must also reject unknown required nodes. An optional operation can have a separate interface and capability. Adding a method to a required interface would break an independently compiled adapter and needs compatibility review. Proposed signatures below use the names of types in the `provider` package. [Full SPI responsibilities](PROVIDER_SPI.md)
+The factory checks the adapter's SPI major before acquiring a lease. Plan negotiation must also reject unknown required nodes. New optional capabilities use separate interfaces. A change to a required interface or its semantics requires a new SPI generation. The [frozen execution SPI](PROVIDER_SPI.md) contains Descriptor, Acquire, Query, Exec and the lease/row lifecycle. Compiler, transaction and schema methods in this table describe extensions that await their implementing waves.
 
 | Candidate interface method | Caller and ownership | Failure to exercise |
 | --- | --- | --- |
-| `Backend.Descriptor() Descriptor` | The adapter identifies its SPI major, provider and driver. The factory resolves capabilities for the actual server and configuration before use. | Reject an incompatible major or missing required capability before issuing a user command. |
+| `Backend.Descriptor() Descriptor` | The adapter reports its SPI major and stable adapter ID without I/O. The later capability extension identifies driver and server configuration. | Reject an incompatible major or missing required capability before issuing a user command. |
 | `Compiler.Compile(RelationalPlan) (Command, error)` | Core supplies validated identifiers, parameter slots and output layout. The adapter returns a reusable template. Execution values belong to a single call. The adapter owns any copies it retains. | Unknown required operation produces a registered translation/capability error with zero commands. |
 | `Connector.Acquire(context.Context) (Lease, error)` | Runtime or migrator acquires a connection lease. Reads, writes and transaction control for one bound unit stay on its physical connection. | Failed acquisition transfers no lease. A suspect connection is discarded before pool reuse. |
 | `Executor.Query(context.Context, Command, Bindings) (Rows, error)` | The bound executor creates rows. The materializer consumes and closes them on exhaustion, error, cancellation or early stop. An active stream occupies the context operation slot. | A late read error remains observable. A close failure preserves the primary error and the connection disposition. |
@@ -40,4 +40,4 @@ Adapters translate vendor diagnostics at their boundary. Public errors expose a 
 
 One core module lets the model, plan vocabulary and public facades evolve at the same revision. A separate Objects module would allow an independent release cadence and add a second version to coordinate. A module containing all four drivers would simplify tagging and enlarge the dependency graph of a one-provider consumer. The proposal gives each driver its own module and checks package closure and module requirements separately. Exposing the entire internal query AST would speed the first adapter and turn normalization details into external compatibility obligations. The SPI exposes the relational input that a compiler actually consumes.
 
-The [offline experiment and acceptance stages](../evidence/W001/ARCHITECTURE.md) specify which parts have compiler evidence. Exact driver pins, production module creation and compatibility publication require their own review.
+The [offline experiment and acceptance stages](../evidence/W001/ARCHITECTURE.md) specify which parts have compiler evidence. The core module and execution SPI now have an external compile fixture. Exact driver pins, concrete adapters and compatibility publication require their own evidence.

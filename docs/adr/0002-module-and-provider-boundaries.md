@@ -1,14 +1,14 @@
 # ADR 0002 — Module and provider boundaries
 
-**Status:** Proposed for W001. W000 records the repository identity, dependency constraints and the compiler experiment. The first production module, public package paths, compatibility policy and dependency pins require review in [issue #12](https://github.com/igorpooh1978/GoEF/issues/12). [W000 issue #3](https://github.com/igorpooh1978/GoEF/issues/3)
+**Status:** Accepted in W001 for the core module identity, dependency direction, and [provider execution SPI v1](../architecture/PROVIDER_SPI.md). Release, driver selections and staged SPI extensions retain their own acceptance gates. [Issue #12](https://github.com/igorpooh1978/GoEF/issues/12) · [W000 issue #3](https://github.com/igorpooh1978/GoEF/issues/3)
 
 ## Context
 
 GoEF must support an application importing only in-memory LINQ, an application using a single relational driver, and independent provider authors. At baseline `2a886c78e622f583fa2980ea0a61a7e328a40e28` the public repository had a README and no production Go module. `git remote get-url origin` and the GitHub repository API identify `igorpooh1978/GoEF` with the same case. The candidate root path is **`github.com/igorpooh1978/GoEF`**, with the lower-case Go package name `goef`. Case is significant in module identity. The Go proxy escapes the final component as `!go!e!f` for transport. Source imports would retain `GoEF`. [Repository](https://github.com/igorpooh1978/GoEF) · [Go module paths](https://go.dev/ref/mod#module-path) · [Module proxy case encoding](https://go.dev/ref/mod#goproxy-protocol)
 
-## Decision under review
+## Decision
 
-Start with one portable core module containing independently importable `linq/objects`, symbolic expressions, the queryable facade, model and migration APIs and a small public SPI. Keep Objects usable with the standard library and native iterators. Keep translation, tracking, materialization and physical planning internal. Expose a minimal versioned relational plan view when a provider needs to consume one. A contract must never require an outside provider to name a core internal type.
+Start with one portable core module containing independently importable `linq/objects`, symbolic expressions, the queryable facade, model and migration APIs and a small public SPI. Keep Objects usable with the standard library and native iterators. Keep translation, tracking, materialization and physical planning internal. Freeze the driver-free execution seam first. Expose a minimal versioned relational plan view when a compiler extension needs one. A contract must never require an outside provider to name a core internal type.
 
 Give each concrete relational provider its own module, depending on core and its selected driver. Keep CLI, generator and design-time packages outside the core runtime dependency closure. Application constructors select concrete providers explicitly. A driver upgrade in one provider should leave the core and the other providers' module graphs unchanged. A major compatibility break follows Go module version rules and a documented provider compatibility matrix.
 

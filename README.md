@@ -2,7 +2,7 @@
 
 GoEF is a planned Go data access library that uses Entity Framework Core behavior as a reference. Its scope includes modeling, typed queries, tracking, migrations, and separate providers for PostgreSQL, SQLite, SQL Server, and MySQL. GoLINQ also covers independent in-memory sequences and explicit database-backed queries.
 
-The project is at the bootstrap stage. The documentation describes proposed APIs and acceptance criteria. There is no GoEF package to install or supported database release yet.
+The core module contains the frozen provider execution contract. The four-engine smoke lab checks isolated engines. The GoEF query runtime, concrete adapters and supported database releases await later work.
 
 - [Documentation](docs/README.md)
 - [Master plan](docs/roadmap/MASTER_PLAN.md)

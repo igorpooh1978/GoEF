@@ -1,6 +1,6 @@
 # Isolated provider conformance lab
 
-[Issue #16](https://github.com/igorpooh1978/GoEF/issues/16) designs the lab for [W002 #13](https://github.com/igorpooh1978/GoEF/issues/13). The four candidates have published artifacts. Runtime conformance is **0/4**. The [artifact and host observations](../evidence/W002/TEST_LAB_DESIGN.md) distinguish available builds from selected dependencies and observed engine identities.
+[Issue #16](https://github.com/igorpooh1978/GoEF/issues/16) designs the lab for [W002 #13](https://github.com/igorpooh1978/GoEF/issues/13). The four candidates have published artifacts. The [executable smoke lab](../../test/conformance/lab/README.md) uses isolated native clients for baseline engine checks. GoEF runtime conformance is **0/4**. The [artifact and host observations](../evidence/W002/TEST_LAB_DESIGN.md) distinguish available builds from selected dependencies and observed engine identities.
 
 ## Runner and resource ownership
 
