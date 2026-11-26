@@ -229,7 +229,8 @@ def build(tempdir, name, profile, *, coverage=False):
     platform = command(["go", "env", "GOVERSION", "GOOS", "GOARCH"], cwd=MODULE, env=environment).splitlines()
     if len(platform) != 3 or platform[0] != GO_VERSION:
         raise Blocked("The SQLite compatibility lab requires Go 1.27.4.")
-    binary = tempdir / (name + (".exe" if os.name == "nt" else ""))
+    suffix = ("-covered" if coverage else "") + (".exe" if os.name == "nt" else "")
+    binary = tempdir / (name + suffix)
     command(
         ["go", "test", "-c", "-mod=readonly", *profile.build_flags, "-o", str(binary),
          *(COVERAGE_ARGS if coverage else ()), "."],
@@ -436,10 +437,15 @@ def run_lab(tempdir, report, *, model_types=False, owned_tx=False, savepoint_tx=
     binaries = {}
     for name, profile in PROFILES.items():
         report["phase"] = f"build {name}"
-        binaries[name], platform = build(tempdir, name, profile, coverage=production_adapters)
+        binaries[name], platform = build(tempdir, name, profile)
+        driver_binary = binaries[name]
+        if production_adapters:
+            # The intentional process-exit workers require an exact stderr marker.
+            # Run them with the ordinary binary, separate from coverage output.
+            driver_binary, _ = build(tempdir, name, profile, coverage=True)
         report["phase"] = f"Gherkin {name}"
         results, extras = run_driver(
-            tempdir, binaries[name], name, profile,
+            tempdir, driver_binary, name, profile,
             model_types=model_types, owned_tx=owned_tx, savepoint_tx=savepoint_tx,
             save_changes=save_changes, tx_options=tx_options, decimal_binding=decimal_binding,
             commit_outcome=commit_outcome, production_adapters=production_adapters,
