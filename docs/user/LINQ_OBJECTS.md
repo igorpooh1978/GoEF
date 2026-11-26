@@ -120,7 +120,7 @@ func main() {
 
 ## Join sources and values
 
-`objects.Concat(first, second)` yields the first sequence followed by the second. `objects.Append(source, value)` yields the value after the source ends. `objects.Prepend(source, value)` yields the value before starting the source. They preserve duplicates and encounter order. An early stop reaches the active source and leaves any later source unopened. [Runnable examples and tests](../../linq/objects/concat_test.go) · [Composition evidence](../evidence/W008/OBJECTS_CONCAT.md)
+`objects.Concat(first, second)` yields the first sequence followed by the second. `objects.Append(source, value)` yields the value after the source ends. `objects.Prepend(source, value)` yields the value before starting the source. They preserve duplicates and encounter order. An early stop reaches the active source and leaves any later source unopened. [Runnable composition example](../../linq/objects/concat_example_test.go) · [Composition evidence](../evidence/W008/OBJECTS_CONCAT.md)
 
 - [LINQ Objects design](../architecture/LINQ_OBJECTS.md)
 - [Where test evidence](../evidence/W008/OBJECTS_WHERE.md)
