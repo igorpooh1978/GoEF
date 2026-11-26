@@ -25,7 +25,7 @@ The baseline is `dc13ff64370f7e7348f0f7958dbf996819177a90`. The fixture revision
 - `go build -mod=readonly ./...`, `go vet -mod=readonly ./...`, and `go test -mod=readonly -shuffle=on -count=1 ./...` exited 0 in the root module. In the driver module, `go mod verify`, `go vet -mod=readonly ./...` and `go test -mod=readonly -shuffle=on -count=1 ./...` exited 0. The race command `go test -race -shuffle=on -count=1 ./...` exited 2 because the host Go environment has CGO disabled.
 - The SQLite negative control temporarily changed the production unknown-commit path to retain the affected connection. With `GOEF_COMMIT_OUTCOME=1`, `GOEF_DRIVERLAB_PROVIDER=sqlite` and `GOEF_DRIVERLAB_PROFILE=sqlite-3.54`, `go test -count=1 -run '^TestCommitOutcome$' -v` in the driver module exited 1 and both cases identified the unreleased physical connection. The mutation was restored before the candidate commit.
 
-The feature's S01 and S02 require automatic tracker reconciliation and remain open. Migration interruption and full application/production adapter conformance retain their own #13 gates.
+This run covers S03 and S04. A subsequent run covers explicit receipt reconciliation for S01, S02 and S05. Migration interruption and full application and production adapter conformance retain their own #13 gates. [Commit reconciliation](COMMIT_RECONCILIATION.md)
 
 ## Integrated verification
 
