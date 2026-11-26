@@ -40,9 +40,11 @@ func TestOwnedTransaction(t *testing.T) {
 	if !ok || profile == "" {
 		t.Fatal("owned transaction scenario requires a provider and profile")
 	}
-	if provider == "sqlite" && ((sqliteVersion == "3.51.3" && profile != "sqlite-3.51") ||
-		(sqliteVersion == "3.54.1" && profile != "sqlite-3.54")) {
-		t.Fatal("SQLite fixture runtime does not match the selected profile")
+	if provider == "sqlite" {
+		versions := map[string]string{"sqlite-3.51": "3.51.3", "sqlite-3.54": "3.54.1"}
+		if versions[profile] != sqliteVersion {
+			t.Fatal("SQLite fixture runtime does not match the selected profile")
+		}
 	}
 
 	var observedVersion string
@@ -57,12 +59,15 @@ func TestOwnedTransaction(t *testing.T) {
 		s.finish(session, 1, "A", transaction.StateCommitted, (*transaction.Tx).Commit)
 		s.finish(session, 2, "B", transaction.StateRolledBack, (*transaction.Tx).Rollback)
 		s.observeCommittedRow(session)
+		if s.db.Stats().InUse != 0 {
+			t.Fatal("the observer and original connection did not return to the pool")
+		}
 		observedVersion = s.facts[engine.version]
 		if observedVersion == "" {
 			t.Fatal("owned transaction fixture did not observe an engine version")
 		}
 	})
-	if !passed {
+	if !passed || observedVersion == "" {
 		return
 	}
 	result, err := json.Marshal(map[string]string{
@@ -233,6 +238,9 @@ func (s *ownedTxFixture) requireWrite(result sql.Result, err error) {
 	s.t.Helper()
 	if err != nil {
 		s.t.Fatalf("transactional write failed (native code %q)", s.code(err))
+	}
+	if result == nil {
+		s.t.Fatal("transactional write returned no result")
 	}
 	if count, err := result.RowsAffected(); err != nil || count != 1 {
 		s.t.Fatal("transactional write did not run exactly once on the expected session")
