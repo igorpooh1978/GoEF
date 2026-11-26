@@ -1340,12 +1340,13 @@
       ],
       "contract": "Rebuild a SQLite table using an explicit writable projection and reject unrecognized dependent objects before mutation.",
       "goApi": {
-        "status": "PROPOSED",
-        "description": "SQLite rebuild planning with dependency inspection."
+        "status": "IMPLEMENTED",
+        "description": "Apply a reviewed transactional SQLite rebuild using an exclusive writer and atomic schema, data, and migration history."
       },
       "wave": "W006",
       "issues": [
-        2
+        2,
+        13
       ],
       "dependencies": [
         "MIG-API-001",
@@ -1387,11 +1388,16 @@
       },
       "scenarios": [
         "MIG-SQLITE-001-S01",
-        "MIG-SQLITE-001-S02"
+        "MIG-SQLITE-001-S02",
+        "MIG-SQLITE-001-S03"
       ],
-      "tests": [],
-      "status": "SPECIFIED",
-      "deviations": [],
+      "tests": [
+        "test/conformance/driverlab/sqlite_executor_rebuild_test.go#TestSQLiteExecutorRebuildStep"
+      ],
+      "status": "PARTIAL",
+      "deviations": [
+        "The executor takes an application-supplied reviewed artifact with target identity and postconditions; automatic schema differ and rebuild generation are pending."
+      ],
       "adr": null,
       "docs": [
         "docs/user/MIGRATIONS.md",
@@ -1921,8 +1927,8 @@
       ],
       "contract": "When commit acknowledgement is lost, preserve an unknown outcome unless independent verification proves the committed state.",
       "goApi": {
-        "status": "PROPOSED",
-        "description": "Typed transaction outcome with operation identity and optional verification."
+        "status": "IMPLEMENTED",
+        "description": "Typed unknown outcomes, explicit authoritative verification, and commit-gated receipt acceptance."
       },
       "wave": "W009",
       "issues": [
@@ -1971,14 +1977,16 @@
         "TX-OUTCOME-001-S01",
         "TX-OUTCOME-001-S02",
         "TX-OUTCOME-001-S03",
-        "TX-OUTCOME-001-S04"
+        "TX-OUTCOME-001-S04",
+        "TX-OUTCOME-001-S05"
       ],
       "tests": [
         "test/conformance/driverlab/commit_outcome_test.go#TestCommitOutcome"
       ],
       "status": "PARTIAL",
       "deviations": [
-        "A test-only driver completion fault covers the owned transaction outcome and staged values. Automatic tracker reconciliation retains separate acceptance."
+        "A test-only driver completion fault covers the owned transaction outcome and staged values. Automatic tracker reconciliation retains separate acceptance.",
+        "The reconciliation test stages a caller-owned snapshot. Automatic change tracking and built-in authoritative operation markers retain separate acceptance."
       ],
       "adr": null,
       "docs": [
@@ -2335,12 +2343,13 @@
       ],
       "contract": "Validate expression operator types and bindings and reject unregistered operations with a diagnostic before execution.",
       "goApi": {
-        "status": "PROPOSED",
-        "description": "One typed expression representation shared by explicit builders and generated query entry points."
+        "status": "IMPLEMENTED",
+        "description": "Generate typed equality bindings with a scalar projection and check artifact freshness. Shared expression lowering and Queryable runtime are pending."
       },
       "wave": "W013",
       "issues": [
-        4
+        4,
+        24
       ],
       "dependencies": [],
       "providers": {
@@ -2382,13 +2391,19 @@
         "LINQ-EXPRESSION-001-S02",
         "LINQ-EXPRESSION-001-S03"
       ],
-      "tests": [],
-      "status": "SPECIFIED",
-      "deviations": [],
+      "tests": [
+        "cmd/goef-linqgen/main_test.go#TestFreshness",
+        "cmd/goef-linqgen/generator_test.go#TestRejectedDeclarations"
+      ],
+      "status": "PARTIAL",
+      "deviations": [
+        "The first generator accepts one portable Go source file with an equality predicate and a scalar projection. It emits typed bindings before the shared query IR and SQL translation are available."
+      ],
       "adr": null,
       "docs": [
         "docs/architecture/LINQ_EXPRESSIONS.md",
-        "docs/parity/linq-operators.json"
+        "docs/parity/linq-operators.json",
+        "docs/user/LINQ_GENERATED.md"
       ],
       "evidence": null
     },

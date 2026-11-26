@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add a reproducible LINQ generator for typed equality bindings and scalar projections, with stale artifact rejection ([#24](https://github.com/igorpooh1978/GoEF/issues/24)).
+- Add separate pinned PostgreSQL, SQLite, SQL Server, and MySQL execution adapters with typed bindings, cancellation, and redacted provider errors ([#13](https://github.com/igorpooh1978/GoEF/issues/13)).
+- Reconcile an unknown commit after authoritative verification and accept staged values only after the commit is proved ([#13](https://github.com/igorpooh1978/GoEF/issues/13)).
+- Apply a reviewed SQLite table rebuild and its migration history atomically, with recovery exercised on both pinned runtimes in DELETE and WAL modes ([#13](https://github.com/igorpooh1978/GoEF/issues/13)).
+
 - Bind exact `Decimal` struct fields through Code First mappings with explicit precision and scale ([#33](https://github.com/igorpooh1978/GoEF/issues/33)).
 - Verify real database state after a withheld commit acknowledgement or a pre-commit rollback in the local conformance lab ([#13](https://github.com/igorpooh1978/GoEF/issues/13)).
 - Verify schema, data and history recovery after an interrupted SQLite table rebuild in DELETE and WAL modes on both pinned runtimes ([#13](https://github.com/igorpooh1978/GoEF/issues/13)).

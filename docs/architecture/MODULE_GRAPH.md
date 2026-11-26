@@ -4,7 +4,7 @@ W001 adopts `github.com/igorpooh1978/GoEF` as the module path and `goef` as its 
 
 ## Who imports whom
 
-Paths in this table are relative to the adopted module root. The provider execution contract, the initial `model` and `goeferr` packages, and the `Where` and `Select` operators in `linq/objects` are available in the current source. The table describes their planned expansion and the remaining dependency graph. Each row lists direct project dependencies relevant to the design. Each provider directory is a module boundary, including when several providers live in the same checkout.
+Paths in this table are relative to the adopted module root. The provider execution contract, the initial `model` and `goeferr` packages, and the `Where` and `Select` operators in `linq/objects` are available in the current source. The generator and the four separate SPI v1 adapter modules are available. The table also describes the remaining dependency graph. Each row lists direct project dependencies relevant to the design. Each provider directory is a module boundary, including when several providers live in the same checkout.
 
 | Importer | Proposed imports | Reason |
 | --- | --- | --- |
@@ -41,4 +41,4 @@ Adapters translate vendor diagnostics at their boundary. Public errors expose a 
 
 One core module lets the model, plan vocabulary and public facades evolve at the same revision. A separate Objects module would allow an independent release cadence and add a second version to coordinate. A module containing all four drivers would simplify tagging and enlarge the dependency graph of a one-provider consumer. The proposal gives each driver its own module and checks package closure and module requirements separately. Exposing the entire internal query AST would speed the first adapter and turn normalization details into external compatibility obligations. The SPI exposes the relational input that a compiler actually consumes.
 
-The [offline experiment and acceptance stages](../evidence/W001/ARCHITECTURE.md) specify which parts have compiler evidence. The core module and execution SPI now have an external compile fixture. Exact driver pins, concrete adapters and compatibility publication require their own evidence.
+The [offline experiment and acceptance stages](../evidence/W001/ARCHITECTURE.md) specify which parts have compiler evidence. The core module and execution SPI have an external compile fixture. The [concrete adapters](../../providers/README.md) pin their own drivers. The [compatibility lab](../../test/conformance/driverlab/README.md) exercises them independently. Public release compatibility requires verification without replacements.

@@ -12,8 +12,8 @@ The sources below are research references for the W000 documentation. The W000 s
 
 The [source lock](docs/upstream/lock.json) records commit and license blob IDs. For any copied or adapted material or approved dependency, record upstream repository, exact commit, file and symbol in a reviewed ADR. Check the exact headers, terms and relevant notices, and update distribution attributions before release. GoEF's own work is licensed under the [MIT License](LICENSE), with copyright attributed to Igor Pukhlikov. The upstream references and test dependencies have the terms recorded here. [Maintainer decision #15](https://github.com/igorpooh1978/GoEF/issues/15)
 
-## W002 test module dependencies
+## W002 driver dependencies
 
-The isolated W002 test module pins pgx v5.13.0 (MIT), modernc.org/sqlite v1.63.0 (BSD-3-Clause), go-mssqldb v1.11.0 (BSD-3-Clause), and go-sql-driver/mysql v1.10.0 (MPL-2.0). The selected modules include their license texts. See the [dependency and checksum report](docs/evidence/W002/DRIVER_GHERKIN.md). Before distributing a test binary, review the resolved transitive graph and preserve its applicable license terms. The core Go module does not import the test drivers.
+The isolated W002 test module pins pgx v5.13.0 (MIT), modernc.org/sqlite v1.63.0 (BSD-3-Clause), go-mssqldb v1.11.0 (BSD-3-Clause), and go-sql-driver/mysql v1.10.0 (MPL-2.0). The selected modules include their license texts. See the [dependency and checksum report](docs/evidence/W002/DRIVER_GHERKIN.md). Before distributing a test binary, review the resolved transitive graph and preserve its applicable license terms. The four [production modules](providers/README.md) reuse these driver pins, with modernc.org/sqlite v1.47.0 as the SQLite module minimum. The core Go module has no native driver dependencies.
 
 The older SQLite test build separately pins modernc.org/sqlite v1.47.0. Its [tagged license](https://raw.githubusercontent.com/modernc-org/sqlite/v1.47.0/LICENSE) is BSD-3-Clause.
