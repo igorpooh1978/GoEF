@@ -49,8 +49,27 @@ Both commands exited 0 on Windows/amd64 with Python 3.14.4 and Go 1.27.4. The pu
 
 The control used the same version with the earlier expected SHA `7a08d90b215d11904109b109c1381ba19c881f35`. It exited 1 on the provenance mismatch before compiling the consumer. A repeat with the caller's proxy and checksum database disabled, an invalid workspace override, and vendor mode selected also exited 0. The verifier supplied its own module environment. An approved release can use the same verifier with its full commit SHA and exact public Go module version.
 
-## Remaining acceptance
+## Acceptance at the original snapshot
 
 - The MIT license is present at the verified commit and [issue #15](https://github.com/igorpooh1978/GoEF/issues/15) is closed.
 - Binding reproducibility and stale-output rejection require the planned generator and the generated-binding fixtures. The checked commit contains compiler fixtures. The generation workflow and changed-capture and stale-output checks are specified in the design. [Generator wave](../../roadmap/MASTER_PLAN.md#9-roadmap-dependency-driven-waves) · [LINQ generation contract](../../architecture/LINQ_EXPRESSIONS.md)
 - Release module resolution requires an approved public release revision and a consumer check pinned to that revision. The observed result establishes public module resolution and execution for the checked commit. [Release gates](../../development/RELEASE_GATES.md)
+
+## Tagged public release
+
+The maintainer approved commit `9fcd036a3927b40e26381202c7f1b5aa4fb3d858` for the first public preview. GitHub published [GoEF v0.1.0-alpha.1](https://github.com/igorpooh1978/GoEF/releases/tag/v0.1.0-alpha.1) on 2026-11-26. The local annotated tag, the remote Git tag, and the GitHub tag API agreed on tag object `7fcd49f96a3aadb8b609b8c04d2acf16f27f5454` and the approved commit.
+
+```powershell
+python -B test/architecture/public-module/verify.py 9fcd036a3927b40e26381202c7f1b5aa4fb3d858 --version v0.1.0-alpha.1 --generated-bindings
+```
+
+The command exited 0 on Windows/amd64 with Go 1.27.4. An independent Linux/amd64 run using Python 3 and the same Go version also exited 0. Each run created a fresh external Go module and module cache. The public Go proxy and checksum database resolved the exact tagged version without a replacement. The downloaded origin SHA matched the approved commit.
+
+| Check | Verified value |
+| --- | --- |
+| Module archive checksum | `h1:q9DrLJGAVL6o49FNoHAxrjdsL9cbsJxMIWEJKWaMPUA=` |
+| Module file checksum | `h1:ABeTL0NnLBe42NYSr8liTicW7AUWHsszrL7EzWFpFF0=` |
+| External consumer | `PASS` |
+| Generated bindings | `PASS` |
+
+The consumer passed module verification, read-only build, vet, tests, and execution. Two generations produced identical files. Freshness checks rejected both an edited source declaration and an edited generated file without rewriting the generated output. This evidence covers the root Go module's public preview. [Issue #24](https://github.com/igorpooh1978/GoEF/issues/24)
