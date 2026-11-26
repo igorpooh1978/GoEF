@@ -1,6 +1,14 @@
 # Transaction conformance
 
-W000 defines the test protocol and initial scenario IDs. Executable cases, server/driver pins, native observations and coverage are pending. Use one disposable database per run and an isolated file for SQLite. Include all four providers in the denominator. Record unsupported configurations with the specific rejection test and a vendor reference. [Behavior specifications](../../../specs/features/transactions/) · [Engine contract](../../../docs/architecture/TRANSACTION_ENGINE.md)
+W000 defines the test protocol and initial scenario IDs. The first owned transaction fixture runs `TX-OWN-001-S02` through the public GoEF API with the local driver lab and its pinned builds. A one-connection worker and an independent observer check physical affinity, committed and rolled-back rows, terminal handle rejection, and return to the pool. The remaining experiments below describe broader conformance. Use one disposable database per run and an isolated file for SQLite. Include all four providers in the denominator. Record unsupported configurations with the specific rejection test and a vendor reference. [Behavior specifications](../../../specs/features/transactions/) · [Engine contract](../../../docs/architecture/TRANSACTION_ENGINE.md) · [Local driver lab](../driverlab/README.md) · [Owned transaction fixture](../driverlab/owned_transaction_test.go)
+
+Run the owned transaction fixture on the four default profiles from the repository root.
+
+```powershell
+pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -OwnedTx -AcceptSqlServerEula
+```
+
+Add `-Compatibility -AcceptLegacySqlServerEula` to include the other pinned profiles when both SQL Server Developer releases are authorized for the run. The corresponding Python selector is `--owned-tx`. [Local driver lab](../driverlab/README.md)
 
 | Experiment | Coordination and assertions |
 | --- | --- |

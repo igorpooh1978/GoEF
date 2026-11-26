@@ -1,13 +1,27 @@
 # Transaction engine
 
-**W000 design contract.** W005 establishes lifetime, physical connection binding and provider hooks. W006 uses them for migrations, W008 binds runtime queries, W009 exercises advanced replay and W011 integrates the change tracker. Public Go signatures and all advertised capabilities await those waves. [Transaction scenarios](../../specs/features/transactions/) · [Conformance protocol](../../test/conformance/transactions/README.md)
+The `transaction` package implements the first owned transaction slice in W005. W005 also covers broader transaction options and provider hooks. W006 uses transaction lifetimes for migrations, W008 binds runtime queries, W009 exercises advanced replay and W011 integrates the change tracker. [User guide](../user/TRANSACTIONS.md) · [Transaction scenarios](../../specs/features/transactions/) · [Conformance protocol](../../test/conformance/transactions/README.md) · [Issue #2](https://github.com/igorpooh1978/GoEF/issues/2)
+
+## Implemented owned transaction boundary
+
+`transaction.Begin` acquires a dedicated `database/sql.Conn` from the application pool and opens a native transaction with default options. The GoEF handle keeps that checkout until it publishes a terminal outcome. `Exec` sends all commands through the bound native transaction. The package imports the standard library SQL APIs, and the application selects the driver and owns the pool. The provider execution SPI remains available to other subsystems. [Executing Go transactions](https://go.dev/doc/database/execute-transactions) · [Go 1.27.4 SQL implementation](https://github.com/golang/go/blob/go1.27.4/src/database/sql/sql.go)
+
+One operation at a time can use the native handle. An overlapping `Exec`, `Commit` or `Rollback` call returns `ErrContextBusy`. `Close` waits for the active operation and rolls back if the handle is still active. The lifetime context cancels the active command and initiates rollback and release. Explicit completion checks the lifetime before sending commit. A native commit already in progress can still complete. `database/sql` exposes context-free finalizers, so cleanup waits for the driver to return.
+
+| Terminal outcome | Lease and handle behavior |
+| --- | --- |
+| Commit acknowledged or rollback confirmed | Release the checkout so the pool can reuse it. Commands and explicit completion through the handle return `ErrInvalidState`. |
+| Commit error with unconfirmed result | Report `StateOutcomeUnknown` and `ErrCommitOutcomeUnknown`. Discard the checkout and leave reconciliation to the caller. |
+| Rollback or cleanup failure with uncertain connection health | The connection is discarded and cleanup failure is surfaced. The handle preserves any independently confirmed transaction outcome. |
+
+The behavior of owned transactions is exercised by `TX-OWN-001-S02` through a one-checkout worker and an independent observer on each engine. The design below covers remaining transaction and tracker capabilities. [Ownership scenario](../../specs/features/transactions/tx-own-001.feature)
 
 ## Ownership across three lifetimes
 
 | Resource | Owner and completion |
 | --- | --- |
 | Pool and borrowed connection | An application owns its pool. A library transaction returns its lease after completion and cleanup. A caller-supplied connection stays open for its owner. |
-| Owned database transaction | Begin binds the physical connection and accepts isolation/read-only options. Only the owning handle can commit or roll back. Close on an active owned handle requests bounded rollback. Close is idempotent. |
+| Owned database transaction | Begin binds the physical connection. Explicit isolation and read-only options are planned. Only the owning handle can commit or roll back. Close requests rollback on an active handle and is idempotent. |
 | External transaction | Explicit enlistment borrows the exact provider, physical connection, target database and transaction identity. Compatible contexts may share that handle serially. Disposing a participant detaches it and closes its readers. The external owner signals final outcome or participants must reload before accepting provisional state. |
 | DbContext and tracker | A context has a single active operation. A stream holds that slot until close or terminal exhaustion. An enlisted transaction also serializes access across participating contexts. Concurrent use returns `ErrContextBusy`. Close ends the context lifetime. |
 
