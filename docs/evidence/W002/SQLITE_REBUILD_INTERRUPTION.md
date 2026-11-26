@@ -2,7 +2,7 @@
 
 [Issue #13](https://github.com/igorpooh1978/GoEF/issues/13) · [Gherkin](../../../test/conformance/driverlab/features/sqlite_rebuild.feature) · [Worker](../../../test/conformance/driverlab/sqlite_rebuild_test.go) · [Compatibility runner](../../../test/conformance/lab/sqlite_compat.py)
 
-An owned local child process rebuilds a synthetic parent table inside a native SQLite transaction. It copies the writable columns, preserves the AUTOINCREMENT high-water mark, swaps the table, restores its index and trigger, updates the retained row, and inserts a row with the next identity. The child sees the changed schema, values and trigger result while the original history remains in place. It emits a phase marker and exits at code 68 before writing history or committing. The runner requires that exact exit and marker.
+An owned local child process rebuilds a synthetic parent table inside a native SQLite transaction. It copies the writable columns, preserves the AUTOINCREMENT high-water mark, swaps the table, restores its index and trigger, updates the retained row, and inserts a row with the next identity. The child sees the changed schema, values and trigger result while the original history remains in place. The transaction stays open through the interruption point, with a deadline on individual operations and a parent watchdog on the child process. After all worker assertions pass, it emits a phase marker and exits at code 68 before writing history or committing. The runner requires that exact exit and marker.
 
 The next process verifies the original schema, row bytes, generated value, sequence, foreign-key relationship, dependent row, index, trigger, empty audit table and pre-existing history. It runs the same rebuild and commits the new history in the same transaction. Foreign-key enforcement is restored on the migration connection and rejects an orphan insert with SQLite code 787. A fresh read-only process verifies the rebuilt schema, preserved payload, generated results, new identity, audit row, one new history entry and the integrity checks. Each case owns its disposable directory, file and marker. The runner binds all Gherkin steps and exactly one example per pinned engine and mode before building binaries.
 
@@ -14,7 +14,7 @@ The fixture follows SQLite's documented create, copy, drop and rename sequence i
 
 ## Local verification
 
-Tested executable revision `6a6e8b8ed50139d89f0a330af831eec410d6ac65` on 2026-11-26 with Go 1.27.4 on Windows/amd64.
+Tested executable revision `6899cbfd7e3a01acae4b902b86bc2c298e0b63c6` on 2026-11-26 with Go 1.27.4 on Windows/amd64.
 
 | SQLite and driver | DELETE | WAL |
 | --- | --- | --- |
@@ -22,6 +22,7 @@ Tested executable revision `6a6e8b8ed50139d89f0a330af831eec410d6ac65` on 2026-11
 | 3.54.1 and modernc.org/sqlite v1.63.0 | PASS | PASS |
 
 - `python -B test/conformance/lab/sqlite_compat.py --model-types --owned-tx --savepoint-tx --save-changes --tx-options --decimal-binding --commit-outcome` exited 0. It reported four interrupted rebuild checks, four compatible file checks, and 14 baseline driver scenarios on the two pinned runtimes.
-- `python -B test/conformance/lab/sqlite_wal_recovery.py` exited 0 with both committed-WAL directions passing. The earlier committed recovery and this pre-commit process exit exercise distinct boundaries.
+- `python -B test/conformance/lab/sqlite_wal_recovery.py` exited 0 on `6a6e8b8ed50139d89f0a330af831eec410d6ac65` with both committed-WAL directions passing. The earlier committed recovery and this pre-commit process exit exercise distinct boundaries.
 - `python -B -m unittest discover -s test/conformance/lab -p 'test*.py'` exited 0 with 83 tests. The new tests reject wrong or missing worker markers and reject missing, duplicate, unsupported or unbound Gherkin examples before building binaries. `python -B test/bootstrap/verify.py` exited 0 with 84 product scenarios.
-- In a separate worktree at `bfb73255439303a836fddd4639df1f08d129231d`, a temporary control committed the physical rebuild before the interruption marker while leaving history unchanged. `python -B test/conformance/lab/sqlite_compat.py` exited 1 at the SQLite 3.51.3 DELETE resume stage. The mutation was restored and the control worktree was clean.
+- In the driver lab module, `go build -mod=readonly ./...`, `go vet -mod=readonly ./...` and `go test -mod=readonly -shuffle=on -count=1 ./...` exited 0.
+- In a separate worktree at the tested revision, a temporary control committed the physical rebuild before the interruption marker while leaving history unchanged. `python -B test/conformance/lab/sqlite_compat.py` exited 1 at the SQLite 3.51.3 DELETE resume stage. A separate mutation introduced a nonfatal Go test assertion failure before the interruption marker. The same command exited 1 at the interruption stage because the expected exit and marker were absent. Both mutations were restored and the control worktree was clean.
