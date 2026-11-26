@@ -42,6 +42,13 @@ ACQUIRE_CANCELLATION_FACTS = {
 }
 MODULE = Path(__file__).resolve().parents[1] / "driverlab"
 BINARY = "/tmp/goef-driverlab"
+COVERAGE_FILE = "goef-provider.cover"
+GOEF_MODULE = "github.com/igorpooh1978/GoEF"
+SHARED_TRANSPORT = f"{GOEF_MODULE}/provider/sqladapter"
+COVERAGE_ARGS = (
+    "-covermode=count",
+    "-coverpkg=" + ",".join((SHARED_TRANSPORT, *(f"{GOEF_MODULE}/providers/{name}" for name in PROVIDERS))),
+)
 RESULT_PREFIX = "GOEF_DRIVERLAB_RESULT="
 SQLSERVER_EULA = "--accept-sqlserver-eula"
 LEGACY_SQLSERVER_EULA = "--accept-legacy-sqlserver-eula"
@@ -291,7 +298,7 @@ GO
 SERVER_CONTAINERS = {"postgres": postgres_container, "mysql": mysql_container, "sqlserver": sqlserver_container}
 
 
-def build_binary(tempdir, target):
+def build_binary(tempdir, target, *, coverage=False):
     env = {
         **inherited(("HOME", "USERPROFILE", "LOCALAPPDATA", "XDG_CACHE_HOME")),
         "GOENV": "off",
@@ -307,7 +314,8 @@ def build_binary(tempdir, target):
         env.update(GOOS="linux", GOARCH="amd64")
     try:
         command(
-            ["go", "test", "-c", "-mod=readonly", "-ldflags=-s -w", "-o", str(binary), "."],
+            ["go", "test", "-c", "-mod=readonly", "-ldflags=-s -w", "-o", str(binary),
+             *(COVERAGE_ARGS if coverage else ()), "."],
             cwd=MODULE, env=env, timeout=600,
         )
     except CommandError:
@@ -493,6 +501,27 @@ def verified_commit_outcome_results(output, provider, profile, engine_version):
     )
 
 
+def production_coverage(path, provider):
+    file_prefixes = {"adapter": f"{GOEF_MODULE}/providers/{provider}/", "transport": SHARED_TRANSPORT + "/"}
+    coverage = {name: {"covered": 0, "total": 0} for name in file_prefixes}
+    lines = path.read_text(encoding="utf-8").splitlines()
+    if not lines or lines[0] != "mode: count":
+        raise LabError("Production coverage is missing its instrumented profile.")
+    for line in lines[1:]:
+        match = re.fullmatch(r"([^:]+):\d+\.\d+,\d+\.\d+ (\d+) (\d+)", line)
+        if match is None:
+            raise LabError("Production coverage contains an invalid block.")
+        filename, statements, count = match.groups()
+        for name, prefix in file_prefixes.items():
+            if filename.startswith(prefix):
+                coverage[name]["total"] += int(statements)
+                if int(count) > 0:
+                    coverage[name]["covered"] += int(statements)
+    if any(not row["covered"] or not row["total"] for row in coverage.values()):
+        raise LabError("Production coverage is missing executed provider or transport statements.")
+    return coverage
+
+
 def verified_production_adapter_results(output, provider, profile, engine_version):
     return _verified_profile_scenarios(
         output, "GOEF_PRODUCTION_ADAPTER_RESULT=", PRODUCTION_ADAPTER_SCENARIOS,
@@ -557,6 +586,10 @@ def run_provider(profile_name, binary, accepted_eulas, *,
                 commit_outcome=commit_outcome, production_adapters=production_adapters,
             )
             env.update(extra_env)
+            coverage_path = path / COVERAGE_FILE
+            if production_adapters:
+                coverage_target = str(coverage_path) if provider == "sqlite" else f"/tmp/{COVERAGE_FILE}"
+                test_args = (*test_args, f"-test.coverprofile={coverage_target}")
             if provider == "sqlite":
                 phase = "driver execution"
                 output = command([str(binary), *test_args], cwd=path, env=env, timeout=200)
@@ -582,6 +615,11 @@ def run_provider(profile_name, binary, accepted_eulas, *,
                         # The isolated 2017 image can generate a TLS certificate with a negative serial.
                         binary_env["GODEBUG"] = "x509negativeserial=1"
                     output = container.exec([BINARY, *test_args], env=binary_env, timeout=200)
+                    if production_adapters:
+                        container.docker(["cp", f"{container.id}:{coverage_target}", str(coverage_path)], timeout=60)
+            phase = "evidence"
+            if production_adapters:
+                coverage = production_coverage(coverage_path, provider)
         phase = "evidence"
         results = verified_results(output, provider, profile_name)
         report = {"provider": provider, "profile": profile_name, "status": "PASS", "scenarios": results}
@@ -606,6 +644,7 @@ def run_provider(profile_name, binary, accepted_eulas, *,
             report["production_adapters"] = verified_production_adapter_results(
                 output, provider, profile_name, profile.version,
             )
+            report["production_coverage"] = coverage
         return report
     except Exception as error:
         blocked = isinstance(error, Blocked)
@@ -654,7 +693,7 @@ def main(argv=None):
         binaries = {}
         for target in sorted({"host" if p == "sqlite" else "linux" for p in enabled}):
             try:
-                binaries[target] = build_binary(path, target)
+                binaries[target] = build_binary(path, target, coverage=args.production_adapters)
             except LabError as error:
                 binaries[target] = error
         failed = False

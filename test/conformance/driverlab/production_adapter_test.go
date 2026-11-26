@@ -236,6 +236,11 @@ func checkProductionTransaction(s *scenario) {
 			s.t.Error("could not close the production adapter transaction")
 		}
 	}()
+	if s.provider == "sqlserver" {
+		if _, err := tx.Exec(s.ctx, "SET XACT_ABORT OFF"); err != nil {
+			s.t.Fatal("could not enable savepoint recovery on the SQL Server fixture")
+		}
+	}
 	var accepted int
 	saved, err := tx.SaveChanges(s.ctx, transaction.SaveOptions{Dialect: dialect, Savepoints: true}, func(writer *transaction.SaveWriter) error {
 		if err := requireSaveWrite(writer.Exec(s.insertParentSQL(), 41, "transactional")); err != nil {
