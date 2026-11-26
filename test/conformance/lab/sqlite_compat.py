@@ -11,8 +11,8 @@ import secrets
 from tempfile import TemporaryDirectory
 
 from driver_run import (
-    ACQUIRE_CANCELLATION_SCENARIO, CANCELLATION_SCENARIO, LOCK_TIMEOUT_SCENARIO, MODULE,
-    PRE_DISPATCH_SCENARIO, RESULT_PREFIX, SCENARIOS, driver_test_options,
+    ACQUIRE_CANCELLATION_SCENARIO, CANCELLATION_SCENARIO, COVERAGE_ARGS, LOCK_TIMEOUT_SCENARIO, MODULE,
+    PRE_DISPATCH_SCENARIO, RESULT_PREFIX, SCENARIOS, driver_test_options, production_coverage,
     verified_acquire_cancellation_facts, verified_cancellation_facts, verified_commit_outcome_results,
     verified_decimal_binding_result, verified_decimal_field_binding_result,
     verified_lock_timeout_facts, verified_model_type_result, verified_owned_tx_result, verified_pre_dispatch_facts,
@@ -216,7 +216,7 @@ def parse_rebuild_examples(lines, stages):
     return examples
 
 
-def build(tempdir, name, profile):
+def build(tempdir, name, profile, *, coverage=False):
     environment = {
         **inherited(("HOME", "USERPROFILE", "LOCALAPPDATA", "XDG_CACHE_HOME")),
         "GOENV": "off",
@@ -231,7 +231,8 @@ def build(tempdir, name, profile):
         raise Blocked("The SQLite compatibility lab requires Go 1.27.4.")
     binary = tempdir / (name + (".exe" if os.name == "nt" else ""))
     command(
-        ["go", "test", "-c", "-mod=readonly", *profile.build_flags, "-o", str(binary), "."],
+        ["go", "test", "-c", "-mod=readonly", *profile.build_flags, "-o", str(binary),
+         *(COVERAGE_ARGS if coverage else ()), "."],
         cwd=MODULE, env=environment, timeout=600,
     )
     if not binary.is_file():
@@ -317,6 +318,9 @@ def run_driver(tempdir, binary, name, profile, *, model_types, owned_tx, savepoi
         commit_outcome=commit_outcome, production_adapters=production_adapters,
     )
     env.update(GOEF_DRIVERLAB_PROVIDER="sqlite", GOEF_DRIVERLAB_PROFILE=name)
+    coverage_path = tempdir / f"{name}-production.cover"
+    if production_adapters:
+        test_args = (*test_args, f"-test.coverprofile={coverage_path}")
     output = command(
         [str(binary), *test_args], cwd=tempdir, env=env, timeout=200,
     )
@@ -340,6 +344,7 @@ def run_driver(tempdir, binary, name, profile, *, model_types, owned_tx, savepoi
         extras["commit_outcome"] = verified_commit_outcome_results(output, "sqlite", name, profile.engine_version)
     if production_adapters:
         extras["production_adapters"] = verified_production_adapter_results(output, "sqlite", name, profile.engine_version)
+        extras["production_coverage"] = [{"profile": name, **production_coverage(coverage_path, "sqlite")}]
     return verified_driver_results(output, name, profile), extras
 
 
@@ -431,7 +436,7 @@ def run_lab(tempdir, report, *, model_types=False, owned_tx=False, savepoint_tx=
     binaries = {}
     for name, profile in PROFILES.items():
         report["phase"] = f"build {name}"
-        binaries[name], platform = build(tempdir, name, profile)
+        binaries[name], platform = build(tempdir, name, profile, coverage=production_adapters)
         report["phase"] = f"Gherkin {name}"
         results, extras = run_driver(
             tempdir, binaries[name], name, profile,
