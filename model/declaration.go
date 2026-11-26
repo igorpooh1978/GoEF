@@ -1,4 +1,4 @@
-// Package model validates resolved logical model declarations.
+// Package model builds Code First mappings and validates logical model declarations.
 package model
 
 import (

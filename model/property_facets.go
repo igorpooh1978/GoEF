@@ -41,6 +41,7 @@ type propertyFacets struct {
 
 type facetConflict struct {
 	facet         string
+	source        facetSource
 	first, second facetPosition
 	cause         error
 }
@@ -61,7 +62,7 @@ func resolvePropertyFacets(columns []facetDeclaration[string], lengths []facetDe
 	if len(columns) == 0 {
 		return propertyFacets{}, fmt.Errorf("%w: missing column name", goeferr.NewInvalidModel())
 	}
-	if strings.TrimSpace(column.value) == "" || !utf8.ValidString(column.value) || strings.ContainsRune(column.value, 0) {
+	if !validMappedName(column.value) {
 		return propertyFacets{}, fmt.Errorf("%w: invalid column name at %s", goeferr.NewInvalidModel(), column.at)
 	}
 
@@ -91,9 +92,13 @@ func resolveFacet[T comparable](name string, declarations []facetDeclaration[T])
 			selected = declaration
 		} else if declaration.value != selected.value {
 			return facetDeclaration[T]{}, &facetConflict{
-				facet: name, first: selected.at, second: declaration.at, cause: goeferr.NewInvalidModel(),
+				facet: name, source: declaration.source, first: selected.at, second: declaration.at, cause: goeferr.NewInvalidModel(),
 			}
 		}
 	}
 	return selected, nil
+}
+
+func validMappedName(name string) bool {
+	return strings.TrimSpace(name) != "" && utf8.ValidString(name) && !strings.ContainsRune(name, 0)
 }

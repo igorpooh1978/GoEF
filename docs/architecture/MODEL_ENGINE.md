@@ -10,6 +10,12 @@ Proposed contract for the first model fixtures. Code First consumes explicit reg
 | MODEL-TYPE-001 | Map logical scalars and value objects through explicit converters, comparers, snapshot strategy and provider codecs. Configure precision, scale, time policy, collation, UUID layout and generation per property/model. | Decimal and timestamp values must satisfy a documented round-trip policy. Reject an unrepresentable mapping or require an explicit conversion with documented loss. |
 | MODEL-VALID-001 | Validate graph, unique names and key identities, generated values, concurrency tokens, mappings and capabilities before publishing immutable metadata. | Reordered registrations produce identical stable IDs, serialized bytes and logical hash. Invalid input yields a source-located error without a partial cached model. |
 
+## Available Code First mapping
+
+`model.Map` resolves the table name and direct exported fields of explicitly registered Go structs. Entity and field names supply defaults. Property tags and fluent options override individual facets. Matching is case-sensitive. Duplicate effective tables or columns and contradictory settings at one precedence yield a typed error with both declaration positions.
+
+The immutable result records ordered primary keys and direct pointer nullability. The version 1 mapping snapshot sorts entities by exact name and preserves field and key-member order. This snapshot describes resolved mapping metadata for the Code First slice. Provider-specific types, quoting, shared-table mapping, schema inspection and source generation have separate acceptance criteria. [Code First guide](../user/MODELS_CODE_FIRST.md) · [Mapping evidence](../evidence/W003/MODEL_MAPPING.md)
+
 ## Freeze and resolve
 
 1. Collect declarations with provenance. Conventions resolve only remaining facets. Preserve provider extension annotations in a versioned namespace.
