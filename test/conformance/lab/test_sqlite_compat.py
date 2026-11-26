@@ -193,6 +193,42 @@ class SQLiteFileFeatureTests(unittest.TestCase):
 
 
 class SQLiteRebuildEvidenceTests(unittest.TestCase):
+    def test_feature_binds_all_four_examples_to_the_worker_schedule(self):
+        source = lab.REBUILD_FEATURE.read_text(encoding="utf-8")
+        stages = ("seed", "interrupt", "resume", "reopen")
+        expected = [
+            lab.RebuildExample(name, mode, stages)
+            for name in (lab.MINIMUM_PROFILE, lab.CURRENT)
+            for mode in ("delete", "wal")
+        ]
+        self.assertEqual(lab.parse_rebuild_feature(source), expected)
+        reordered = source.replace("| 3.51.3 | delete       |\n      | 3.51.3 | wal          |",
+                                   "| 3.51.3 | wal |\n      | 3.51.3 | delete |")
+        self.assertEqual(lab.parse_rebuild_feature(reordered), [expected[1], expected[0], *expected[2:]])
+
+    def test_invalid_rebuild_feature_prevents_build_and_provisioning(self):
+        source = lab.REBUILD_FEATURE.read_text(encoding="utf-8")
+        for original, replacement in (
+            ("And the worker verifies the rebuilt table and exits before recording history or committing", ""),
+            ("Then a new process verifies the original schema", "Then a different assertion checks the schema"),
+            ("| 3.51.3 | wal          |", ""),
+            ("| 3.51.3 | wal          |", "| 3.51.3 | delete |"),
+            ("| 3.51.3 | wal          |", "| 3.53.0 | wal |"),
+            ("| 3.51.3 | wal          |", "| 3.51.3 | memory |"),
+            ("| 3.54.1 | wal          |", "| 3.54.1 | wal |\n    Then an unbound step follows"),
+        ):
+            with (
+                self.subTest(original=original, replacement=replacement),
+                patch.object(lab, "REBUILD_FEATURE") as feature,
+                patch.object(lab, "build") as build,
+            ):
+                modified = source.replace(original, replacement, 1)
+                self.assertNotEqual(modified, source)
+                feature.read_text.return_value = modified
+                with self.assertRaises(lab.LabError):
+                    lab.run_lab(None, {})
+                build.assert_not_called()
+
     def test_interruption_requires_the_expected_exit_and_stage_marker(self):
         profile = lab.PROFILES[lab.MINIMUM_PROFILE]
         with patch.object(lab, "command", return_value="") as command:

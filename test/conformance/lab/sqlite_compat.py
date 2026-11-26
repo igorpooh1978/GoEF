@@ -58,6 +58,7 @@ NATIVE_CODES = {
 }
 FILE_RESULT_PREFIX = "GOEF_SQLITE_FILE_RESULT="
 STRICT_GENERATED_NATIVE_CODE = "3091"
+REBUILD_FEATURE = MODULE / "features" / "sqlite_rebuild.feature"
 REBUILD_SCENARIO = "LAB-SQLITE-REBUILD-001-S01"
 REBUILD_RESULT_PREFIX = "GOEF_SQLITE_REBUILD_RESULT="
 REBUILD_INTERRUPTED_EXIT = 68
@@ -69,6 +70,13 @@ class FileExample:
     scenario: str
     journal: str
     stages: tuple[tuple[str, str], ...]
+
+
+@dataclass(frozen=True)
+class RebuildExample:
+    profile: str
+    journal: str
+    stages: tuple[str, ...]
 
 
 def parse_file_feature(source):
@@ -122,6 +130,52 @@ def parse_file_feature(source):
             examples.append(FileExample(scenario, journal, stages))
     if next(lines, None) is not None:
         raise LabError("The SQLite file feature contains an unbound line.")
+    return examples
+
+
+def parse_rebuild_feature(source):
+    lines = iter(line.strip() for line in source.splitlines() if line.strip())
+
+    def expect(expected):
+        if next(lines, None) != expected:
+            raise LabError("The SQLite rebuild feature contains a missing or unbound step.")
+
+    expect("@LAB-SQLITE-REBUILD-001")
+    expect("Feature: Recover a SQLite table rebuild interrupted before commit")
+    expect(f"@{REBUILD_SCENARIO}")
+    expect("Scenario Outline: An interrupted rebuild preserves the original schema, rows and history")
+    bindings = (
+        ("seed", ("Given SQLite <engine> has seeded a synthetic database in <journal_mode> mode",)),
+        ("interrupt", (
+            "When a worker copies the writable columns, swaps the table, recreates its index and trigger, and writes within its transaction",
+            "And the worker verifies the rebuilt table and exits before recording history or committing",
+        )),
+        ("resume", (
+            "Then a new process verifies the original schema, rows, sequence, dependencies and history",
+            "When that process commits the rebuild and history in one transaction",
+        )),
+        ("reopen", ("Then an independent process reads the rebuilt table, preserved rows and exactly one new history entry",)),
+    )
+    for _, steps in bindings:
+        for step in steps:
+            expect(step)
+    expect("Examples:")
+    if not re.fullmatch(r"\|\s*engine\s*\|\s*journal_mode\s*\|", next(lines, "")):
+        raise LabError("The SQLite rebuild feature requires engine and journal_mode examples columns.")
+
+    profile_names = {profile.engine_version: name for name, profile in PROFILES.items()}
+    remaining = {(version, mode) for version in profile_names for mode in FILE_JOURNALS}
+    stages = tuple(stage for stage, _ in bindings)
+    examples = []
+    for _ in range(len(remaining)):
+        row = re.fullmatch(r"\|\s*([0-9.]+)\s*\|\s*([a-z]+)\s*\|", next(lines, ""))
+        if row is None or row.groups() not in remaining:
+            raise LabError("The SQLite rebuild feature requires one DELETE and one WAL example per pinned engine.")
+        version, journal = row.groups()
+        remaining.remove((version, journal))
+        examples.append(RebuildExample(profile_names[version], journal, stages))
+    if next(lines, None) is not None:
+        raise LabError("The SQLite rebuild feature contains an unbound line.")
     return examples
 
 
@@ -297,25 +351,28 @@ def run_rebuild_stage(directory, binary, profile, journal, stage, token):
             raise LabError("The SQLite rebuild did not report the requested stage and pinned engine.")
 
 
-def run_rebuild_checks(tempdir, binaries, report):
-    for name, profile in PROFILES.items():
-        for journal in sorted(FILE_JOURNALS):
-            case = f"{REBUILD_SCENARIO} {name} {journal}"
-            report["phase"] = f"{case} setup"
-            directory, token = allocate_file_case(tempdir, f"{REBUILD_SCENARIO}-{name}-{journal}")
-            for stage in ("seed", "interrupt", "resume", "reopen"):
-                report["phase"] = f"{case} {stage}"
-                run_rebuild_stage(directory, binaries[name], profile, journal, stage, token)
-            report["rebuild_checks"].append({
-                "scenario": REBUILD_SCENARIO, "profile": name, "engine_version": profile.engine_version,
-                "journal_mode": journal, "interrupted_exit": REBUILD_INTERRUPTED_EXIT, "status": "PASS",
-            })
+def run_rebuild_checks(tempdir, binaries, examples, report):
+    for example in examples:
+        name, journal = example.profile, example.journal
+        profile = PROFILES[name]
+        case = f"{REBUILD_SCENARIO} {name} {journal}"
+        report["phase"] = f"{case} setup"
+        directory, token = allocate_file_case(tempdir, f"{REBUILD_SCENARIO}-{name}-{journal}")
+        for stage in example.stages:
+            report["phase"] = f"{case} {stage}"
+            run_rebuild_stage(directory, binaries[name], profile, journal, stage, token)
+        report["rebuild_checks"].append({
+            "scenario": REBUILD_SCENARIO, "profile": name, "engine_version": profile.engine_version,
+            "journal_mode": journal, "interrupted_exit": REBUILD_INTERRUPTED_EXIT, "status": "PASS",
+        })
 
 
 def run_lab(tempdir, report, *, model_types=False, owned_tx=False, savepoint_tx=False,
             save_changes=False, tx_options=False, decimal_binding=False, commit_outcome=False):
     report["phase"] = "SQLite file feature discovery"
     examples = parse_file_feature(FILE_FEATURE.read_text(encoding="utf-8"))
+    report["phase"] = "SQLite rebuild feature discovery"
+    rebuild_examples = parse_rebuild_feature(REBUILD_FEATURE.read_text(encoding="utf-8"))
     binaries = {}
     for name, profile in PROFILES.items():
         report["phase"] = f"build {name}"
@@ -355,7 +412,7 @@ def run_lab(tempdir, report, *, model_types=False, owned_tx=False, savepoint_tx=
             "scenario": scenario, "journal_mode": journal, "engines": engines,
             "strict_generated_native_code": strict_generated_native_code, "status": "PASS",
         })
-    run_rebuild_checks(tempdir, binaries, report)
+    run_rebuild_checks(tempdir, binaries, rebuild_examples, report)
 
 
 def main(argv=None):
