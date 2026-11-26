@@ -157,6 +157,17 @@ func TestSaveChangesDetachesEndedExternal(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			var previous *transaction.SavedChanges
+			var accepted int
+			if dialect == transaction.DialectPostgreSQL {
+				previous, err = e.SaveChanges(t.Context(), saveInPostgres, func(w *transaction.SaveWriter) error {
+					return transaction.StageValue(w, &accepted, 4)
+				})
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			initialCommands := len(p.commands)
 			if err := native.Commit(); err != nil {
 				t.Fatal(err)
 			}
@@ -170,8 +181,13 @@ func TestSaveChangesDetachesEndedExternal(t *testing.T) {
 			if _, err := e.Enlist(); !errors.Is(err, goeferr.ErrInvalidState) {
 				t.Fatalf("ended coordinator still enlists: %v", err)
 			}
-			if p.rollback.Load() != 0 || len(p.commands) != 0 {
+			if p.rollback.Load() != 0 || len(p.commands) != initialCommands {
 				t.Fatal("closed native transaction was reused")
+			}
+			if previous != nil {
+				if err := previous.Accept(); err != nil || accepted != 4 {
+					t.Fatalf("observing native completion revoked the earlier committed save: %v", err)
+				}
 			}
 		})
 	}

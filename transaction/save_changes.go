@@ -134,7 +134,10 @@ func saveBatch(ctx context.Context, native *sql.Tx, stack *savepointStack, optio
 		var xactAbort int
 		if err := native.QueryRowContext(ctx, sqlServerXactAbort).Scan(&xactAbort); err != nil {
 			detail := redact(err)
-			if badConnection || nativeDone {
+			if nativeDone {
+				return nil, errors.Join(detail, abandon(false))
+			}
+			if badConnection {
 				detail = unsafe(detail)
 			}
 			return nil, detail
@@ -156,7 +159,9 @@ func saveBatch(ctx context.Context, native *sql.Tx, stack *savepointStack, optio
 	}
 	if err := execPoint(ctx, create+name); err != nil {
 		if nativeDone {
-			return nil, unsafe(goeferr.NewInvalidState())
+			// No batch work ran. Detach without revoking receipts for
+			// earlier saves the native owner may have committed.
+			return nil, errors.Join(goeferr.NewInvalidState(), abandon(false))
 		}
 		return nil, unsafe(savepointError(normalize(err)))
 	}
