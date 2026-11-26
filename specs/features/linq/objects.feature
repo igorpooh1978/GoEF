@@ -42,3 +42,17 @@ Feature: Enumerate typed local values
     And the iterator and predicate have seen all four values during the replay
     And the selector has seen 2 and 4 during the replay
     And the iterator has released its resources twice in total
+
+  @LINQ-OBJECTS-001-S06
+  Scenario: Counting projected matches consumes the entire sequence
+    Given a replayable counting iterator yielding 1, 2, 4, 2 and 3 with a cleanup callback
+    When I filter for even values and project each match to the same one-element slice
+    Then the iterator, predicate and selector are idle
+    When I count the projected sequence
+    Then the count is 3
+    And the iterator and predicate have seen 1, 2, 4, 2 and 3 in order
+    And the selector has seen 2, 4 and 2 in order
+    And the iterator has released its resources once
+    When I count the projected sequence again
+    Then the count and traversal are the same
+    And the iterator has released its resources twice in total
