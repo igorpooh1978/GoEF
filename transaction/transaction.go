@@ -24,20 +24,22 @@ const (
 )
 
 // Tx owns a transaction and its connection lease. The application owns the pool.
-// Only Begin creates an active Tx. Copies of a handle share the same lifecycle.
+// Begin and BeginWithOptions create active transactions. Copies of a handle
+// share the same lifecycle.
 type Tx struct {
 	owned *ownedTx
 }
 
 type ownedTx struct {
-	mu           sync.Mutex
-	state        atomic.Value // State, initialized before publishing the handle
-	lifetime     context.Context
-	conn         *sql.Conn
-	native       *sql.Tx
-	stopRollback func() bool
-	cleanupErr   error
-	savepoints   savepointStack
+	mu                 sync.Mutex
+	state              atomic.Value // State, initialized before publishing the handle
+	lifetime           context.Context
+	conn               *sql.Conn
+	native             *sql.Tx
+	stopRollback       func() bool
+	cleanupErr         error
+	savepoints         savepointStack
+	discardAfterFinish bool
 }
 
 // Begin acquires one connection and starts a transaction with the driver defaults.
@@ -45,6 +47,10 @@ type ownedTx struct {
 // transaction control calls may run until the driver returns. If cancellation
 // happens during native begin, cleanup finishes before Begin returns an error.
 func Begin(ctx context.Context, db *sql.DB) (*Tx, error) {
+	return begin(ctx, db, "", sql.TxOptions{})
+}
+
+func begin(ctx context.Context, db *sql.DB, dialect Dialect, options sql.TxOptions) (*Tx, error) {
 	if ctx == nil || db == nil {
 		return nil, goeferr.NewInvalidState()
 	}
@@ -56,21 +62,43 @@ func Begin(ctx context.Context, db *sql.DB) (*Tx, error) {
 		release(conn, false)
 		return nil, operationError(err)
 	}
+	if dialect == DialectSQLite && options.Isolation == sql.LevelSerializable {
+		var readUncommitted int
+		err := conn.QueryRowContext(ctx, "PRAGMA read_uncommitted").Scan(&readUncommitted)
+		if err != nil {
+			release(conn, errors.Is(err, driver.ErrBadConn))
+			return nil, operationError(err)
+		}
+		if readUncommitted != 0 {
+			release(conn, false)
+			return nil, goeferr.NewUnsupportedFeature()
+		}
+		if err := ctx.Err(); err != nil {
+			release(conn, false)
+			return nil, operationError(err)
+		}
+		// The driver leaves isolation at SQLite's native setting.
+		options.Isolation = sql.LevelDefault
+	}
+	discardAfterFinish := dialect == DialectSQLServer && options.Isolation != sql.LevelDefault
 
 	// Own rollback and release in one place. A cancellable native Tx context
 	// would let database/sql roll back independently and obscure its result.
-	native, err := conn.BeginTx(context.WithoutCancel(ctx), nil)
+	native, err := conn.BeginTx(context.WithoutCancel(ctx), &options)
 	if err != nil {
 		release(conn, true)
 		return nil, operationError(err)
 	}
 	if err := ctx.Err(); err != nil {
 		rollbackErr := native.Rollback()
-		release(conn, rollbackErr != nil)
+		release(conn, rollbackErr != nil || discardAfterFinish)
 		return nil, errors.Join(operationError(err), rollbackError(rollbackErr))
 	}
 
-	owned := &ownedTx{lifetime: ctx, conn: conn, native: native}
+	owned := &ownedTx{
+		lifetime: ctx, conn: conn, native: native,
+		savepoints: savepointStack{dialect: dialect}, discardAfterFinish: discardAfterFinish,
+	}
 	owned.state.Store(StateActive)
 	tx := &Tx{owned: owned}
 	owned.mu.Lock()
@@ -219,7 +247,7 @@ func (o *ownedTx) rollback(badConnection bool) error {
 
 func (o *ownedTx) finish(state State, discard bool) {
 	o.stopRollback()
-	release(o.conn, discard)
+	release(o.conn, discard || o.discardAfterFinish)
 	o.native, o.conn, o.lifetime, o.stopRollback = nil, nil, nil, nil
 	o.savepoints = savepointStack{}
 	o.state.Store(state)

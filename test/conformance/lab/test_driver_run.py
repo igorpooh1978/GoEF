@@ -208,6 +208,20 @@ class OptionalScenarioEvidenceTests(unittest.TestCase):
             with self.subTest(rows=rows), self.assertRaises(driver_run.LabError):
                 verify(rows)
 
+    def test_transaction_options_requires_exact_profile(self):
+        row = {"provider": "sqlite", "profile": "sqlite-3.51", "engine_version": "3.51.3",
+               "scenario": "TX-ISOLATION-001-S01", "status": "PASS"}
+        prefix = "GOEF_TX_OPTIONS_RESULT="
+        verify = driver_run.verified_tx_options_result
+        self.assertEqual(verify(prefix + json.dumps(row), "sqlite", "sqlite-3.51", "3.51.3"), row)
+        for output in ("", "\n".join([prefix + json.dumps(row)] * 2),
+                       prefix + json.dumps({**row, "engine_version": "3.54.1"})):
+            with self.subTest(output=output), self.assertRaises(driver_run.LabError):
+                verify(output, "sqlite", "sqlite-3.51", "3.51.3")
+        args, env = driver_run.driver_test_options(tx_options=True)
+        self.assertEqual(args[0], "-test.run=^(TestDriverGherkin|TestTransactionOptions)$")
+        self.assertEqual(env, {"GOEF_TX_OPTIONS": "1"})
+
 
 class SaveChangesEvidenceTests(unittest.TestCase):
     def rows(self, profile="sqlite-3.54", engine_version="3.54.1"):

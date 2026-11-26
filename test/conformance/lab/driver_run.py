@@ -404,7 +404,7 @@ def verified_results(output, provider, profile_name=None):
     return [results[key] for key in sorted(results)]
 
 
-def driver_test_options(*, model_types=False, owned_tx=False, savepoint_tx=False, save_changes=False):
+def driver_test_options(*, model_types=False, owned_tx=False, savepoint_tx=False, save_changes=False, tx_options=False):
     tests = ["TestDriverGherkin"]
     environment = {}
     if model_types:
@@ -419,6 +419,9 @@ def driver_test_options(*, model_types=False, owned_tx=False, savepoint_tx=False
     if save_changes:
         tests.append("TestSaveChangesTransaction")
         environment["GOEF_SAVE_CHANGES"] = "1"
+    if tx_options:
+        tests.append("TestTransactionOptions")
+        environment["GOEF_TX_OPTIONS"] = "1"
     if not environment:
         return TEST_ARGS, environment
     return (f"-test.run=^({'|'.join(tests)})$", *TEST_ARGS[1:]), environment
@@ -461,6 +464,11 @@ def verified_save_changes_results(output, provider, profile, engine_version):
     return _verified_profile_scenarios(output, SAVE_CHANGES_RESULT_PREFIX, SAVE_CHANGES_SCENARIOS, provider, profile, engine_version)
 
 
+def verified_tx_options_result(output, provider, profile, engine_version):
+    return _verified_profile_scenarios(output, "GOEF_TX_OPTIONS_RESULT=", ("TX-ISOLATION-001-S01",),
+                                       provider, profile, engine_version)[0]
+
+
 def missing_eula(profile, accepted_eulas):
     settings = profile.sqlserver_settings
     if settings is not None and settings.eula_flag not in accepted_eulas:
@@ -486,7 +494,7 @@ def sqlserver_provisioning_reason(error):
 
 
 def run_provider(profile_name, binary, accepted_eulas, *,
-                 model_types=False, owned_tx=False, savepoint_tx=False, save_changes=False):
+                 model_types=False, owned_tx=False, savepoint_tx=False, save_changes=False, tx_options=False):
     profile = PROFILES[profile_name]
     provider = profile.provider
     phase = "build"
@@ -506,7 +514,7 @@ def run_provider(profile_name, binary, accepted_eulas, *,
             path = Path(directory)
             env = {"GOEF_DRIVERLAB_PROVIDER": provider, "GOEF_DRIVERLAB_PROFILE": profile_name}
             test_args, extra_env = driver_test_options(
-                model_types=model_types, owned_tx=owned_tx, savepoint_tx=savepoint_tx, save_changes=save_changes,
+                model_types=model_types, owned_tx=owned_tx, savepoint_tx=savepoint_tx, save_changes=save_changes, tx_options=tx_options,
             )
             env.update(extra_env)
             if provider == "sqlite":
@@ -545,6 +553,8 @@ def run_provider(profile_name, binary, accepted_eulas, *,
             report["savepoint_tx"] = verified_savepoint_tx_results(output, provider, profile_name, profile.version)
         if save_changes:
             report["save_changes"] = verified_save_changes_results(output, provider, profile_name, profile.version)
+        if tx_options:
+            report["tx_options"] = verified_tx_options_result(output, provider, profile_name, profile.version)
         return report
     except Exception as error:
         blocked = isinstance(error, Blocked)
@@ -567,6 +577,7 @@ def main(argv=None):
     parser.add_argument("--owned-tx", action="store_true", help="also run the owned transaction scenario")
     parser.add_argument("--savepoint-tx", action="store_true", help="also run savepoint and external transaction scenarios")
     parser.add_argument("--save-changes", action="store_true", help="also run SaveChanges transaction scenarios")
+    parser.add_argument("--tx-options", action="store_true", help="also verify transaction isolation options")
     parser.add_argument(SQLSERVER_EULA, action="store_true", help="accept the SQL Server 2022 Developer EULA")
     parser.add_argument(LEGACY_SQLSERVER_EULA, action="store_true", help="accept the selected SQL Server 2017 or 2019 Developer EULA")
     args = parser.parse_args(argv)
@@ -598,7 +609,8 @@ def main(argv=None):
                 pool.submit(run_provider, name,
                             binaries.get("host" if provider == "sqlite" else "linux"),
                             accepted_eulas, model_types=args.model_types, owned_tx=args.owned_tx,
-                            savepoint_tx=args.savepoint_tx, save_changes=args.save_changes)
+                            savepoint_tx=args.savepoint_tx, save_changes=args.save_changes,
+                            tx_options=args.tx_options)
                 for provider, name in selected.items()
             ]
             for task in tasks:

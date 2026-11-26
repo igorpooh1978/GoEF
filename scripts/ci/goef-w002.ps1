@@ -7,7 +7,8 @@ param(
     [switch] $ModelTypes,
     [switch] $OwnedTx,
     [switch] $SavepointTx,
-    [switch] $SaveChanges
+    [switch] $SaveChanges,
+    [switch] $TxOptions
 )
 
 Set-StrictMode -Version 3.0
@@ -218,7 +219,8 @@ function Invoke-DriverMatrix {
         [switch] $ModelTypes,
         [switch] $OwnedTx,
         [switch] $SavepointTx,
-        [switch] $SaveChanges
+        [switch] $SaveChanges,
+        [switch] $TxOptions
     )
 
     $driverArguments = @('-B', 'test/conformance/lab/driver_run.py') + $Selection
@@ -226,6 +228,7 @@ function Invoke-DriverMatrix {
     if ($OwnedTx) { $driverArguments += '--owned-tx' }
     if ($SavepointTx) { $driverArguments += '--savepoint-tx' }
     if ($SaveChanges) { $driverArguments += '--save-changes' }
+    if ($TxOptions) { $driverArguments += '--tx-options' }
     Write-Host "RUN $(Split-Path -Leaf $Python) $($driverArguments -join ' ')"
     $driverOutput = @(& $Python @driverArguments)
     Confirm-DriverResults -Lines $driverOutput -ExitCode $LASTEXITCODE -ExpectedProfiles $ExpectedProfiles -ExpectedFacts $ExpectedFacts
@@ -237,7 +240,8 @@ function Invoke-SqliteCompatibility {
         [switch] $ModelTypes,
         [switch] $OwnedTx,
         [switch] $SavepointTx,
-        [switch] $SaveChanges
+        [switch] $SaveChanges,
+        [switch] $TxOptions
     )
 
     $script = 'test/conformance/lab/sqlite_compat.py'
@@ -246,6 +250,7 @@ function Invoke-SqliteCompatibility {
     if ($OwnedTx) { $sqliteArguments += '--owned-tx' }
     if ($SavepointTx) { $sqliteArguments += '--savepoint-tx' }
     if ($SaveChanges) { $sqliteArguments += '--save-changes' }
+    if ($TxOptions) { $sqliteArguments += '--tx-options' }
     Write-Host "RUN $(Split-Path -Leaf $Python) $($sqliteArguments -join ' ')"
     $lines = @(& $Python @sqliteArguments)
     $exitCode = $LASTEXITCODE
@@ -463,7 +468,7 @@ try {
     $baselineFacts = @{ sqlserver = @{ version = '16.0.4325.4'; compatibility_level = '160'; generate_series = 'available' } }
     $matrixFailures = [System.Collections.Generic.List[string]]::new()
     try {
-        Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles $baselineProfiles -ExpectedFacts $baselineFacts -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx -SavepointTx:$SavepointTx -SaveChanges:$SaveChanges
+        Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles $baselineProfiles -ExpectedFacts $baselineFacts -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx -SavepointTx:$SavepointTx -SaveChanges:$SaveChanges -TxOptions:$TxOptions
         Write-Host 'PASS W002 local checks and all four driver suites'
     }
     catch {
@@ -510,7 +515,7 @@ try {
             }
             try {
                 $expectedFacts = @{ $provider = $entry.Value.Facts }
-                Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles @{ $provider = $profileName } -ExpectedFacts $expectedFacts -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx -SavepointTx:$SavepointTx -SaveChanges:$SaveChanges
+                Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles @{ $provider = $profileName } -ExpectedFacts $expectedFacts -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx -SavepointTx:$SavepointTx -SaveChanges:$SaveChanges -TxOptions:$TxOptions
                 Write-Host "PASS W002 $profileName compatibility suite"
             }
             catch {
@@ -518,7 +523,7 @@ try {
             }
         }
         try {
-            Invoke-SqliteCompatibility -Python $python -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx -SavepointTx:$SavepointTx -SaveChanges:$SaveChanges
+            Invoke-SqliteCompatibility -Python $python -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx -SavepointTx:$SavepointTx -SaveChanges:$SaveChanges -TxOptions:$TxOptions
         }
         catch {
             $matrixFailures.Add($_.Exception.Message)
