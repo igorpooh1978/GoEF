@@ -95,3 +95,24 @@ W002 selects **SQLite 3.51.3** as the minimum for the pinned pure-Go builds. The
 Earlier releases can parse generated columns and `STRICT` tables. SQLite 3.51.0 added enforcement of the declared type of computed columns in `STRICT` tables. SQLite 3.51.3 is the first 3.51 patch with the WAL-reset corruption fix. SQLite also backported the WAL fix to the 3.44 and 3.50 branches. The older backports are outside the selected Go-driver builds and file contract. [SQLite 3.51.3 release](https://www.sqlite.org/releaselog/3_51_3.html) · [WAL reset fix and backports](https://www.sqlite.org/wal.html#the_wal_reset_bug) · [Tagged driver change history](https://raw.githubusercontent.com/modernc-org/sqlite/v1.47.0/CHANGELOG.md)
 
 The [file scenarios](../../../test/conformance/driverlab/features/sqlite_files.feature) require an inserted row with an invalid generated value to fail with native `SQLITE_CONSTRAINT_DATATYPE` (`3091`). They check that the row and the rolled-back migration leave the persisted schema, values, audit and migration history intact. The accepted additive change is visible when the originating runtime reopens the same file. Library-level recovery, rebuilds and files using higher-version schema features retain separate acceptance gates. [SQLite's tagged computed-column tests](https://github.com/sqlite/sqlite/blob/version-3.51.3/test/strict1.test) · [Native result codes](https://www.sqlite.org/rescode.html#constraint_datatype)
+
+On 2026-11-26 UTC, a standalone Context7 4.7.3 documentation query used protocol `2025-06-18`, tool `query-docs` and selector `/websites/sqlite_docs`. The response corroborated the exact 3.51.3 source ID and linked the vendor's 3.51.0 and 3.51.3 notes and WAL history. The exact SQLite and driver releases above anchor the version decision.
+
+### Minimum-profile local run
+
+The focused file run used `python -B test/conformance/lab/sqlite_compat.py`. The arithmetic-only fixture could produce only integers. With the new datatype assertion, that fixture failed at the first file mutation with exit 1. After the fixture deliberately generated a noncoercible value, the command exited 0 on implementation revision `50ebfcc468a451254be97e3016a56f151f0e79ef` with six passing driver rows and four passing file cases.
+
+The following command then exited 0 on integrated revision `07038da670a3e26871d0312d792f92d68ab72ede` on 2026-11-26. The Windows/amd64 workstation used Go 1.27.4, Python 3.14.4 and PowerShell 7.6.9. Server cases used the workstation's Docker Desktop 29.4.0 Linux/amd64 daemon.
+
+```powershell
+pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -AcceptSqlServerEula -AcceptLegacySqlServerEula
+```
+
+| File sequence | DELETE journal | WAL journal |
+| --- | --- | --- |
+| 3.51.3 creates → 3.54.1 mutates → 3.51.3 reopens | PASS, code `3091` | PASS, code `3091` |
+| 3.54.1 creates → 3.51.3 mutates → 3.54.1 reopens | PASS, code `3091` | PASS, code `3091` |
+
+The report identified `sqlite-3.51` as the minimum, observed the same source IDs and compile options listed above, and recorded 36 distinct driver cases across 12 profiles and four file cases. The 39 reported driver rows include the three repeated current SQLite cases. The repository validator, seven bootstrap tests, 35 Python lab tests and Go build, vet, test and module checks passed. The primary driver's unit tests also passed with `go test -mod=vendor -race -count=1 -shuffle=on ./...` in a local Linux/amd64 container. The lab removed its containers after the run.
+
+The exact driver module tree is `951054e5683db030a5e20e31cc399cff79ad0fce`, lab tree `0806db6023667fca2090f55495d971ad8b3b1a85` and PowerShell blob `38b02e2f725808f251cffeab274d68b1db9a0125`. The evidence commit preserves these executable artifacts.
