@@ -27,4 +27,16 @@ Four separate external consumers ran with Go 1.27.4 on Windows/amd64, a fresh mo
 
 The compiled consumer asserted that the concrete adapter implements `provider.Backend`. Its tests rejected a nil pool and checked the descriptor of a newly constructed adapter. The SQLite consumer also read a bound integer from a file-backed database through the execution interface. In each module, `go build -mod=readonly -p=2 ./...`, `go vet -mod=readonly -p=2 ./...`, and `go test -mod=readonly -p=2 -count=1 ./...` exited 0.
 
-An independent Ubuntu Linux/amd64 run using Go 1.27.4 installed all four adapters together with the explicit [core preview v0.1.0-alpha.1](https://github.com/igorpooh1978/GoEF/releases/tag/v0.1.0-alpha.1) in another fresh module without replacements. The origin SHA and checksums matched. Module verification, vet, and shuffled tests passed, including a typed row read from file-backed SQLite. The 12-profile execution matrix remains the [real-engine evidence for this exact source](https://github.com/igorpooh1978/GoEF/issues/13#issuecomment-7197938653).
+On 2026-11-26, a fresh Go 1.27.4 consumer module outside the repository installed the published PostgreSQL, SQL Server, and MySQL adapters together at `v0.1.0-alpha.1`. The run used the public Go proxy and checksum database with `GOWORK=off` and no `replace` directives. `go mod verify`, `go list -mod=readonly -m all`, `go vet -mod=readonly .`, and `go build -mod=readonly` for Windows/amd64 and Linux/amd64 exited 0.
+
+Each parameterized query used the published adapter's execution interface with the integer `41`. It returned exactly one row containing the integer `42` and the observed server version. All three runs exited 0.
+
+| Engine | Observed version | Runtime |
+| --- | --- | --- |
+| PostgreSQL | `18.7` | Disposable Linux/amd64 container |
+| SQL Server Express LocalDB | `17.0.4025.3` | Local Windows/amd64 instance over a named pipe |
+| MySQL | `8.4.13.1` | Disposable Linux/amd64 container |
+
+An independent Ubuntu Linux/amd64 run using Go 1.27.4 installed all four adapters together with the explicit [core preview v0.1.0-alpha.1](https://github.com/igorpooh1978/GoEF/releases/tag/v0.1.0-alpha.1) in another fresh module without replacements. The origin SHA and checksums matched. Module verification, vet, and shuffled tests passed, including a typed row read from file-backed SQLite.
+
+See the [12-profile real-engine conformance matrix for the same source commit](https://github.com/igorpooh1978/GoEF/issues/13#issuecomment-7197938653).
