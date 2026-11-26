@@ -45,7 +45,9 @@ When the native commit result is inconclusive, the handle reports `StateOutcomeU
 
 ## Use savepoints inside a transaction
 
-Call `tx.Savepoint(ctx, dialect)` on an owned transaction or `external.Savepoint(ctx, dialect)` on an external coordinator. Supply the dialect for the actual driver and database. The package generates point names. Rolling back to a live point undoes writes made after it, keeps that point available and invalidates younger handles. Release the innermost live point when it is no longer needed. A release keeps the writes pending in the enclosing transaction. A retired handle, or an attempt to release an older point first, returns an error matching `goeferr.ErrInvalidState`.
+Call `tx.Savepoint(ctx, dialect)` on an owned transaction or `external.Savepoint(ctx, dialect)` on an external coordinator. Supply the dialect for the actual driver and database. The package generates point names. Rolling back to a live point reverts transactional writes made after it, keeps that point available and invalidates younger handles. Release the innermost live point when it is no longer needed. A release keeps the writes pending in the enclosing transaction. A retired handle, or an attempt to release an older point first, returns an error matching `goeferr.ErrInvalidState`.
+
+Keep the same dialect throughout the transaction or external coordinator after its first savepoint. An unknown or different dialect returns `goeferr.ErrUnsupportedFeature` before dispatch. Use the managed point operations so the stack follows the database transaction. Cancellation detected before dispatch leaves the stack valid. If a native point command fails, the error matches `goeferr.ErrSavepointFailed` and the managed stack is invalidated. The owner should roll back the enclosing transaction unless engine evidence establishes safe recovery.
 
 | Dialect | Create and roll back | Release |
 | --- | --- | --- |
@@ -58,9 +60,9 @@ The SQL Server fixture uses a local, committable transaction with Multiple Activ
 
 ## Enlist in an external transaction
 
-Use one `transaction.NewExternal(native)` coordinator per caller-owned `*sql.Tx`. Each `Enlist` call creates a participant on that transaction. Participant `Exec` and coordinator savepoint operations share one operation slot. An overlapping operation returns `goeferr.ErrContextBusy`. A participant's `Close` detaches it and can be repeated. The caller retains control of the native transaction and connection.
+Use one `transaction.NewExternal(native)` coordinator per caller-owned `*sql.Tx`. Each `Enlist` call creates a participant on that transaction. Participant `Exec` and coordinator savepoint operations share one operation slot. An overlapping operation returns `goeferr.ErrContextBusy`. A participant's `Close` waits for any active managed operation and detaches just that participant. It can be repeated. The caller retains control of the native transaction and connection.
 
-The proposed example uses the same `transaction_markers` fixture and driver parameter syntax as `WriteMarker`. It requires Go 1.27.4. The owner inserts `A` through its native transaction, creates an external coordinator and calls `StageMarker` with `"B", false`. On success the owner closes the coordinator and commits the native transaction. A separate connection sees only `A`. On error the helper returns control to the native owner for cleanup.
+The example uses the same `transaction_markers` fixture and driver parameter syntax as `WriteMarker`. It requires Go 1.27.4. The owner inserts `A` through its native transaction, creates an external coordinator and calls `StageMarker` with `"B", false`. On success the owner closes the coordinator and commits the native transaction. A separate connection sees only `A`. On error the helper returns control to the native owner for cleanup.
 
 ```go
 package example

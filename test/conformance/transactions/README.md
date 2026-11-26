@@ -10,7 +10,7 @@ pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -OwnedTx -AcceptSqlServerEula
 
 Add `-Compatibility -AcceptLegacySqlServerEula` to include the other pinned profiles when both SQL Server Developer releases are authorized for the run. The corresponding Python selector is `--owned-tx`. [Local driver lab](../driverlab/README.md)
 
-The manual savepoint and external-transaction fixture checks earlier writes, younger point invalidation, owner visibility after participant detach, and rollback observed independently. Run it on the four default profiles with the following command.
+The manual `TestSavepointAndExternalTransaction` fixture checks earlier writes, younger point invalidation, owner visibility after participant detach, and rollback observed independently. Run it on the four default profiles with the following command.
 
 ```powershell
 pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -SavepointTx -AcceptSqlServerEula
