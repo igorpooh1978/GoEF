@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Observe blocked writes in the local driver matrix, distinguish caller deadlines from native lock timeouts, and verify recovery and the original rows ([#13](https://github.com/igorpooh1978/GoEF/issues/13)).
+- Record a PostgreSQL 18.7 left-join reference run that compares EF Core and native pgx results, parameters, and command counts ([#13](https://github.com/igorpooh1978/GoEF/issues/13)).
 - Exercise cancellation and connection release through the provider execution interface on the local driver matrix ([#13](https://github.com/igorpooh1978/GoEF/issues/13)).
 - Set SQLite 3.51.3 as the W002 minimum for the pinned Go driver and verify strict generated-column errors during bidirectional file exchange with 3.54.1 ([#31](https://github.com/igorpooh1978/GoEF/issues/31)).
 - Add PostgreSQL 19 and SQL Server 2022 at database compatibility level 140 to the local matrix. Check `GENERATE_SERIES` at levels 140 and 160 on the same SQL Server build ([#31](https://github.com/igorpooh1978/GoEF/issues/31)).

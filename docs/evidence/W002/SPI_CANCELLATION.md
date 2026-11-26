@@ -33,6 +33,8 @@ The exact driver module tree is `7f90e1bd88e73a7f0352c08024de2a80415006de`, lab 
 
 ## Lock-wait follow-up
 
+The [lock timeout run](LOCK_TIMEOUT.md) implements the driver-lab follow-up. The table below records the controls identified at the cancellation checkpoint.
+
 The [fault schedule](../../development/CONFORMANCE_LAB.md) requires observed lock entry and separate runs for caller deadline and engine timeout. Provider research identified these controls for the next executable slice.
 
 | Provider | Lock evidence and expected native timeout |
