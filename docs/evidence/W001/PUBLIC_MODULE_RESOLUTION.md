@@ -36,6 +36,19 @@ The consumer imported `github.com/igorpooh1978/GoEF/linq/objects` and called `ob
 
 With those files present, `go mod tidy`, `go mod verify`, `go build -mod=readonly ./...`, `go vet -mod=readonly ./...` and `go test -mod=readonly -count=1 -v ./...` all exited 0. `go list -m -json github.com/igorpooh1978/GoEF` confirmed the expected version, Go 1.27.4 and an unset replacement.
 
+## Repeatable public consumer check
+
+Run [the public module verifier](../../../test/architecture/public-module/verify.py) from the repository root with Python 3.11 or newer and Go 1.27.4. It uses a fresh consumer directory and module cache, the public Go proxy and checksum database, and normal module mode with workspaces disabled. It checks the downloaded module path, origin SHA, both checksums, and the selected dependency with its replacement field unset. It runs tidy, module verification, a read-only build and vet, then executes a [small consumer program](../../../test/architecture/public-module/consumer.go.txt) that filters a local sequence and lists a pending migration.
+
+```powershell
+python -B test/architecture/public-module/verify.py fdd22eef3d8ddc07aadef1a152cb20392b090c3f
+python -B test/architecture/public-module/verify.py fdd22eef3d8ddc07aadef1a152cb20392b090c3f --version v0.0.0-20261126152102-fdd22eef3d8d
+```
+
+Both commands exited 0 on Windows/amd64 with Python 3.14.4 and Go 1.27.4. The public download resolved to `v0.0.0-20261126152102-fdd22eef3d8d` at `fdd22eef3d8ddc07aadef1a152cb20392b090c3f`, matching `git ls-remote origin refs/heads/main`. The archive checksum was `h1:Ig7RtMcwpg2VIWiwzn1xps4XYUANHeu67fP4O+lOmzg=` and the module file checksum was `h1:ABeTL0NnLBe42NYSr8liTicW7AUWHsszrL7EzWFpFF0=`. The consumer produced `8 true` and `002_customer_notes`. [Published source](https://github.com/igorpooh1978/GoEF/commit/fdd22eef3d8ddc07aadef1a152cb20392b090c3f)
+
+The control used the same version with the earlier expected SHA `7a08d90b215d11904109b109c1381ba19c881f35`. It exited 1 on the provenance mismatch before compiling the consumer. A repeat with the caller's proxy and checksum database disabled, an invalid workspace override, and vendor mode selected also exited 0. The verifier supplied its own module environment. An approved release can use the same verifier with its full commit SHA and exact public Go module version.
+
 ## Remaining acceptance
 
 - The MIT license is present at the verified commit and [issue #15](https://github.com/igorpooh1978/GoEF/issues/15) is closed.

@@ -1,0 +1,31 @@
+package main
+
+import (
+	"crypto/sha256"
+	"fmt"
+	"slices"
+
+	"github.com/igorpooh1978/GoEF/linq/objects"
+	"github.com/igorpooh1978/GoEF/migration"
+)
+
+func main() {
+	evens := objects.Where(slices.Values([]int{3, 8, 10}), func(n int) bool { return n%2 == 0 })
+	fmt.Println(objects.First(evens))
+
+	registered := []migration.Entry{
+		{ID: "001_customers", Digest: sha256.Sum256([]byte("synthetic initial artifact"))},
+		{
+			ID:          "002_customer_notes",
+			Predecessor: "001_customers",
+			Digest:      sha256.Sum256([]byte("synthetic notes artifact")),
+		},
+	}
+	pending, err := migration.Pending(registered, registered[:1])
+	if err != nil {
+		panic(err)
+	}
+	for _, entry := range pending {
+		fmt.Println(entry.ID)
+	}
+}
