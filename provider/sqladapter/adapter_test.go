@@ -18,18 +18,20 @@ import (
 )
 
 type driverFixture struct {
-	connects, closes int
-	dispatches       int
-	args             []driver.NamedValue
-	connectErr       error
-	execErr          error
-	queryErr         error
-	closeErr         error
-	nextErr          error
-	sets             [][][]driver.Value
-	columnNames      []string
-	affected         int64
-	affectedErr      error
+	resultSetErr                 error
+	onQuery, onNext, onResultSet func()
+	connects, closes             int
+	dispatches                   int
+	args                         []driver.NamedValue
+	connectErr                   error
+	execErr                      error
+	queryErr                     error
+	closeErr                     error
+	nextErr                      error
+	sets                         [][][]driver.Value
+	columnNames                  []string
+	affected                     int64
+	affectedErr                  error
 }
 
 func (f *driverFixture) Connect(context.Context) (driver.Conn, error) {
@@ -67,6 +69,9 @@ func (f *driverFixture) QueryContext(_ context.Context, _ string, args []driver.
 	if f.queryErr != nil {
 		return nil, f.queryErr
 	}
+	if f.onQuery != nil {
+		f.onQuery()
+	}
 	return &fakeRows{driver: f}, nil
 }
 
@@ -79,6 +84,9 @@ type fakeRows struct {
 func (r *fakeRows) Columns() []string { return r.driver.columnNames }
 func (r *fakeRows) Close() error      { return r.driver.closeErr }
 func (r *fakeRows) Next(dest []driver.Value) error {
+	if r.driver.onNext != nil {
+		r.driver.onNext()
+	}
 	if r.set < len(r.driver.sets) && r.row < len(r.driver.sets[r.set]) {
 		copy(dest, r.driver.sets[r.set][r.row])
 		r.row++
@@ -91,6 +99,12 @@ func (r *fakeRows) Next(dest []driver.Value) error {
 }
 func (r *fakeRows) HasNextResultSet() bool { return r.set+1 < len(r.driver.sets) }
 func (r *fakeRows) NextResultSet() error {
+	if r.driver.onResultSet != nil {
+		r.driver.onResultSet()
+	}
+	if r.driver.resultSetErr != nil {
+		return r.driver.resultSetErr
+	}
 	r.set++
 	r.row = 0
 	return nil
@@ -421,5 +435,94 @@ func TestCellValueRejectsOverflowAndOutOfDomainConversions(t *testing.T) {
 	}
 	if got, ok := cellValue(uint64(1), provider.Column{Kind: provider.KindBoolean}, true); !ok || got != provider.Boolean(true) {
 		t.Fatalf("unsigned tinyint bool: %v, %t", got, ok)
+	}
+}
+
+func TestCancellationDuringOpeningAndExhaustion(t *testing.T) {
+	b, f := newFixture(t, Config{})
+	l := acquire(t, b)
+	defer l.Release(t.Context(), provider.Discard)
+	command := provider.Command{SQL: "query", Columns: []provider.Column{{Kind: provider.KindInteger}}}
+	f.columnNames = []string{"i"}
+	for _, at := range []string{"query opening", "next", "next result set"} {
+		t.Run(at, func(t *testing.T) {
+			ctx, cancel := context.WithCancelCause(t.Context())
+			defer cancel(nil)
+			f.sets = nil
+			f.onQuery, f.onNext, f.onResultSet = nil, nil, nil
+			switch at {
+			case "query opening":
+				f.onQuery = func() { cancel(private) }
+			case "next":
+				f.onNext = func() { cancel(private) }
+			case "next result set":
+				f.sets = [][][]driver.Value{{}, {{int64(1)}}}
+				f.onResultSet = func() { cancel(private) }
+			}
+			rows, err := l.Query(ctx, command, nil)
+			if err == nil {
+				if at == "query opening" {
+					t.Fatal("query transferred a stream after cancellation during opening")
+				}
+				_, err = rows.Next()
+				if closeErr := rows.Close(t.Context()); closeErr != nil {
+					t.Fatal(closeErr)
+				}
+			}
+			if !errors.Is(err, goeferr.ErrCanceled) || !errors.Is(err, context.Canceled) || !errors.Is(err, private) {
+				t.Fatalf("cancellation lost its cause: %v", err)
+			}
+		})
+	}
+}
+
+func TestAdditionalCloseAndResultSetFailures(t *testing.T) {
+	b, f := newFixture(t, Config{})
+	l := acquire(t, b)
+	defer l.Release(t.Context(), provider.Discard)
+	command := provider.Command{SQL: "query", Columns: []provider.Column{{Kind: provider.KindInteger}}}
+	f.columnNames = []string{"i"}
+	f.sets = [][][]driver.Value{{}, {{int64(2)}}}
+	f.resultSetErr = private
+	rows, err := l.Query(t.Context(), command, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := rows.Next(); !errors.Is(err, goeferr.ErrUnknownDriver) || errors.Is(err, private) {
+		t.Fatalf("result set error: %v", err)
+	}
+	if err := rows.Close(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	rows, err = l.Query(t.Context(), command, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.closeErr = private
+	if err := rows.Close(t.Context()); !errors.Is(err, goeferr.ErrUnknownDriver) || errors.Is(err, private) {
+		t.Fatalf("close error lost or leaked: %v", err)
+	}
+	if err := rows.Close(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestRowsRejectDriverLayoutChanges(t *testing.T) {
+	b, f := newFixture(t, Config{})
+	l := acquire(t, b)
+	defer l.Release(t.Context(), provider.Discard)
+	f.columnNames = []string{"i"}
+	f.sets = [][][]driver.Value{{{int64(1), int64(2)}}}
+	command := provider.Command{SQL: "query", Columns: []provider.Column{{Kind: provider.KindInteger}}}
+	rows, err := l.Query(t.Context(), command, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.columnNames = []string{"i", "unexpected"}
+	if row, err := rows.Next(); row != nil || !errors.Is(err, goeferr.ErrMaterialization) {
+		t.Fatalf("changed layout was accepted: %v, %v", row, err)
+	}
+	if err := rows.Close(t.Context()); err != nil {
+		t.Fatal(err)
 	}
 }
