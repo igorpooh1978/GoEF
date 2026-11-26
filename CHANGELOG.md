@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Verify already-ended query contexts stop before dispatch and a live query succeeds on the same test lease across the local driver matrix ([#13](https://github.com/igorpooh1978/GoEF/issues/13)).
 - Observe blocked writes in the local driver matrix, distinguish caller deadlines from native lock timeouts, and verify recovery and the original rows ([#13](https://github.com/igorpooh1978/GoEF/issues/13)).
 - Record a PostgreSQL 18.7 left-join reference run that compares EF Core and native pgx results, parameters, and command counts ([#13](https://github.com/igorpooh1978/GoEF/issues/13)).
 - Exercise cancellation and connection release through the provider execution interface on the local driver matrix ([#13](https://github.com/igorpooh1978/GoEF/issues/13)).
