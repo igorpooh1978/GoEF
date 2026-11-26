@@ -67,6 +67,11 @@ var bindings = map[string][]step{
 		{"When the same lease receives a canceled query, an expired query and a live query", (*scenario).checkSPIPreDispatch},
 		{"Then only the live query reaches database/sql and the lease returns to the pool", (*scenario).checkSPIPreDispatchEvidence},
 	},
+	"LAB-DRIVER-001-S07": {
+		{"Given a single-connection provider SPI fixture on <provider>", (*scenario).setupSPICancel},
+		{"When the caller cancels an acquisition after it has entered the full pool queue", (*scenario).checkSPIAcquireCancellation},
+		{"Then the wait returns the caller cause and a later query completes with no lease left in use", (*scenario).checkSPIAcquireEvidence},
+	},
 }
 
 func (s *scenario) checkSPIPreDispatchEvidence() {
@@ -76,6 +81,15 @@ func (s *scenario) checkSPIPreDispatchEvidence() {
 		s.facts["pre_dispatch_calls"] != "0,0,1" ||
 		s.facts["pre_dispatch_pool_in_use_after"] != "0" {
 		s.t.Fatal("missing query pre-dispatch or lease recovery evidence")
+	}
+}
+
+func (s *scenario) checkSPIAcquireEvidence() {
+	s.t.Helper()
+	if s.facts["acquire_cancel_cause"] != "context.Canceled" ||
+		s.facts["acquire_wait_count_delta"] != "1" ||
+		s.facts["acquire_pool_in_use_after"] != "0" {
+		s.t.Fatal("missing canceled pool acquisition or recovery evidence")
 	}
 }
 
@@ -154,8 +168,8 @@ func tableCell(line string) string {
 
 func TestDriverFeature(t *testing.T) {
 	examples, err := parseDriverFeature(driverFeature)
-	if err != nil || len(examples) != 24 {
-		t.Fatalf("expected twenty-four bound examples, got %d: %v", len(examples), err)
+	if err != nil || len(examples) != 28 {
+		t.Fatalf("expected twenty-eight bound examples, got %d: %v", len(examples), err)
 	}
 	for _, test := range []struct{ name, before, after string }{
 		{"unknown step", "When the writer commits", "When the reader commits"},
@@ -171,6 +185,7 @@ func TestDriverFeature(t *testing.T) {
 		{"missing cancellation assertion", "Then the reader reports caller cancellation and releases its connection", ""},
 		{"missing lock wait assertion", "Then the observed waits distinguish the caller deadline and native engine timeout", ""},
 		{"missing pre-dispatch assertion", "Then only the live query reaches database/sql and the lease returns to the pool", ""},
+		{"missing acquisition assertion", "Then the wait returns the caller cause and a later query completes with no lease left in use", ""},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			source := strings.Replace(driverFeature, test.before, test.after, 1)
@@ -179,7 +194,7 @@ func TestDriverFeature(t *testing.T) {
 			}
 		})
 	}
-	withoutLast, _, _ := strings.Cut(driverFeature, "@LAB-DRIVER-001-S06")
+	withoutLast, _, _ := strings.Cut(driverFeature, "@LAB-DRIVER-001-S07")
 	if _, err := parseDriverFeature(withoutLast); err == nil {
 		t.Fatal("missing scenario passed discovery")
 	}

@@ -22,6 +22,7 @@ class SQLiteDriverEvidenceTests(unittest.TestCase):
                 "pre_dispatch_canceled": "context.Canceled", "pre_dispatch_deadline": "context.DeadlineExceeded",
                 "pre_dispatch_calls": "0,0,1", "pre_dispatch_pool_in_use_after": "0",
             },
+            {"acquire_cancel_cause": "context.Canceled", "acquire_wait_count_delta": "1", "acquire_pool_in_use_after": "0"},
         )
         return [
             {
@@ -39,7 +40,7 @@ class SQLiteDriverEvidenceTests(unittest.TestCase):
             with self.subTest(profile=name):
                 rows = self.result_lines(profile)
                 results = lab.verified_driver_results(self.output(rows), name, profile)
-                self.assertEqual(len(results), 6)
+                self.assertEqual(len(results), 7)
                 self.assertEqual(results[3]["profile"], name)
                 facts = results[3]["facts"]
                 self.assertEqual(facts["cancel_cause"], "context.Canceled")
@@ -62,7 +63,7 @@ class SQLiteDriverEvidenceTests(unittest.TestCase):
                 self.assertEqual(facts["lock_timeout_native"], "5")
                 self.assertNotIn("native_code", facts)
                 self.assertNotIn("ignored_secret", facts)
-                for altered in ([*rows[:4], rows[5]], [*rows, rows[4]]):
+                for altered in ([*rows[:4], *rows[5:]], [*rows, rows[4]]):
                     with self.assertRaises(lab.LabError):
                         lab.verified_driver_results(self.output(altered), name, profile)
                 for field, wrong in (
@@ -89,11 +90,28 @@ class SQLiteDriverEvidenceTests(unittest.TestCase):
                 self.assertEqual(result["facts"]["pre_dispatch_deadline"], "context.DeadlineExceeded")
                 self.assertEqual(result["facts"]["pre_dispatch_pool_in_use_after"], "0")
                 self.assertNotIn("ignored_secret", result["facts"])
-                for altered in (rows[:-1], [*rows, rows[5]]):
+                for altered in ([*rows[:5], rows[6]], [*rows, rows[5]]):
                     with self.assertRaises(lab.LabError):
                         lab.verified_driver_results(self.output(altered), name, profile)
                 rows[5]["facts"]["lock_timeout_native"] = "5"
                 with self.assertRaisesRegex(lab.LabError, "pre-dispatch"):
+                    lab.verified_driver_results(self.output(rows), name, profile)
+
+    def test_acquire_cancellation_on_both_linked_runtimes(self):
+        for name, profile in lab.PROFILES.items():
+            with self.subTest(profile=name):
+                rows = self.result_lines(profile)
+                result = lab.verified_driver_results(self.output(rows), name, profile)[6]
+                self.assertEqual(result["profile"], name)
+                self.assertEqual(result["facts"]["acquire_cancel_cause"], "context.Canceled")
+                self.assertEqual(result["facts"]["acquire_wait_count_delta"], "1")
+                self.assertEqual(result["facts"]["acquire_pool_in_use_after"], "0")
+                self.assertNotIn("ignored_secret", result["facts"])
+                for altered in (rows[:-1], [*rows, rows[6]]):
+                    with self.assertRaises(lab.LabError):
+                        lab.verified_driver_results(self.output(altered), name, profile)
+                rows[6]["facts"]["pre_dispatch_calls"] = "0,0,1"
+                with self.assertRaisesRegex(lab.LabError, "acquisition"):
                     lab.verified_driver_results(self.output(rows), name, profile)
 
     def test_cancellation_rejects_invalid_facts(self):

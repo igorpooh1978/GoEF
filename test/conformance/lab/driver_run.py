@@ -19,16 +19,23 @@ from runtime import Blocked, CommandError, Lab, LabError, command, inherited, sa
 
 
 PROVIDERS = ("postgres", "sqlite", "sqlserver", "mysql")
-SCENARIOS = {f"LAB-DRIVER-001-S{i:02d}" for i in range(1, 7)}
+SCENARIOS = {f"LAB-DRIVER-001-S{i:02d}" for i in range(1, 8)}
 CANCELLATION_SCENARIO = "LAB-DRIVER-001-S04"
 CANCELLATION_FACTS = {"cancel_cause": "context.Canceled", "pool_in_use_after": "0"}
 LOCK_TIMEOUT_SCENARIO = "LAB-DRIVER-001-S05"
+LOCK_TIMEOUT_OUTCOME_FIELDS = {"lock_deadline_cause", "lock_wait_observed", "lock_timeout_native"}
 PRE_DISPATCH_SCENARIO = "LAB-DRIVER-001-S06"
 PRE_DISPATCH_FACTS = {
     "pre_dispatch_canceled": "context.Canceled",
     "pre_dispatch_deadline": "context.DeadlineExceeded",
     "pre_dispatch_calls": "0,0,1",
     "pre_dispatch_pool_in_use_after": "0",
+}
+ACQUIRE_CANCELLATION_SCENARIO = "LAB-DRIVER-001-S07"
+ACQUIRE_CANCELLATION_FACTS = {
+    "acquire_cancel_cause": "context.Canceled",
+    "acquire_wait_count_delta": "1",
+    "acquire_pool_in_use_after": "0",
 }
 MODULE = Path(__file__).resolve().parents[1] / "driverlab"
 BINARY = "/tmp/goef-driverlab"
@@ -305,10 +312,17 @@ def verified_lock_timeout_facts(facts, provider):
 
 
 def verified_pre_dispatch_facts(facts):
-    unrelated = {"native_code", "lock_deadline_cause", "lock_wait_observed", "lock_timeout_native"}
+    unrelated = {"native_code", *LOCK_TIMEOUT_OUTCOME_FIELDS}
     if unrelated.intersection(facts) or any(facts.get(key) != value for key, value in PRE_DISPATCH_FACTS.items()):
         raise LabError("The scenario did not report the expected pre-dispatch causes, call counts and released pool.")
     return {key: facts[key] for key in PRE_DISPATCH_FACTS}
+
+
+def verified_acquire_cancellation_facts(facts):
+    unrelated = {"native_code", *CANCELLATION_FACTS, *LOCK_TIMEOUT_OUTCOME_FIELDS, *PRE_DISPATCH_FACTS}
+    if unrelated.intersection(facts) or any(facts.get(key) != value for key, value in ACQUIRE_CANCELLATION_FACTS.items()):
+        raise LabError("The scenario did not report canceled acquisition, one wait and a released pool.")
+    return {key: facts[key] for key in ACQUIRE_CANCELLATION_FACTS}
 
 
 def verified_results(output, provider, profile_name=None):
@@ -350,6 +364,8 @@ def verified_results(output, provider, profile_name=None):
             outcome = verified_lock_timeout_facts(facts, provider)
         elif scenario == PRE_DISPATCH_SCENARIO:
             outcome = verified_pre_dispatch_facts(facts)
+        elif scenario == ACQUIRE_CANCELLATION_SCENARIO:
+            outcome = verified_acquire_cancellation_facts(facts)
         elif scenario != "LAB-DRIVER-001-S01":
             expected = NATIVE_CODES[provider][0 if scenario == "LAB-DRIVER-001-S02" else 1]
             if facts.get("native_code") != expected:

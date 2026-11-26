@@ -86,3 +86,16 @@ Feature: Observe transaction outcomes, constraints and reader cancellation with 
       | sqlite    |
       | sqlserver |
       | mysql     |
+
+  @LAB-DRIVER-001-S07
+  Scenario Outline: Cancel while waiting for a connection from a full pool
+    Given a single-connection provider SPI fixture on <provider>
+    When the caller cancels an acquisition after it has entered the full pool queue
+    Then the wait returns the caller cause and a later query completes with no lease left in use
+
+    Examples:
+      | provider  |
+      | postgres  |
+      | sqlite    |
+      | sqlserver |
+      | mysql     |
