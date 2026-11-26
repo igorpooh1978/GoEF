@@ -15,3 +15,17 @@ The mapped and physical version 1 snapshots keep a `decimal` member with the con
 - Run the same Go and Python commands after implementation. The unit model probe exercises all four dialects without a connection. The runnable example uses Go 1.27.4.
 - Run `python -B test/conformance/lab/driver_run.py <provider> --profile <profile> --decimal-binding` on a selected isolated server profile and `python -B test/conformance/lab/sqlite_compat.py --decimal-binding` for both linked SQLite runtimes. The result must contain a verified `decimal_field_binding` marker for S05. The SQL Server lab requires its matching Developer consent switches.
 - Run `pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -DecimalBinding -AcceptSqlServerEula -AcceptLegacySqlServerEula` after approval to verify the full profile matrix. The fixture owns the temporary database and uses separate writer and observer leases. It verifies SQL NULL, signed values, the exact precision boundary and scale, and native catalog nullability.
+
+## Source-commit verification
+
+On Windows/amd64 with Go 1.27.4 and Python 3.14.4, the clean scope commit `86820e2a1989fa2a5c1515ea1d12e597987448d7` passed `go mod verify`, `go mod tidy -diff`, `go build -mod=readonly ./...`, `go vet -mod=readonly ./...`, and `go test -mod=readonly -count=1 -shuffle=on ./...` in the root and driver lab modules. The repository validator checked 78 Gherkin scenarios. Seven bootstrap tests and 78 lab tests passed. `go test -mod=readonly -count=1 -shuffle=on -coverprofile=<profile> ./model` exited 0 with 410 of 414 model statements covered (99.0%). The network-isolated Go 1.27.4 Linux/amd64 test container passed `go test -mod=readonly -race -count=1 -shuffle=on ./...` for all five root packages.
+
+On the same commit, the local workstation built the Linux fixture once with `driver_run.build_binary(tempdir, "linux")` and called `driver_run.run_provider(profile, binary, set(), decimal_binding=True)` for PostgreSQL 16–19 and MySQL 8.0 and 8.4. The lab reported PASS for S05 on all six profiles and exited 0. `python -B test/conformance/lab/sqlite_compat.py --decimal-binding` exited 0 with both linked versions passing S05. The reported rows verified the observed engine, requested profile, scenario and PASS outcome.
+
+| Provider | S05 profiles passed at the scope commit | Go driver |
+| --- | --- | --- |
+| PostgreSQL | 16.16, 17.12, 18.7, 19.0 | pgx v5.13.0 |
+| SQLite | 3.51.3, 3.54.1 | modernc.org/sqlite v1.47.0 and v1.63.0 |
+| MySQL | 8.0.46, 8.4.13.1 | go-sql-driver/mysql v1.10.0 |
+
+The standard SQL Server Developer and legacy Developer commands returned BLOCKED without the consent options (exit 1). The combined source candidate will carry SQL Server and independent acceptance evidence.

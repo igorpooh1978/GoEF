@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Bind exact `Decimal` struct fields through Code First mappings with explicit precision and scale ([#33](https://github.com/igorpooh1978/GoEF/issues/33)).
+- Verify real database state after a withheld commit acknowledgement or a pre-commit rollback in the local conformance lab ([#13](https://github.com/igorpooh1978/GoEF/issues/13)).
 - Add `migration.Pending` to verify an applied migration lineage and provide the pending entries through the Go API ([#34](https://github.com/igorpooh1978/GoEF/issues/34)).
 - Add `First` and `FirstOrDefault` for in-memory sequences, with early termination and explicit empty-sequence behavior ([#32](https://github.com/igorpooh1978/GoEF/issues/32)).
 - Bind explicit exact-decimal columns for PostgreSQL, SQLite, SQL Server and MySQL with checked fixed-scale conversion ([#3](https://github.com/igorpooh1978/GoEF/issues/3)).
