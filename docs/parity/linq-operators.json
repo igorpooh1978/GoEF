@@ -13150,7 +13150,7 @@
       "tests": [
         "result_test.go#L112"
       ],
-      "status": "DISCOVERED",
+      "status": "GREEN",
       "semanticProfile": "cardinality",
       "providerCells": {
         "postgres": "local",
@@ -13158,11 +13158,18 @@
         "sqlserver": "local",
         "mysql": "local"
       },
-      "issue": 4,
+      "issue": 32,
       "scenarioIds": [
-        "LINQ-CONFORMANCE-001-S01"
+        "LINQ-CONFORMANCE-001-S01",
+        "LINQ-OBJECTS-001-S11",
+        "LINQ-OBJECTS-001-S12",
+        "LINQ-OBJECTS-001-S13"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "linq/objects/first_test.go#TestFirstDistinguishesMissingFromPresent",
+        "linq/objects/first_test.go#TestFirstStopsAndClosesFilteredSource",
+        "linq/objects/first_test.go#TestFirstPreservesSingleUseAndUnboundedInputs"
+      ],
       "evidenceSha": null
     },
     {
@@ -13184,7 +13191,7 @@
       "tests": [
         "result_test.go#L122"
       ],
-      "status": "DISCOVERED",
+      "status": "GREEN",
       "semanticProfile": "cardinality",
       "providerCells": {
         "postgres": "local",
@@ -13192,11 +13199,16 @@
         "sqlserver": "local",
         "mysql": "local"
       },
-      "issue": 4,
+      "issue": 32,
       "scenarioIds": [
-        "LINQ-CONFORMANCE-001-S01"
+        "LINQ-CONFORMANCE-001-S01",
+        "LINQ-OBJECTS-001-S12",
+        "LINQ-OBJECTS-001-S13"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "linq/objects/first_test.go#TestFirstStopsAndClosesFilteredSource",
+        "linq/objects/first_test.go#TestFirstPreservesSingleUseAndUnboundedInputs"
+      ],
       "evidenceSha": null
     },
     {
@@ -15564,7 +15576,7 @@
       "tests": [
         "src/libraries/System.Linq/tests/FirstTests.cs#L19"
       ],
-      "status": "DISCOVERED",
+      "status": "PARTIAL",
       "semanticProfile": "cardinality",
       "providerCells": {
         "postgres": "local",
@@ -15572,11 +15584,18 @@
         "sqlserver": "local",
         "mysql": "local"
       },
-      "issue": 4,
+      "issue": 32,
       "scenarioIds": [
-        "LINQ-CONFORMANCE-001-S01"
+        "LINQ-CONFORMANCE-001-S01",
+        "LINQ-OBJECTS-001-S11",
+        "LINQ-OBJECTS-001-S12",
+        "LINQ-OBJECTS-001-S13"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "linq/objects/first_test.go#TestFirstDistinguishesMissingFromPresent",
+        "linq/objects/first_test.go#TestFirstStopsAndClosesFilteredSource",
+        "linq/objects/first_test.go#TestFirstPreservesSingleUseAndUnboundedInputs"
+      ],
       "evidenceSha": null
     },
     {
@@ -15616,7 +15635,7 @@
       "tests": [
         "src/libraries/System.Linq/tests/FirstOrDefaultTests.cs#L19"
       ],
-      "status": "DISCOVERED",
+      "status": "PARTIAL",
       "semanticProfile": "cardinality",
       "providerCells": {
         "postgres": "local",
@@ -15624,11 +15643,18 @@
         "sqlserver": "local",
         "mysql": "local"
       },
-      "issue": 4,
+      "issue": 32,
       "scenarioIds": [
-        "LINQ-CONFORMANCE-001-S01"
+        "LINQ-CONFORMANCE-001-S01",
+        "LINQ-OBJECTS-001-S11",
+        "LINQ-OBJECTS-001-S12",
+        "LINQ-OBJECTS-001-S13"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "linq/objects/first_test.go#TestFirstDistinguishesMissingFromPresent",
+        "linq/objects/first_test.go#TestFirstStopsAndClosesFilteredSource",
+        "linq/objects/first_test.go#TestFirstPreservesSingleUseAndUnboundedInputs"
+      ],
       "evidenceSha": null
     },
     {

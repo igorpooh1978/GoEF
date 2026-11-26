@@ -2154,16 +2154,50 @@
           "testPath": "result_test.go",
           "testSymbol": "TestCount",
           "relation": "analogue"
+        },
+        {
+          "lockId": "dotnet-runtime",
+          "repository": "https://github.com/dotnet/runtime",
+          "tag": "v10.0.0",
+          "sha": "60629d14374c56f1cb51819049ad1fa529307f8d",
+          "path": "src/libraries/System.Linq/src/System/Linq/First.cs",
+          "symbol": "Enumerable.First",
+          "testPath": "src/libraries/System.Linq/tests/FirstTests.cs",
+          "testSymbol": "PredicateTrueForSomeRunOnce",
+          "relation": "behavior"
+        },
+        {
+          "lockId": "dotnet-runtime",
+          "repository": "https://github.com/dotnet/runtime",
+          "tag": "v10.0.0",
+          "sha": "60629d14374c56f1cb51819049ad1fa529307f8d",
+          "path": "src/libraries/System.Linq/src/System/Linq/First.cs",
+          "symbol": "Enumerable.FirstOrDefault",
+          "testPath": "src/libraries/System.Linq/tests/FirstOrDefaultTests.cs",
+          "testSymbol": "EmptyIListDefault",
+          "relation": "behavior"
+        },
+        {
+          "lockId": "go-linq-stable",
+          "repository": "https://github.com/ahmetb/go-linq",
+          "tag": "v5.0.0",
+          "sha": "6ebc43b7c971a8a4cb9e38742f6cb491d4032cbb",
+          "path": "result.go",
+          "symbol": "Query.First",
+          "testPath": "result_test.go",
+          "testSymbol": "TestFirst",
+          "relation": "analogue"
         }
       ],
-      "contract": "Filter and project values through lazy typed in-memory iterators. Count enumerates the composed source once and returns its cardinality.",
+      "contract": "Filter and project values through lazy typed in-memory iterators. Count enumerates the composed source once and returns its cardinality. First-value selection preserves encounter order and distinguishes absence from a yielded zero.",
       "goApi": {
         "status": "IMPLEMENTED",
-        "description": "Typed in-memory filters, projections, indexed variants, integer windows and sequence composition over iter.Seq. Count and Any, AnyBy and All are local terminals."
+        "description": "Typed in-memory filters, projections, indexed variants, integer windows and sequence composition over iter.Seq. Count and Any, AnyBy and All are local terminals. First and FirstOrDefault select the first value with presence or an explicit fallback."
       },
       "wave": "W008",
       "issues": [
-        4
+        4,
+        32
       ],
       "dependencies": [],
       "providers": {
@@ -2210,7 +2244,10 @@
         "LINQ-OBJECTS-001-S07",
         "LINQ-OBJECTS-001-S08",
         "LINQ-OBJECTS-001-S09",
-        "LINQ-OBJECTS-001-S10"
+        "LINQ-OBJECTS-001-S10",
+        "LINQ-OBJECTS-001-S11",
+        "LINQ-OBJECTS-001-S12",
+        "LINQ-OBJECTS-001-S13"
       ],
       "tests": [
         "linq/objects/where_test.go#TestWhereConsumesOnlyNecessaryPrefix",
@@ -2219,12 +2256,16 @@
         "linq/objects/indexed_test.go#TestIndexedWhereSelectStopsAndResetsBothPositions",
         "linq/objects/quantifiers_test.go#TestQuantifiersShortCircuitThroughPipeline",
         "linq/objects/paging_test.go#TestSkipTakeStopsAndReplays",
-        "linq/objects/concat_test.go#TestConcatStartsOnlyDemandedSources"
+        "linq/objects/concat_test.go#TestConcatStartsOnlyDemandedSources",
+        "linq/objects/first_test.go#TestFirstDistinguishesMissingFromPresent",
+        "linq/objects/first_test.go#TestFirstStopsAndClosesFilteredSource",
+        "linq/objects/first_test.go#TestFirstPreservesSingleUseAndUnboundedInputs"
       ],
       "status": "PARTIAL",
       "deviations": [
         "The current functions take iter.Seq and non-nil callbacks. Indexed overloads and the other Objects scenarios retain separate acceptance requirements.",
-        "Count returns Go int rather than a fixed-width .NET Int32 and always enumerates its iter.Seq input."
+        "Count returns Go int rather than a fixed-width .NET Int32 and always enumerates its iter.Seq input.",
+        "First reports successful presence as a boolean. FirstOrDefault takes an explicit fallback. A lazy Where supplies predicate selection."
       ],
       "adr": null,
       "docs": [

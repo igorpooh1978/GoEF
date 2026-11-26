@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add `First` and `FirstOrDefault` for in-memory sequences, with early termination and explicit empty-sequence behavior ([#32](https://github.com/igorpooh1978/GoEF/issues/32)).
 - Bind explicit exact-decimal columns for PostgreSQL, SQLite, SQL Server and MySQL with checked fixed-scale conversion ([#3](https://github.com/igorpooh1978/GoEF/issues/3)).
 - Add lazy `Skip`, `Take`, `Concat`, `Append` and `Prepend` for in-memory sequences ([#4](https://github.com/igorpooh1978/GoEF/issues/4)).
 

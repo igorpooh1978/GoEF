@@ -122,6 +122,22 @@ func main() {
 
 `objects.Concat(first, second)` yields the first sequence followed by the second. `objects.Append(source, value)` yields the value after the source ends. `objects.Prepend(source, value)` yields the value before starting the source. They preserve duplicates and encounter order. An early stop reaches the active source and leaves any later source unopened. [Runnable composition example](../../linq/objects/concat_example_test.go) · [Composition evidence](../evidence/W008/OBJECTS_CONCAT.md)
 
+## Read the first value
+
+Use `objects.First` when you need to distinguish a yielded Go zero value from an empty sequence. The first example prints `0 true`. The second calls `objects.FirstOrDefault` with an explicit fallback and prints `-1`. [Runnable examples](../../linq/objects/first_example_test.go)
+
+```go
+source := slices.Values([]int{3, 0, 8})
+evens := objects.Where(source, func(n int) bool { return n%2 == 0 })
+value, found := objects.First(evens)
+fmt.Println(value, found)
+
+large := objects.Where(source, func(n int) bool { return n > 10 })
+fmt.Println(objects.FirstOrDefault(large, -1))
+```
+
+An empty sequence returns the zero value of its element type with `found == false` from `First`. `FirstOrDefault` returns the supplied fallback only when its input yields nothing. A yielded zero or typed nil is a valid first result. Both operators stop after the first result in encounter order, before any later element is read. Use `Where` for predicate-based selection. Both operators return after source cleanup, and the source controls replayability. A filter with no match on an unbounded input keeps reading. [Selection evidence](../evidence/W008/OBJECTS_FIRST.md)
+
 - [LINQ Objects design](../architecture/LINQ_OBJECTS.md)
 - [Where test evidence](../evidence/W008/OBJECTS_WHERE.md)
 - [Select and pipeline test evidence](../evidence/W008/OBJECTS_SELECT.md)

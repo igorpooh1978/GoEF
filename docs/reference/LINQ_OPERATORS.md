@@ -4,6 +4,8 @@ The in-memory `Where`, `Select` and `Count` implementations have direct local ev
 
 Use the operator registry for versioned source members, overloads, local and SQL execution modes, semantics and provider cells. Compare ordering, equality, deferred evaluation, empty input, and overflow at the individual overload level before setting support status.
 
+For local selection, `objects.First` reports presence and `objects.FirstOrDefault` takes an explicit fallback. Compose `Where` for a predicate-based selection. The [selection evidence](../evidence/W008/OBJECTS_FIRST.md) records the equivalent pinned overloads and the Go empty-input contract.
+
 Feature IDs: LINQ-OBJECTS-001, LINQ-QUERYABLE-001, LINQ-CONFORMANCE-001.
 
 - [Canonical design or registry](../parity/linq-operators.json)

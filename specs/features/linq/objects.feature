@@ -85,3 +85,29 @@ Feature: Enumerate typed local values
     When I concatenate the sequences or append or prepend the value
     Then enumeration preserves the order and duplicates
     And a consumer stopping in an earlier segment leaves a later source unopened
+
+  @LINQ-OBJECTS-001-S11
+  Scenario: First distinguishes an empty sequence from a yielded zero
+    Given empty, zero-first and nil-first sequences
+    When I request the first value with presence or with an explicit fallback
+    Then the presence result is false only for the empty sequence
+    And only the empty sequence returns the fallback
+
+  @LINQ-OBJECTS-001-S12
+  Scenario: First stops a lazy filter at the first match
+    Given a replayable counting iterator yielding 3, 5, 0 and 2 with a cleanup callback
+    When I construct a filter for even values
+    Then the source and predicate are idle
+    When I request the first match in each of two terminal calls
+    Then each call yields 0, has inspected only 3, 5 and 0, and closes the source before returning
+    When I supply a fallback and a filter that rejects every value
+    Then the source is exhausted and closed before the fallback is returned
+
+  @LINQ-OBJECTS-001-S13
+  Scenario: First preserves single-use and unbounded source behavior
+    Given a single-use sequence over 7 and 8
+    When I request its first result three times with fallback -1
+    Then I get 7, 8 and -1 in that order
+    Given an unbounded sequence with a first matching value
+    When I request the first match
+    Then the source stops at that value

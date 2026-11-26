@@ -310,6 +310,7 @@
       "scenarioId": "LINQ-OBJECTS-001-S01",
       "spec": "specs/features/linq/objects.feature",
       "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/32",
         "https://github.com/igorpooh1978/GoEF/issues/4"
       ],
       "docs": [
@@ -325,6 +326,7 @@
       "scenarioId": "LINQ-OBJECTS-001-S02",
       "spec": "specs/features/linq/objects.feature",
       "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/32",
         "https://github.com/igorpooh1978/GoEF/issues/4"
       ],
       "docs": [
@@ -340,6 +342,7 @@
       "scenarioId": "LINQ-OBJECTS-001-S03",
       "spec": "specs/features/linq/objects.feature",
       "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/32",
         "https://github.com/igorpooh1978/GoEF/issues/4"
       ],
       "docs": [
@@ -355,6 +358,7 @@
       "scenarioId": "LINQ-OBJECTS-001-S04",
       "spec": "specs/features/linq/objects.feature",
       "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/32",
         "https://github.com/igorpooh1978/GoEF/issues/4"
       ],
       "docs": [
@@ -370,6 +374,7 @@
       "scenarioId": "LINQ-OBJECTS-001-S05",
       "spec": "specs/features/linq/objects.feature",
       "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/32",
         "https://github.com/igorpooh1978/GoEF/issues/4"
       ],
       "docs": [
@@ -385,6 +390,7 @@
       "scenarioId": "LINQ-OBJECTS-001-S06",
       "spec": "specs/features/linq/objects.feature",
       "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/32",
         "https://github.com/igorpooh1978/GoEF/issues/4"
       ],
       "docs": [
@@ -400,6 +406,7 @@
       "scenarioId": "LINQ-OBJECTS-001-S07",
       "spec": "specs/features/linq/objects.feature",
       "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/32",
         "https://github.com/igorpooh1978/GoEF/issues/4"
       ],
       "docs": [
@@ -415,6 +422,7 @@
       "scenarioId": "LINQ-OBJECTS-001-S08",
       "spec": "specs/features/linq/objects.feature",
       "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/32",
         "https://github.com/igorpooh1978/GoEF/issues/4"
       ],
       "docs": [
@@ -430,6 +438,7 @@
       "scenarioId": "LINQ-OBJECTS-001-S09",
       "spec": "specs/features/linq/objects.feature",
       "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/32",
         "https://github.com/igorpooh1978/GoEF/issues/4"
       ],
       "docs": [
@@ -445,6 +454,7 @@
       "scenarioId": "LINQ-OBJECTS-001-S10",
       "spec": "specs/features/linq/objects.feature",
       "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/32",
         "https://github.com/igorpooh1978/GoEF/issues/4"
       ],
       "docs": [
@@ -453,6 +463,54 @@
       ],
       "test": "linq/objects/concat_test.go#TestConcatStartsOnlyDemandedSources",
       "evidence": "docs/evidence/W008/OBJECTS_CONCAT.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-OBJECTS-001",
+      "scenarioId": "LINQ-OBJECTS-001-S11",
+      "spec": "specs/features/linq/objects.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/32",
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_OBJECTS.md",
+        "docs/user/LINQ_OBJECTS.md"
+      ],
+      "test": "linq/objects/first_test.go#TestFirstDistinguishesMissingFromPresent",
+      "evidence": "docs/evidence/W008/OBJECTS_FIRST.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-OBJECTS-001",
+      "scenarioId": "LINQ-OBJECTS-001-S12",
+      "spec": "specs/features/linq/objects.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/32",
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_OBJECTS.md",
+        "docs/user/LINQ_OBJECTS.md"
+      ],
+      "test": "linq/objects/first_test.go#TestFirstStopsAndClosesFilteredSource",
+      "evidence": "docs/evidence/W008/OBJECTS_FIRST.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-OBJECTS-001",
+      "scenarioId": "LINQ-OBJECTS-001-S13",
+      "spec": "specs/features/linq/objects.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/32",
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_OBJECTS.md",
+        "docs/user/LINQ_OBJECTS.md"
+      ],
+      "test": "linq/objects/first_test.go#TestFirstPreservesSingleUseAndUnboundedInputs",
+      "evidence": "docs/evidence/W008/OBJECTS_FIRST.md",
       "status": "SPECIFIED"
     },
     {

@@ -8,6 +8,8 @@ The indexed variants `objects.WhereIndexed` and `objects.SelectIndexed` pass eac
 
 `objects.Skip` and `objects.Take` apply an integer window without buffering. `Take` returns an empty sequence without starting its input for a nonpositive limit, and a positive limit stops on the last requested value. `Concat`, `Append` and `Prepend` consume only the demanded segments in order. [Paging verification](../evidence/W008/OBJECTS_SKIP_TAKE.md) · [Composition verification](../evidence/W008/OBJECTS_CONCAT.md)
 
+`objects.First` selects the first value and reports whether the source yielded it. The presence flag distinguishes an empty input from a yielded zero or typed nil. `objects.FirstOrDefault` selects the caller's fallback on empty input. A preceding lazy `Where` supplies predicate selection. Both terminals read only until the first yielded element and return after source cleanup. [Selection behavior and verification](../evidence/W008/OBJECTS_FIRST.md)
+
 | Input | Proposed observation |
 | --- | --- |
 | Slice | Enumerations traverse the current elements of the captured slice. No snapshot or synchronization is implied. Specify mutation timing before accepting concurrent readers. |
@@ -22,7 +24,7 @@ The indexed variants `objects.WhereIndexed` and `objects.SelectIndexed` pass eac
 | Operations | Required distinction and test |
 | --- | --- |
 | SelectMany, Zip | Preserve source encounter order. Flatten in outer-then-inner order. Zip stops at the shorter input and closes any pulled iterators. Test side effects, including how many values were read from each input. |
-| First, Single | First may stop after one match. Single must distinguish zero, one and at least two matches. Distinguish missing from a present Go zero value. Define explicit default value overloads. |
+| Single | Distinguish zero, one and at least two matches, including a present Go zero value. Define explicit default behavior. |
 | Skip, Take, Chunk, Last, Range | Cover negative counts, bounds from the end, short final chunks and steps in both directions. Taking a finite prefix must terminate on an infinite source. Several suffix and from-end forms need buffering or complete traversal. |
 | OrderBy, ThenBy, Reverse, Shuffle | Stable sort preserves encounter order on ties. ThenBy refines that order. Reverse needs the tail before it yields the head. For Shuffle compare permutations with multiplicity and use a reproducible random fixture. Unbounded inputs cannot yield a fully sorted result. |
 | Distinct, Union, Intersect, Except, Concat | Specify first occurrence, multiplicity and encounter order separately. Concat keeps duplicates. Set operations require equivalent hash/equality contracts. A projected comparable key or explicit equality function can accommodate slices and map-containing structs. Cost can be quadratic when only pairwise equality is available. |
