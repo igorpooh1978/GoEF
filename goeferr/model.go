@@ -39,12 +39,14 @@ type ErrorDetail struct {
 }
 
 type errorData struct {
-	id      ID
-	phase   Phase
-	retry   RetryClass
-	outcome Outcome
-	message string
-	kind    error
+	id         ID
+	phase      Phase
+	retry      RetryClass
+	outcome    Outcome
+	message    string
+	kind       error
+	provider   string
+	nativeCode string
 }
 
 // NewInvalidModel returns the portable error for a failed logical model validation.
