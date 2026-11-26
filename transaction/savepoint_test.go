@@ -17,8 +17,9 @@ import (
 
 type savepointProbe struct {
 	*probe
-	commands []string
-	fail     error
+	commands  []string
+	fail      error
+	onCommand func(string)
 }
 
 func (p *savepointProbe) Connect(ctx context.Context) (driver.Conn, error) {
@@ -36,6 +37,9 @@ type savepointConn struct {
 
 func (c *savepointConn) ExecContext(ctx context.Context, query string, args []driver.NamedValue) (driver.Result, error) {
 	c.probe.commands = append(c.probe.commands, query)
+	if c.probe.onCommand != nil {
+		c.probe.onCommand(query)
+	}
 	if c.probe.fail != nil {
 		return nil, c.probe.fail
 	}
@@ -111,6 +115,9 @@ func TestManagedSavepointStackAndCommands(t *testing.T) {
 				t.Fatalf("duplicate release = %v", err)
 			}
 			expected := []string{tc.create + outerName, tc.create + innerName, tc.rollback + outerName, tc.rollback + outerName}
+			if tc.dialect == transaction.DialectSQLServer {
+				expected = []string{tc.create + outerName, tc.create + innerName, tc.rollback + outerName, tc.create + outerName, tc.rollback + outerName, tc.create + outerName}
+			}
 			if tc.release != "" {
 				expected = append(expected, tc.release+outerName)
 			}
@@ -238,4 +245,55 @@ func TestSavepointObservesOwnedTransactionBusyAndLifetime(t *testing.T) {
 		t.Fatal(err)
 	}
 	checkState(t, tx, db, transaction.StateRolledBack, 0)
+}
+
+func TestSQLServerRearmFailureInvalidatesManagedStack(t *testing.T) {
+	for _, tc := range []struct {
+		name         string
+		cancelRearm  bool
+		wantCommands int
+	}{
+		{"native rearm failure", false, 4},
+		{"cancellation before rearm dispatch", true, 3},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			p, db := openSavepointProbe(t)
+			tx := begin(t, t.Context(), db)
+			outer := newSavepoint(t, tx, transaction.DialectSQLServer)
+			target := newSavepoint(t, tx, transaction.DialectSQLServer)
+			targetName := strings.TrimPrefix(p.commands[1], "SAVE TRANSACTION ")
+			ctx, cancel := context.WithCancel(t.Context())
+			defer cancel()
+			p.onCommand = func(query string) {
+				if tc.cancelRearm && query == "ROLLBACK TRANSACTION "+targetName {
+					cancel()
+				}
+				if !tc.cancelRearm && query == "SAVE TRANSACTION "+targetName {
+					p.fail = privateError
+				}
+			}
+			err := target.Rollback(ctx)
+			if !errors.Is(err, goeferr.ErrSavepointFailed) || errors.Is(err, privateError) ||
+				errors.Is(err, context.Canceled) != tc.cancelRearm {
+				t.Fatalf("rearm failure = %v", err)
+			}
+			if err := outer.Rollback(t.Context()); !errors.Is(err, goeferr.ErrInvalidState) {
+				t.Fatalf("rollback after failed rearm = %v", err)
+			}
+			if err := target.Release(t.Context()); !errors.Is(err, goeferr.ErrInvalidState) {
+				t.Fatalf("release after failed rearm = %v", err)
+			}
+			if _, err := tx.Savepoint(t.Context(), transaction.DialectSQLServer); !errors.Is(err, goeferr.ErrInvalidState) {
+				t.Fatalf("new point after failed rearm = %v", err)
+			}
+			if len(p.commands) != tc.wantCommands {
+				t.Fatalf("rearm command count = %d, want %d", len(p.commands), tc.wantCommands)
+			}
+			checkState(t, tx, db, transaction.StateActive, 1)
+			if err := tx.Rollback(); err != nil {
+				t.Fatal(err)
+			}
+			checkState(t, tx, db, transaction.StateRolledBack, 0)
+		})
+	}
 }

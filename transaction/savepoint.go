@@ -124,6 +124,20 @@ func (s *Savepoint) apply(ctx context.Context, release bool) error {
 				return err
 			}
 		}
+		if !release && stack.dialect == DialectSQLServer {
+			// Rolling back can consume the native point on SQL Server.
+			// Recreate it at the restored position so the same GoEF
+			// handle can be used for another rollback.
+			if err := exec("SAVE TRANSACTION " + s.name); err != nil {
+				// Rollback already dispatched. A canceled re-arm also
+				// leaves the managed stack without a confirmed target.
+				stack.invalidate()
+				if errors.Is(err, goeferr.ErrSavepointFailed) {
+					return err
+				}
+				return errors.Join(goeferr.NewSavepointFailed(), err)
+			}
+		}
 		clear(stack.live[keep:])
 		stack.live = stack.live[:keep]
 		return nil
