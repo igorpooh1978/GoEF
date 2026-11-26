@@ -132,6 +132,8 @@ MODEL_TYPES_RESULT_PREFIX = "GOEF_MODEL_TYPES_RESULT="
 OWNED_TX_RESULT_PREFIX = "GOEF_OWNED_TX_RESULT="
 SAVEPOINT_TX_RESULT_PREFIX = "GOEF_SAVEPOINT_TX_RESULT="
 SAVEPOINT_TX_SCENARIOS = ("TX-OWN-001-S01", "TX-SAVEPOINT-001-S03")
+SAVE_CHANGES_RESULT_PREFIX = "GOEF_SAVE_CHANGES_RESULT="
+SAVE_CHANGES_SCENARIOS = ("TX-OWN-001-S03", "TX-SAVEPOINT-001-S01", "TX-SAVEPOINT-001-S02")
 FACT_KEYS = {
     "autocommit", "busy_timeout_ms", "character_set_connection", "collation", "collation_connection",
     "compatibility_level", "compile_options_count", "compile_options_sha256", "database", "driver", "edition",
@@ -402,7 +404,7 @@ def verified_results(output, provider, profile_name=None):
     return [results[key] for key in sorted(results)]
 
 
-def driver_test_options(*, model_types=False, owned_tx=False, savepoint_tx=False):
+def driver_test_options(*, model_types=False, owned_tx=False, savepoint_tx=False, save_changes=False):
     tests = ["TestDriverGherkin"]
     environment = {}
     if model_types:
@@ -414,6 +416,9 @@ def driver_test_options(*, model_types=False, owned_tx=False, savepoint_tx=False
     if savepoint_tx:
         tests.append("TestSavepointAndExternalTransaction")
         environment["GOEF_DRIVERLAB_SAVEPOINT_TX"] = "1"
+    if save_changes:
+        tests.append("TestSaveChangesTransaction")
+        environment["GOEF_SAVE_CHANGES"] = "1"
     if not environment:
         return TEST_ARGS, environment
     return (f"-test.run=^({'|'.join(tests)})$", *TEST_ARGS[1:]), environment
@@ -452,6 +457,10 @@ def verified_savepoint_tx_results(output, provider, profile, engine_version):
     return _verified_profile_scenarios(output, SAVEPOINT_TX_RESULT_PREFIX, SAVEPOINT_TX_SCENARIOS, provider, profile, engine_version)
 
 
+def verified_save_changes_results(output, provider, profile, engine_version):
+    return _verified_profile_scenarios(output, SAVE_CHANGES_RESULT_PREFIX, SAVE_CHANGES_SCENARIOS, provider, profile, engine_version)
+
+
 def missing_eula(profile, accepted_eulas):
     settings = profile.sqlserver_settings
     if settings is not None and settings.eula_flag not in accepted_eulas:
@@ -476,7 +485,8 @@ def sqlserver_provisioning_reason(error):
     return "SQL Server provisioning failed."
 
 
-def run_provider(profile_name, binary, accepted_eulas, *, model_types=False, owned_tx=False, savepoint_tx=False):
+def run_provider(profile_name, binary, accepted_eulas, *,
+                 model_types=False, owned_tx=False, savepoint_tx=False, save_changes=False):
     profile = PROFILES[profile_name]
     provider = profile.provider
     phase = "build"
@@ -495,7 +505,9 @@ def run_provider(profile_name, binary, accepted_eulas, *, model_types=False, own
         with TemporaryDirectory(prefix="goef-driver-cell-") as directory:
             path = Path(directory)
             env = {"GOEF_DRIVERLAB_PROVIDER": provider, "GOEF_DRIVERLAB_PROFILE": profile_name}
-            test_args, extra_env = driver_test_options(model_types=model_types, owned_tx=owned_tx, savepoint_tx=savepoint_tx)
+            test_args, extra_env = driver_test_options(
+                model_types=model_types, owned_tx=owned_tx, savepoint_tx=savepoint_tx, save_changes=save_changes,
+            )
             env.update(extra_env)
             if provider == "sqlite":
                 phase = "driver execution"
@@ -531,6 +543,8 @@ def run_provider(profile_name, binary, accepted_eulas, *, model_types=False, own
             report["owned_tx"] = verified_owned_tx_result(output, provider, profile_name, profile.version)
         if savepoint_tx:
             report["savepoint_tx"] = verified_savepoint_tx_results(output, provider, profile_name, profile.version)
+        if save_changes:
+            report["save_changes"] = verified_save_changes_results(output, provider, profile_name, profile.version)
         return report
     except Exception as error:
         blocked = isinstance(error, Blocked)
@@ -552,6 +566,7 @@ def main(argv=None):
     parser.add_argument("--model-types", action="store_true", help="also run the model type round-trip scenario")
     parser.add_argument("--owned-tx", action="store_true", help="also run the owned transaction scenario")
     parser.add_argument("--savepoint-tx", action="store_true", help="also run savepoint and external transaction scenarios")
+    parser.add_argument("--save-changes", action="store_true", help="also run SaveChanges transaction scenarios")
     parser.add_argument(SQLSERVER_EULA, action="store_true", help="accept the SQL Server 2022 Developer EULA")
     parser.add_argument(LEGACY_SQLSERVER_EULA, action="store_true", help="accept the selected SQL Server 2017 or 2019 Developer EULA")
     args = parser.parse_args(argv)
@@ -583,7 +598,7 @@ def main(argv=None):
                 pool.submit(run_provider, name,
                             binaries.get("host" if provider == "sqlite" else "linux"),
                             accepted_eulas, model_types=args.model_types, owned_tx=args.owned_tx,
-                            savepoint_tx=args.savepoint_tx)
+                            savepoint_tx=args.savepoint_tx, save_changes=args.save_changes)
                 for provider, name in selected.items()
             ]
             for task in tasks:

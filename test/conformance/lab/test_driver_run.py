@@ -9,6 +9,7 @@ import unittest
 from unittest.mock import MagicMock, Mock, patch
 
 import driver_run
+import sqlite_compat
 
 
 class SQLServerProvisioningDiagnosticsTests(unittest.TestCase):
@@ -173,13 +174,17 @@ class OptionalScenarioEvidenceTests(unittest.TestCase):
                 verify(*rows)
 
     def test_optional_cases_can_run_together(self):
-        arguments, environment = driver_run.driver_test_options(model_types=True, owned_tx=True, savepoint_tx=True)
+        arguments, environment = driver_run.driver_test_options(
+            model_types=True, owned_tx=True, savepoint_tx=True, save_changes=True,
+        )
         self.assertEqual(arguments, (
-            "-test.run=^(TestDriverGherkin|TestModelTypeRoundTrip|TestOwnedTransaction|TestSavepointAndExternalTransaction)$",
+            "-test.run=^(TestDriverGherkin|TestModelTypeRoundTrip|TestOwnedTransaction|"
+            "TestSavepointAndExternalTransaction|TestSaveChangesTransaction)$",
             *driver_run.TEST_ARGS[1:],
         ))
         self.assertEqual(environment, {
             "GOEF_DRIVERLAB_MODEL_TYPES": "1", "GOEF_DRIVERLAB_OWNED_TX": "1", "GOEF_DRIVERLAB_SAVEPOINT_TX": "1",
+            "GOEF_SAVE_CHANGES": "1",
         })
         self.assertEqual(driver_run.driver_test_options(), (driver_run.TEST_ARGS, {}))
 
@@ -202,6 +207,91 @@ class OptionalScenarioEvidenceTests(unittest.TestCase):
         ):
             with self.subTest(rows=rows), self.assertRaises(driver_run.LabError):
                 verify(rows)
+
+
+class SaveChangesEvidenceTests(unittest.TestCase):
+    def rows(self, profile="sqlite-3.54", engine_version="3.54.1"):
+        return [{
+            "provider": "sqlite", "profile": profile, "engine_version": engine_version,
+            "scenario": scenario, "status": "PASS",
+        } for scenario in ("TX-OWN-001-S03", "TX-SAVEPOINT-001-S01", "TX-SAVEPOINT-001-S02")]
+
+    def evidence(self, rows):
+        return "\n".join("GOEF_SAVE_CHANGES_RESULT=" + json.dumps(row) for row in rows)
+
+    def test_save_changes_requires_three_exact_results(self):
+        expected = self.rows()
+
+        def verify(output):
+            return driver_run.verified_save_changes_results(output, "sqlite", "sqlite-3.54", "3.54.1")
+
+        self.assertEqual(verify(self.evidence(reversed(expected))), expected)
+        for rows in (expected[:-1], [*expected[:-1], expected[0]], [*expected, expected[-1]]):
+            with self.subTest(rows=rows), self.assertRaises(driver_run.LabError):
+                verify(self.evidence(rows))
+        for field, wrong in (
+            ("provider", "postgres"), ("profile", "sqlite-3.51"), ("engine_version", "3.51.3"),
+            ("scenario", "TX-SAVEPOINT-001-S03"), ("status", "SKIP"), ("unexpected", "private-data"),
+        ):
+            with self.subTest(field=field):
+                with self.assertRaises(driver_run.LabError) as failure:
+                    verify(self.evidence([*expected[:-1], {**expected[-1], field: wrong}]))
+                self.assertNotIn("private-data", str(failure.exception))
+        malformed = self.evidence(expected[:-1]) + "\nGOEF_SAVE_CHANGES_RESULT={private-data"
+        with self.assertRaises(driver_run.LabError) as failure:
+            verify(malformed)
+        self.assertNotIn("private-data", str(failure.exception))
+
+    def test_selected_driver_profile_requires_save_changes_evidence(self):
+        expected = self.rows()
+        stdout = io.StringIO()
+        with (
+            patch.object(driver_run, "build_binary", return_value="driverlab-binary"),
+            patch.object(driver_run, "command", side_effect=[self.evidence(expected), "PASS"]) as command,
+            patch.object(driver_run, "verified_results", return_value=[]),
+            redirect_stdout(stdout),
+        ):
+            self.assertEqual(driver_run.main(["sqlite", "--save-changes"]), 0)
+            self.assertEqual(driver_run.main(["sqlite", "--save-changes"]), 1)
+
+        for call in command.call_args_list:
+            self.assertEqual(call.args[0][1], "-test.run=^(TestDriverGherkin|TestSaveChangesTransaction)$")
+            self.assertEqual(call.kwargs["env"]["GOEF_SAVE_CHANGES"], "1")
+        passed, failed = [json.loads(line) for line in stdout.getvalue().splitlines()]
+        self.assertEqual(passed["save_changes"], expected)
+        self.assertEqual((failed["status"], failed["phase"]), ("FAIL", "evidence"))
+
+    def test_compatibility_runner_requires_save_changes_on_both_linked_runtimes(self):
+        expected = []
+        outputs = []
+        profiles = []
+        for name, profile in sqlite_compat.PROFILES.items():
+            rows = self.rows(name, profile.engine_version)
+            expected.extend(rows)
+            outputs.append(self.evidence(rows))
+            profiles.append(name)
+
+        def run(supplied_outputs):
+            stdout = io.StringIO()
+            with (
+                patch.object(sqlite_compat, "parse_file_feature", return_value=[]),
+                patch.object(sqlite_compat, "build", return_value=("driverlab-binary", "windows/amd64")),
+                patch.object(sqlite_compat, "command", side_effect=supplied_outputs) as command,
+                patch.object(sqlite_compat, "verified_driver_results", return_value=[{"facts": {}}]),
+                redirect_stdout(stdout),
+            ):
+                result = sqlite_compat.main(["--save-changes"])
+            return result, json.loads(stdout.getvalue()), command.call_args_list
+
+        result, report, calls = run(outputs)
+        self.assertEqual(result, 0)
+        self.assertEqual(report["save_changes"], expected)
+        self.assertEqual([call.kwargs["env"]["GOEF_DRIVERLAB_PROFILE"] for call in calls], profiles)
+        self.assertTrue(all(call.kwargs["env"]["GOEF_SAVE_CHANGES"] == "1" for call in calls))
+
+        result, report, _ = run([outputs[0], "PASS"])
+        self.assertEqual(result, 1)
+        self.assertEqual(report["phase"], f"Gherkin {profiles[1]}")
 
 
 class DriverEvidenceTests(unittest.TestCase):

@@ -13,7 +13,8 @@ from driver_run import (
     ACQUIRE_CANCELLATION_SCENARIO, CANCELLATION_SCENARIO, LOCK_TIMEOUT_SCENARIO, MODULE,
     PRE_DISPATCH_SCENARIO, RESULT_PREFIX, SCENARIOS, driver_test_options,
     verified_acquire_cancellation_facts, verified_cancellation_facts, verified_lock_timeout_facts,
-    verified_model_type_result, verified_owned_tx_result, verified_pre_dispatch_facts, verified_savepoint_tx_results,
+    verified_model_type_result, verified_owned_tx_result, verified_pre_dispatch_facts,
+    verified_save_changes_results, verified_savepoint_tx_results,
 )
 from runtime import Blocked, LabError, command, inherited, safe_reason
 
@@ -212,8 +213,10 @@ def verified_driver_results(output, name, profile):
     return [results[scenario] for scenario in sorted(results)]
 
 
-def run_driver(tempdir, binary, name, profile, *, model_types, owned_tx, savepoint_tx):
-    test_args, env = driver_test_options(model_types=model_types, owned_tx=owned_tx, savepoint_tx=savepoint_tx)
+def run_driver(tempdir, binary, name, profile, *, model_types, owned_tx, savepoint_tx, save_changes=False):
+    test_args, env = driver_test_options(
+        model_types=model_types, owned_tx=owned_tx, savepoint_tx=savepoint_tx, save_changes=save_changes,
+    )
     env.update(GOEF_DRIVERLAB_PROVIDER="sqlite", GOEF_DRIVERLAB_PROFILE=name)
     output = command(
         [str(binary), *test_args], cwd=tempdir, env=env, timeout=200,
@@ -225,6 +228,8 @@ def run_driver(tempdir, binary, name, profile, *, model_types, owned_tx, savepoi
         extras["owned_tx"] = [verified_owned_tx_result(output, "sqlite", name, profile.engine_version)]
     if savepoint_tx:
         extras["savepoint_tx"] = verified_savepoint_tx_results(output, "sqlite", name, profile.engine_version)
+    if save_changes:
+        extras["save_changes"] = verified_save_changes_results(output, "sqlite", name, profile.engine_version)
     return verified_driver_results(output, name, profile), extras
 
 
@@ -248,7 +253,7 @@ def run_exchange_stage(directory, binary, profile, journal, stage, token):
     return profile.engine_version, native_code
 
 
-def run_lab(tempdir, report, *, model_types=False, owned_tx=False, savepoint_tx=False):
+def run_lab(tempdir, report, *, model_types=False, owned_tx=False, savepoint_tx=False, save_changes=False):
     report["phase"] = "SQLite file feature discovery"
     examples = parse_file_feature(FILE_FEATURE.read_text(encoding="utf-8"))
     binaries = {}
@@ -256,8 +261,10 @@ def run_lab(tempdir, report, *, model_types=False, owned_tx=False, savepoint_tx=
         report["phase"] = f"build {name}"
         binaries[name], platform = build(tempdir, name, profile)
         report["phase"] = f"Gherkin {name}"
-        results, extras = run_driver(tempdir, binaries[name], name, profile,
-                                    model_types=model_types, owned_tx=owned_tx, savepoint_tx=savepoint_tx)
+        results, extras = run_driver(
+            tempdir, binaries[name], name, profile,
+            model_types=model_types, owned_tx=owned_tx, savepoint_tx=savepoint_tx, save_changes=save_changes,
+        )
         report["profiles"][name] = {
             "engine_version": profile.engine_version,
             "source_id": profile.source_id,
@@ -297,6 +304,7 @@ def main(argv=None):
     parser.add_argument("--model-types", action="store_true", help="also run the model type round-trip scenario")
     parser.add_argument("--owned-tx", action="store_true", help="also run the owned transaction scenario")
     parser.add_argument("--savepoint-tx", action="store_true", help="also run savepoint and external transaction scenarios")
+    parser.add_argument("--save-changes", action="store_true", help="also run SaveChanges transaction scenarios")
     args = parser.parse_args(argv)
     report = {
         "status": "FAIL", "go_version": GO_VERSION, "minimum_profile": MINIMUM_PROFILE, "profiles": {},
@@ -305,7 +313,7 @@ def main(argv=None):
     try:
         with TemporaryDirectory(prefix="goef-sqlite-compat-") as directory:
             run_lab(Path(directory), report, model_types=args.model_types, owned_tx=args.owned_tx,
-                    savepoint_tx=args.savepoint_tx)
+                    savepoint_tx=args.savepoint_tx, save_changes=args.save_changes)
             report["phase"] = "cleanup"
     except Blocked as error:
         report.update(status="BLOCKED", reason=safe_reason(error))
