@@ -163,19 +163,25 @@ func createModelTypeFixture(s *scenario, target modelTypeTarget) []string {
 func verifyModelTypeCatalog(s *scenario, target modelTypeTarget) {
 	s.t.Helper()
 	var query string
-	if s.provider == "sqlite" {
+	switch s.provider {
+	case "sqlite":
 		query = `SELECT name, lower(type), CASE "notnull" WHEN 0 THEN 'YES' ELSE 'NO' END, 0
 			FROM pragma_table_info(?1) ORDER BY cid`
-	} else {
+	case "sqlserver":
+		// The fixture uses case-sensitive Latin1_General_100_BIN2.
+		query = "SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COALESCE(CHARACTER_MAXIMUM_LENGTH, 0) " +
+			"FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = SCHEMA_NAME() " +
+			"AND TABLE_NAME = " + s.bind(1) + " ORDER BY ORDINAL_POSITION"
+	default:
 		// The provisioning fixtures select and verify the target database/schema.
-		schemas := map[string]string{"postgres": "current_schema()", "mysql": "DATABASE()", "sqlserver": "SCHEMA_NAME()"}
+		schemas := map[string]string{"postgres": "current_schema()", "mysql": "DATABASE()"}
 		query = "SELECT column_name, data_type, is_nullable, COALESCE(character_maximum_length, 0) " +
 			"FROM information_schema.columns WHERE table_schema = " + schemas[s.provider] +
 			" AND table_name = " + s.bind(1) + " ORDER BY ordinal_position"
 	}
 	rows, err := s.writer.QueryContext(s.ctx, query, modelTypeTable)
 	if err != nil {
-		s.t.Fatal("could not inspect the model type catalog")
+		s.t.Fatalf("could not inspect the model type catalog (native code %q)", s.code(err))
 	}
 	defer rows.Close()
 	for i, want := range modelTypeColumns {
