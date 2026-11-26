@@ -111,7 +111,7 @@ func (s *saveChangesFixture) ownedGraph(session int64) {
 	if err := failed.Commit(); err != nil || failed.State() != transaction.StateCommitted {
 		s.t.Fatal("the recovered owned transaction could not commit")
 	}
-	s.observeSaveGraph(session, func(observer *sql.Conn) {
+	s.observeSaveRows(session, func(observer *sql.Conn) {
 		var code string
 		if err := observer.QueryRowContext(s.ctx, "SELECT code FROM "+ownedTxTable+" WHERE id = "+s.bind(1), 1).
 			Scan(&code); err != nil || code != "A" {
@@ -147,7 +147,7 @@ func (s *saveChangesFixture) ownedGraph(session int64) {
 		pending.label != corrected.label || pending.children[0].code != "first" || pending.children[1].code != "second" {
 		s.t.Fatal("acceptance did not publish the generated key, version and child references")
 	}
-	s.observeSaveGraph(session, func(observer *sql.Conn) {
+	s.observeSaveRows(session, func(observer *sql.Conn) {
 		var id, revision int64
 		var label string
 		if err := observer.QueryRowContext(s.ctx, "SELECT id, revision, label FROM "+saveParentTable).
@@ -325,18 +325,18 @@ func requireSaveWrite(result sql.Result, err error) error {
 	return nil
 }
 
-func (s *saveChangesFixture) observeSaveGraph(session int64, check func(*sql.Conn)) {
+func (s *saveChangesFixture) observeSaveRows(session int64, check func(*sql.Conn)) {
 	s.t.Helper()
 	s.db.SetMaxOpenConns(2)
 	defer s.db.SetMaxOpenConns(1)
 	original := s.lease()
 	defer s.closeConn(original)
 	if s.sessionID(original) != session {
-		s.t.Fatal("owned SaveChanges did not preserve the original connection")
+		s.t.Fatal("SaveChanges did not preserve the original connection")
 	}
 	observer := s.lease()
 	defer func() {
-		// Keep only the original session available for a subsequent owned save.
+		// Keep only the original session available for subsequent saves.
 		s.db.SetMaxIdleConns(0)
 		s.closeConn(observer)
 		s.db.SetMaxIdleConns(1)
@@ -345,10 +345,10 @@ func (s *saveChangesFixture) observeSaveGraph(session int64, check func(*sql.Con
 		var markers int
 		if err := observer.QueryRowContext(s.ctx,
 			"SELECT COUNT(*) FROM temp.sqlite_master WHERE name = ?1", "goef_owned_tx_session").Scan(&markers); err != nil || markers != 0 {
-			s.t.Fatal("SQLite graph observer was not an independent physical connection")
+			s.t.Fatal("SQLite save observer was not an independent physical connection")
 		}
 	} else if s.sessionID(observer) == session {
-		s.t.Fatal("graph observer reused the transaction session")
+		s.t.Fatal("save observer reused the transaction session")
 	}
 	check(observer)
 }
@@ -356,7 +356,13 @@ func (s *saveChangesFixture) observeSaveGraph(session int64, check func(*sql.Con
 func (s *saveChangesFixture) externalRecovery(session int64) {
 	s.t.Helper()
 	s.completeExternalSave(session, true)
-	s.observeCommittedRow(session)
+	s.observeSaveRows(session, func(observer *sql.Conn) {
+		s.requireDurableExternalRows(observer, session, "A")
+	})
+	s.successfulExternalSave(session)
+	s.observeSaveRows(session, func(observer *sql.Conn) {
+		s.requireDurableExternalRows(observer, session, "A", "B")
+	})
 }
 
 func (s *saveChangesFixture) externalUnsupported(session int64) {
@@ -366,6 +372,80 @@ func (s *saveChangesFixture) externalUnsupported(session int64) {
 }
 
 func (s *saveChangesFixture) completeExternalSave(session int64, supportsSavepoints bool) {
+	s.t.Helper()
+	s.withExternalSave(session, supportsSavepoints, func(native *sql.Tx, external *transaction.External) {
+		insert := s.insertOnOriginalSession()
+		s.requireWrite(native.ExecContext(s.ctx, insert, 1, "A", session))
+		if supportsSavepoints {
+			s.requireExternalRecovery(external, insert, session)
+		} else {
+			s.requireExternalPreflightRejection(external, insert, session, false)
+			if s.provider == "sqlserver" {
+				var abort int
+				if err := native.QueryRowContext(s.ctx, "SELECT @@OPTIONS & 16384").Scan(&abort); err != nil || abort != 16384 {
+					s.t.Fatal("SQL Server rejection fixture requires XACT_ABORT ON")
+				}
+				s.requireExternalPreflightRejection(external, insert, session, true)
+			}
+		}
+		var count int
+		if err := native.QueryRowContext(s.ctx, "SELECT COUNT(*) FROM "+ownedTxTable).Scan(&count); err != nil || count != 1 {
+			s.t.Fatal("owner did not retain only its earlier pending write")
+		}
+	})
+}
+
+func (s *saveChangesFixture) successfulExternalSave(session int64) {
+	s.t.Helper()
+	value := "pending"
+	var saved *transaction.SavedChanges
+	s.withExternalSave(session, true, func(native *sql.Tx, external *transaction.External) {
+		var err error
+		saved, err = external.SaveChanges(s.ctx, s.saveOptions(true), func(writer *transaction.SaveWriter) error {
+			if err := s.verifySaveSession(writer, session); err != nil {
+				return err
+			}
+			if err := requireSaveWrite(writer.Exec(s.insertOnOriginalSession(), 2, "B", session)); err != nil {
+				return err
+			}
+			return transaction.StageValue(writer, &value, "B")
+		})
+		if err != nil || saved == nil || value != "pending" {
+			s.t.Fatal("successful external save did not defer acceptance")
+		}
+		var code string
+		if err := native.QueryRowContext(s.ctx, "SELECT code FROM "+ownedTxTable+" WHERE id = "+s.bind(1), 2).
+			Scan(&code); err != nil || code != "B" {
+			s.t.Fatal("owner could not see the provisional external write")
+		}
+	})
+	if value != "pending" || saved.Accept() != nil || value != "B" {
+		s.t.Fatal("external receipt did not accept the staged value after the owner's commit")
+	}
+}
+
+func (s *saveChangesFixture) requireDurableExternalRows(observer *sql.Conn, session int64, codes ...string) {
+	s.t.Helper()
+	rows, err := observer.QueryContext(s.ctx, "SELECT id, code, session_id FROM "+ownedTxTable+" ORDER BY id")
+	if err != nil {
+		s.t.Fatal("could not read durable external rows")
+	}
+	defer rows.Close()
+	for i, expected := range codes {
+		var id int
+		var code string
+		var actualSession int64
+		if !rows.Next() || rows.Scan(&id, &code, &actualSession) != nil ||
+			id != i+1 || code != expected || actualSession != session {
+			s.t.Fatal("independent observer did not find an expected external row")
+		}
+	}
+	if rows.Next() || rows.Err() != nil {
+		s.t.Fatal("independent observer found an extra external row or could not finish reading")
+	}
+}
+
+func (s *saveChangesFixture) withExternalSave(session int64, supportsSavepoints bool, run func(*sql.Tx, *transaction.External)) {
 	s.t.Helper()
 	owner := s.lease()
 	defer s.closeConn(owner)
@@ -396,30 +476,13 @@ func (s *saveChangesFixture) completeExternalSave(session int64, supportsSavepoi
 		}
 	}()
 
-	insert := s.insertOnOriginalSession()
-	s.requireWrite(native.ExecContext(s.ctx, insert, 1, "A", session))
-	if supportsSavepoints {
-		s.requireExternalRecovery(external, insert, session)
-	} else {
-		s.requireExternalPreflightRejection(external, insert, session, false)
-		if s.provider == "sqlserver" {
-			var abort int
-			if err := native.QueryRowContext(s.ctx, "SELECT @@OPTIONS & 16384").Scan(&abort); err != nil || abort != 16384 {
-				s.t.Fatal("SQL Server rejection fixture requires XACT_ABORT ON")
-			}
-			s.requireExternalPreflightRejection(external, insert, session, true)
-		}
-	}
+	run(native, external)
 	if err := external.Close(); err != nil {
 		s.t.Fatal("could not detach the caller-owned SaveChanges coordinator")
 	}
 
-	var count int
-	if err := native.QueryRowContext(s.ctx, "SELECT COUNT(*) FROM "+ownedTxTable).Scan(&count); err != nil || count != 1 {
-		s.t.Fatal("owner did not retain only its earlier pending write")
-	}
 	if err := native.Commit(); err != nil {
-		s.t.Fatal("the external transaction owner could not commit its earlier work")
+		s.t.Fatal("the external transaction owner could not commit its pending work")
 	}
 	if s.sessionID(owner) != session || s.db.Stats().InUse != 1 {
 		s.t.Fatal("SaveChanges replaced or returned the caller's connection")
