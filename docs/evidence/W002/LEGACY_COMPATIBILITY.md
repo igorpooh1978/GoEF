@@ -116,3 +116,21 @@ pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -AcceptSqlServerEu
 The report identified `sqlite-3.51` as the minimum, observed the same source IDs and compile options listed above, and recorded 36 distinct driver cases across 12 profiles and four file cases. The 39 reported driver rows include the three repeated current SQLite cases. The repository validator, seven bootstrap tests, 35 Python lab tests and Go build, vet, test and module checks passed. The primary driver's unit tests also passed with `go test -mod=vendor -race -count=1 -shuffle=on ./...` in a local Linux/amd64 container. The lab removed its containers after the run.
 
 The exact driver module tree is `951054e5683db030a5e20e31cc399cff79ad0fce`, lab tree `0806db6023667fca2090f55495d971ad8b3b1a85` and PowerShell blob `38b02e2f725808f251cffeab274d68b1db9a0125`. The evidence commit preserves these executable artifacts.
+
+## Issue #31 acceptance
+
+The detached source revision `dc13ff64370f7e7348f0f7958dbf996819177a90` was verified on 2026-11-26 with Go 1.27.4, Python 3.14.4 and PowerShell 7.6.9 on Windows/amd64. The server scenarios used the local Docker 29.4.0 Linux/amd64 daemon.
+
+| Evidence | Profiles | Results |
+| --- | --- | --- |
+| `python -B test/conformance/lab/driver_run.py postgres --profile <profile>` | `postgres-16`, `postgres-17`, `postgres-18`, `postgres-19` | Each invocation exited 0. All 28 driver scenario rows passed. |
+| `python -B test/conformance/lab/driver_run.py mysql --profile <profile>` | `mysql-8.0`, `mysql-8.4` | Each invocation exited 0. All 14 driver scenario rows passed. |
+| `python -B test/conformance/lab/sqlite_compat.py` | `sqlite-3.51`, `sqlite-3.54` | Exit 0. All 14 driver rows and four clean-close file cases passed. All file cases observed native code `3091`. |
+| `python -B test/conformance/lab/sqlite_wal_recovery.py` | `sqlite-3.51` → `sqlite-3.54` and the reverse | Exit 0. Both peer runtimes recovered and checkpointed the committed WAL after the originating process exited. The originating runtime then reopened the checkpointed file in each direction. [Recovery evidence](SQLITE_WAL_RECOVERY.md) |
+| [Published authorized matrix run](../W003/DECIMAL_SQL_BINDING.md#real-engine-catalog-and-value-checks) | `sqlserver-2017`, `sqlserver-2019`, `sqlserver-2022-140`, `sqlserver-2022` | All 28 SQL Server driver scenario rows passed at `acd3c5a6250b80dcd716630291174c4dfb93dcce`. |
+
+`git diff --name-status acd3c5a dc13ff6` lists only two Markdown files. Both revisions have the same driver module tree (`74c7f0445a8a6d0a01b627438a9e36d884f9c513`), lab tree (`2a6c7254c6837aa241b7527a097b194e71b7af58`) and local PowerShell runner blob (`7214dda39ac437513827123f15bde41031d1ea04`). The prior run therefore exercised the same executable source and pins. The current review used the recorded SQL Server build, compatibility-level and feature-gate evidence. A fresh SQL Server invocation requires separate local consent.
+
+`python -B test/bootstrap/verify.py` exited 0 and validated 76 Gherkin scenarios. `python -B -m unittest discover -s test/conformance/lab -p 'test*.py'` exited 0 with 78 tests.
+
+The evidence covers the 12 selected driver compatibility profiles, the four SQLite clean-close cases, and the two committed WAL recovery directions. [Issue #13](https://github.com/igorpooh1978/GoEF/issues/13) tracks GoEF adapter and application conformance. MySQL 5.7 remains a candidate with a separate compatibility scope.
