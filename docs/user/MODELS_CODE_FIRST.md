@@ -115,7 +115,7 @@ func main() {
 | `string` with maximum length `n` | `varchar(n)` | `TEXT` | `nvarchar(n)` | `varchar(n) CHARACTER SET utf8mb4` |
 | `[]byte` | `bytea` | `BLOB` | `varbinary(max)` | `longblob` |
 
-A single pointer to a supported Go type is nullable. Plain `[]byte` remains a non-nullable model property. Use non-nil byte slices when supplying values to a non-null SQL column through a driver. Built-in aliases have the same mapping. Distinct defined types and unsupported types such as `uint64`, floating-point values and exact decimals fail with `*model.TypeBindingError` and `goeferr.ErrInvalidModel`. The error reports positions in canonical entity and mapped field order. An unsupported field prevents publication of the entire binding.
+A single pointer to a supported Go type is nullable. Plain `[]byte` remains a non-nullable model property. Use non-nil byte slices when supplying values to a non-null SQL column through a driver. Built-in aliases have the same mapping. Distinct defined types and unsupported types such as `uint64` and floating-point values fail with `*model.TypeBindingError` and `goeferr.ErrInvalidModel`. The error reports positions in canonical entity and mapped field order. An unsupported field prevents publication of the entire binding.
 
 Length is a text facet. PostgreSQL and MySQL use character counts. SQL Server counts UTF-16 units under a supplementary-character collation. SQLite retains length as metadata and emits `TEXT`. SQL Server collation and PostgreSQL client and server encodings determine the supported text domain. MySQL bounded declarations also share a row-size limit. Supply valid text representable in the selected dialect and enforce the intended length before passing values to a driver. Value encoding, identifier quoting, index validation, DDL and schema generation belong to later stages.
 
@@ -146,7 +146,43 @@ Go equality compares canonical values at the same scale. For example, `+01.00` c
 
 Use `model.BindDecimal(provider, precision, scale)` to declare a column explicitly and get its `StoreType`. Pass a `model.Decimal` to `binding.Encode` and send the returned text as a parameter. Select the stored value as text and pass it to `binding.Decode`. Both methods validate capacity and preserve the requested scale. Conversion returns an error if it would discard any nonzero digit. [Runnable binding example](../../model/decimal_binding_test.go)
 
-PostgreSQL uses `numeric(p,s)`. With pgx, cast a bound string through `text` before casting it to that numeric type. SQL Server and MySQL use `decimal(p,s)`. SQLite uses `TEXT`, where sorting follows the text collation and the Go codec supplies the precision and scale checks. `BindDecimal` applies to an explicitly declared column. Struct-field bindings still use the built-in scalar set from the earlier table. [Catalog and round-trip evidence](../evidence/W003/DECIMAL_SQL_BINDING.md)
+PostgreSQL uses `numeric(p,s)`. With pgx, cast a bound string through `text` before casting it to that numeric type. SQL Server and MySQL use `decimal(p,s)`. SQLite uses `TEXT`, where sorting follows the text collation and the Go codec supplies the precision and scale checks. `BindDecimal` applies to an explicitly declared column. Use the field binding below when declaring a Code First model. [Catalog and round-trip evidence](../evidence/W003/DECIMAL_SQL_BINDING.md)
+
+## Bind a decimal struct field
+
+Declare `model.DecimalPrecision` for each `model.Decimal` or `*model.Decimal` field. Go 1.27.4 runs this example without a database. It prints `numeric(24,4) 9007199254740993.1200`.
+
+```go
+type Invoice struct {
+	Total model.Decimal
+}
+mapped, err := model.Map(model.Struct[Invoice]("Invoice", nil, model.DecimalPrecision("Total", 24, 4)))
+if err != nil {
+	panic(err)
+}
+physical, err := model.BindTypes(mapped, model.TypePostgreSQL)
+if err != nil {
+	panic(err)
+}
+field := physical.Entities()[0].Properties[0]
+codec, ok := field.DecimalBinding()
+if !ok {
+	panic("expected a decimal binding")
+}
+total, err := model.ParseDecimal("9007199254740993.12")
+if err != nil {
+	panic(err)
+}
+text, err := codec.Encode(total)
+if err != nil {
+	panic(err)
+}
+fmt.Println(field.StoreType, text)
+```
+
+Precision and scale are explicit fluent settings. Use the exact Go field name even when a tag renames the SQL column. Precision is 1–1000 and scale is 0 through precision at mapping time. `BindTypes` applies the narrower SQL Server and MySQL limits where applicable. `errors.Is(err, goeferr.ErrInvalidModel)` detects declaration errors. `errors.As` retrieves a `*model.MappingError` for invalid or conflicting options or a `*model.TypeBindingError` for a missing facet, an incompatible field or a dialect limit.
+
+For a `*model.Decimal` field, send SQL NULL for a nil pointer and decode a non-null value through the field codec. The codec rejects overflow and changes that would require rounding. Follow the parameter and text-readback rules for `BindDecimal`. Both snapshots include `decimal` with `precision` and `scale` when declared. [Runnable field example](../../model/decimal_field_test.go) · [Issue and profile evidence](../evidence/W003/DECIMAL_FIELD_BINDING.md)
 
 Feature IDs: MODEL-MAP-001, MODEL-NULL-001, MODEL-TYPE-001, MODEL-VALID-001.
 

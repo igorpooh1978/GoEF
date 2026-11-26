@@ -320,6 +320,12 @@ class DecimalBindingEvidenceTests(unittest.TestCase):
     def evidence(self, row):
         return self.prefix + json.dumps(row)
 
+    def field_row(self, row):
+        return {**row, "scenario": "MODEL-TYPE-001-S05"}
+
+    def field_evidence(self, row):
+        return "GOEF_DECIMAL_FIELD_BINDING_RESULT=" + json.dumps(self.field_row(row))
+
     def test_decimal_binding_verifies_one_exact_result(self):
         row = self.row()
 
@@ -355,7 +361,11 @@ class DecimalBindingEvidenceTests(unittest.TestCase):
         stdout = io.StringIO()
         with (
             patch.object(driver_run, "build_binary", return_value="driverlab-binary"),
-            patch.object(driver_run, "command", side_effect=[self.evidence(expected), "PASS", "PASS"]) as command,
+            patch.object(driver_run, "command", side_effect=[
+                self.evidence(expected) + "\n" + self.field_evidence(expected),
+                self.evidence(expected),
+                "PASS",
+            ]) as command,
             patch.object(driver_run, "verified_results", return_value=[]),
             redirect_stdout(stdout),
         ):
@@ -369,12 +379,14 @@ class DecimalBindingEvidenceTests(unittest.TestCase):
         self.assertNotIn("GOEF_DECIMAL_BINDING", command.call_args_list[2].kwargs["env"])
         passed, failed, unrequested = [json.loads(line) for line in stdout.getvalue().splitlines()]
         self.assertEqual(passed["decimal_binding"], expected)
+        self.assertEqual(passed["decimal_field_binding"], self.field_row(expected))
         self.assertEqual((failed["status"], failed["phase"]), ("FAIL", "evidence"))
         self.assertNotIn("decimal_binding", unrequested)
+        self.assertNotIn("decimal_field_binding", unrequested)
 
     def test_sqlite_compatibility_requires_decimal_evidence_on_both_linked_runtimes(self):
         expected = [self.row(name, profile.engine_version) for name, profile in sqlite_compat.PROFILES.items()]
-        outputs = [self.evidence(row) for row in expected]
+        outputs = [self.evidence(row) + "\n" + self.field_evidence(row) for row in expected]
 
         def run(supplied_outputs):
             stdout = io.StringIO()
@@ -391,12 +403,13 @@ class DecimalBindingEvidenceTests(unittest.TestCase):
         result, report, calls = run(outputs)
         self.assertEqual(result, 0)
         self.assertEqual(report["decimal_binding"], expected)
+        self.assertEqual(report["decimal_field_binding"], [self.field_row(row) for row in expected])
         self.assertEqual(
             [call.kwargs["env"]["GOEF_DRIVERLAB_PROFILE"] for call in calls],
             list(sqlite_compat.PROFILES),
         )
         self.assertTrue(all(call.kwargs["env"]["GOEF_DECIMAL_BINDING"] == "1" for call in calls))
-        result, report, _ = run([outputs[0], "PASS"])
+        result, report, _ = run([outputs[0], self.evidence(expected[1])])
         self.assertEqual(result, 1)
         self.assertEqual(report["phase"], f"Gherkin {expected[1]['profile']}")
 

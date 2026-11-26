@@ -880,7 +880,8 @@
       "scenarioId": "MODEL-TYPE-001-S01",
       "spec": "specs/features/model/model-type-001.feature",
       "issues": [
-        "https://github.com/igorpooh1978/GoEF/issues/3"
+        "https://github.com/igorpooh1978/GoEF/issues/3",
+        "https://github.com/igorpooh1978/GoEF/issues/33"
       ],
       "docs": [
         "docs/user/MODELS_CODE_FIRST.md"
@@ -894,7 +895,8 @@
       "scenarioId": "MODEL-TYPE-001-S02",
       "spec": "specs/features/model/model-type-001.feature",
       "issues": [
-        "https://github.com/igorpooh1978/GoEF/issues/3"
+        "https://github.com/igorpooh1978/GoEF/issues/3",
+        "https://github.com/igorpooh1978/GoEF/issues/33"
       ],
       "docs": [
         "docs/user/MODELS_CODE_FIRST.md"
@@ -908,7 +910,8 @@
       "scenarioId": "MODEL-TYPE-001-S03",
       "spec": "specs/features/model/model-type-001.feature",
       "issues": [
-        "https://github.com/igorpooh1978/GoEF/issues/3"
+        "https://github.com/igorpooh1978/GoEF/issues/3",
+        "https://github.com/igorpooh1978/GoEF/issues/33"
       ],
       "docs": [
         "docs/user/MODELS_CODE_FIRST.md"
@@ -922,13 +925,44 @@
       "scenarioId": "MODEL-TYPE-001-S04",
       "spec": "specs/features/model/model-type-001.feature",
       "issues": [
-        "https://github.com/igorpooh1978/GoEF/issues/3"
+        "https://github.com/igorpooh1978/GoEF/issues/3",
+        "https://github.com/igorpooh1978/GoEF/issues/33"
       ],
       "docs": [
         "docs/user/MODELS_CODE_FIRST.md"
       ],
       "test": "model/decimal_test.go#TestDecimalCanonicalTextAndScale",
       "evidence": "docs/evidence/W003/DECIMAL_VALUE.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MODEL-TYPE-001",
+      "scenarioId": "MODEL-TYPE-001-S05",
+      "spec": "specs/features/model/model-type-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/3",
+        "https://github.com/igorpooh1978/GoEF/issues/33"
+      ],
+      "docs": [
+        "docs/user/MODELS_CODE_FIRST.md"
+      ],
+      "test": "test/conformance/driverlab/decimal_binding_test.go#TestDecimalBindingRoundTrip",
+      "evidence": "docs/evidence/W003/DECIMAL_FIELD_BINDING.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MODEL-TYPE-001",
+      "scenarioId": "MODEL-TYPE-001-S06",
+      "spec": "specs/features/model/model-type-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/3",
+        "https://github.com/igorpooh1978/GoEF/issues/33"
+      ],
+      "docs": [
+        "docs/user/MODELS_CODE_FIRST.md"
+      ],
+      "test": "model/decimal_field_test.go#TestDecimalFieldsMODEL_TYPE_001S06",
+      "evidence": "docs/evidence/W003/DECIMAL_FIELD_BINDING.md",
       "status": "SPECIFIED"
     },
     {

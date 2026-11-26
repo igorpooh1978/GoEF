@@ -11,6 +11,7 @@ type fieldMapping struct {
 	property MappedProperty
 	columns  []facetDeclaration[string]
 	lengths  []facetDeclaration[int]
+	decimals []facetDeclaration[DecimalFacets]
 }
 
 func mapEntity(entityPosition int, registration EntityMapping) (MappedEntity, error) {
@@ -47,12 +48,17 @@ func mapEntity(entityPosition int, registration EntityMapping) (MappedEntity, er
 		if err != nil {
 			return MappedEntity{}, mappingFacetError(err, field.at)
 		}
+		decimal, err := resolveFacet("decimal precision and scale", field.decimals)
+		if err != nil {
+			return MappedEntity{}, mappingFacetError(err, field.at)
+		}
 		if previous, ok := columns[facets.columnName]; ok {
 			return MappedEntity{}, invalidMapping(field.at, previous, "duplicate effective column name")
 		}
 		columns[facets.columnName] = field.at
 		field.property.ColumnName = facets.columnName
 		field.property.MaxLength = facets.maxLength
+		field.property.Decimal = decimal.value
 		entity.Properties[i] = field.property
 	}
 	return entity, nil
@@ -131,7 +137,7 @@ func applyMappingOptions(at MappingPosition, registration EntityMapping, fields 
 			tables = append(tables, facetDeclaration[string]{source: fluentSource, at: origin, value: option.name})
 			continue
 		}
-		if option.kind != columnOption && option.kind != maxLengthOption {
+		if option.kind != columnOption && option.kind != maxLengthOption && option.kind != decimalPrecisionOption {
 			return nil, invalidMapping(position, MappingPosition{}, "unknown mapping option")
 		}
 		field, found := fieldByName[option.property]
@@ -139,16 +145,22 @@ func applyMappingOptions(at MappingPosition, registration EntityMapping, fields 
 			return nil, invalidMapping(position, MappingPosition{}, "unknown option field")
 		}
 		position.Property = field.at.Property
-		if option.kind == columnOption {
+		switch option.kind {
+		case columnOption:
 			if !validMappedName(option.name) {
 				return nil, invalidMapping(position, MappingPosition{}, "invalid column name")
 			}
 			field.columns = append(field.columns, facetDeclaration[string]{source: fluentSource, at: origin, value: option.name})
-		} else {
+		case maxLengthOption:
 			if option.length < 1 {
 				return nil, invalidMapping(position, MappingPosition{}, "invalid maximum length")
 			}
 			field.lengths = append(field.lengths, facetDeclaration[int]{source: fluentSource, at: origin, value: option.length})
+		case decimalPrecisionOption:
+			if !option.decimal.valid() {
+				return nil, invalidMapping(position, MappingPosition{}, "invalid decimal precision or scale")
+			}
+			field.decimals = append(field.decimals, facetDeclaration[DecimalFacets]{source: fluentSource, at: origin, value: option.decimal})
 		}
 	}
 	return tables, nil

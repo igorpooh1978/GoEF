@@ -13,7 +13,8 @@ var (
 )
 
 // DecimalBinding specifies an exact decimal storage type and its text codec.
-// Construct a binding with [BindDecimal]. The zero binding has no store type
+// Construct a binding with [BindDecimal] or obtain it from a bound decimal
+// field via [BoundProperty.DecimalBinding]. The zero value has no store type
 // and cannot convert values.
 type DecimalBinding struct {
 	storeType string
@@ -27,6 +28,11 @@ type DecimalBinding struct {
 // same checks in the codec. The text column does not supply decimal ordering
 // or arithmetic. Invalid declarations return a *TypeBindingError.
 func BindDecimal(provider TypeProvider, precision, scale int) (DecimalBinding, error) {
+	return bindDecimal(provider, DecimalFacets{Precision: precision, Scale: scale}, 0, 0)
+}
+
+func bindDecimal(provider TypeProvider, facets DecimalFacets, entityPosition, propertyPosition int) (DecimalBinding, error) {
+	precision, scale := facets.Precision, facets.Scale
 	maxPrecision, maxScale := MaxDecimalDigits, MaxDecimalDigits
 	typeName := "decimal"
 	switch provider {
@@ -41,8 +47,8 @@ func BindDecimal(provider TypeProvider, precision, scale int) (DecimalBinding, e
 	default:
 		return DecimalBinding{}, invalidTypeBinding("", 0, 0, "unknown decimal provider")
 	}
-	if precision < 1 || precision > maxPrecision || scale < 0 || scale > precision || scale > maxScale {
-		return DecimalBinding{}, invalidTypeBinding(provider, 0, 0, "unsupported decimal precision or scale")
+	if !facets.valid() || precision > maxPrecision || scale > maxScale {
+		return DecimalBinding{}, invalidTypeBinding(provider, entityPosition, propertyPosition, "unsupported decimal precision or scale")
 	}
 
 	storeType := typeName

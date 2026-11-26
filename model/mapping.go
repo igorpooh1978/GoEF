@@ -34,6 +34,7 @@ type MappingOption struct {
 	property string
 	name     string
 	length   int
+	decimal  DecimalFacets
 }
 
 type mappingOptionKind uint8
@@ -42,6 +43,7 @@ const (
 	tableOption mappingOptionKind = iota + 1
 	columnOption
 	maxLengthOption
+	decimalPrecisionOption
 )
 
 // ToTable sets the table name for an entity. The default is the entity name.
@@ -58,6 +60,25 @@ func ColumnName(property, name string) MappingOption {
 // field name. Interpretation and enforcement of the limit belong to the provider.
 func MaxLength(property string, length int) MappingOption {
 	return MappingOption{kind: maxLengthOption, property: property, length: length}
+}
+
+// DecimalPrecision sets explicit precision and scale for a [Decimal] or
+// *Decimal property identified by its Go field name. Map accepts a positive
+// precision up to [MaxDecimalDigits] and a scale between zero and that
+// precision. BindTypes checks any narrower dialect limits.
+func DecimalPrecision(property string, precision, scale int) MappingOption {
+	return MappingOption{kind: decimalPrecisionOption, property: property, decimal: DecimalFacets{Precision: precision, Scale: scale}}
+}
+
+// DecimalFacets records the precision and scale of a declared decimal field.
+// A zero value means no decimal facets were declared.
+type DecimalFacets struct {
+	Precision int `json:"precision"`
+	Scale     int `json:"scale"`
+}
+
+func (f DecimalFacets) valid() bool {
+	return f.Precision >= 1 && f.Precision <= MaxDecimalDigits && f.Scale >= 0 && f.Scale <= f.Precision
 }
 
 // MappedModel contains validated, provider-neutral Code First metadata.
@@ -77,12 +98,13 @@ type MappedEntity struct {
 }
 
 // MappedProperty describes a Go field and its resolved column facets.
-// A zero MaxLength means that no maximum length was declared.
+// A zero MaxLength or Decimal means that the respective facet was not declared.
 type MappedProperty struct {
-	Name       string `json:"name"`
-	ColumnName string `json:"columnName"`
-	Nullable   bool   `json:"nullable"`
-	MaxLength  int    `json:"maxLength"`
+	Name       string        `json:"name"`
+	ColumnName string        `json:"columnName"`
+	Nullable   bool          `json:"nullable"`
+	MaxLength  int           `json:"maxLength"`
+	Decimal    DecimalFacets `json:"decimal,omitzero"`
 }
 
 // Entities returns an independent copy of the metadata. Entities are sorted by
@@ -97,8 +119,8 @@ func (m *MappedModel) Entities() []MappedEntity {
 }
 
 // Snapshot returns an independent copy of the canonical version 1 JSON mapping.
-// It describes table and column names, maximum lengths, direct field
-// nullability, and primary keys, without encoding Go or database types.
+// It describes names, column facets, direct field nullability and primary keys,
+// without encoding Go or database types. Decimal facets appear when declared.
 func (m *MappedModel) Snapshot() []byte {
 	return slices.Clone(m.snapshot)
 }

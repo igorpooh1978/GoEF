@@ -488,6 +488,11 @@ def verified_commit_outcome_results(output, provider, profile, engine_version):
     )
 
 
+def verified_decimal_field_binding_result(output, provider, profile, engine_version):
+    return _verified_profile_scenarios(output, "GOEF_DECIMAL_FIELD_BINDING_RESULT=", ("MODEL-TYPE-001-S05",),
+                                       provider, profile, engine_version)[0]
+
+
 def missing_eula(profile, accepted_eulas):
     settings = profile.sqlserver_settings
     if settings is not None and settings.eula_flag not in accepted_eulas:
@@ -579,6 +584,9 @@ def run_provider(profile_name, binary, accepted_eulas, *,
             report["tx_options"] = verified_tx_options_result(output, provider, profile_name, profile.version)
         if decimal_binding:
             report["decimal_binding"] = verified_decimal_binding_result(output, provider, profile_name, profile.version)
+            report["decimal_field_binding"] = verified_decimal_field_binding_result(
+                output, provider, profile_name, profile.version,
+            )
         if commit_outcome:
             report["commit_outcome"] = verified_commit_outcome_results(output, provider, profile_name, profile.version)
         return report

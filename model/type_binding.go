@@ -23,14 +23,15 @@ const (
 type ScalarKind string
 
 const (
-	ScalarBool   ScalarKind = "bool"
-	ScalarInt    ScalarKind = "int"
-	ScalarInt8   ScalarKind = "int8"
-	ScalarInt16  ScalarKind = "int16"
-	ScalarInt32  ScalarKind = "int32"
-	ScalarInt64  ScalarKind = "int64"
-	ScalarString ScalarKind = "string"
-	ScalarBytes  ScalarKind = "bytes"
+	ScalarBool    ScalarKind = "bool"
+	ScalarInt     ScalarKind = "int"
+	ScalarInt8    ScalarKind = "int8"
+	ScalarInt16   ScalarKind = "int16"
+	ScalarInt32   ScalarKind = "int32"
+	ScalarInt64   ScalarKind = "int64"
+	ScalarString  ScalarKind = "string"
+	ScalarBytes   ScalarKind = "bytes"
+	ScalarDecimal ScalarKind = "decimal"
 )
 
 // BoundModel contains the physical scalar bindings for one dialect.
@@ -52,14 +53,24 @@ type BoundEntity struct {
 
 // BoundProperty describes a physical column binding. StoreType is the dialect's
 // column type declaration, including its charset qualifier where applicable.
-// MaxLength is the original length facet. Zero means unspecified.
+// MaxLength and Decimal are the original column facets. Their zero values
+// mean unspecified.
 type BoundProperty struct {
-	Name       string     `json:"name"`
-	ColumnName string     `json:"columnName"`
-	StoreType  string     `json:"storeType"`
-	Kind       ScalarKind `json:"kind"`
-	Nullable   bool       `json:"nullable"`
-	MaxLength  int        `json:"maxLength"`
+	Name       string        `json:"name"`
+	ColumnName string        `json:"columnName"`
+	StoreType  string        `json:"storeType"`
+	Kind       ScalarKind    `json:"kind"`
+	Nullable   bool          `json:"nullable"`
+	MaxLength  int           `json:"maxLength"`
+	Decimal    DecimalFacets `json:"decimal,omitzero"`
+
+	decimalBinding DecimalBinding
+}
+
+// DecimalBinding returns the text codec for a bound decimal field. For another
+// kind, it returns the zero codec and false. SQL NULL is handled by the caller.
+func (p BoundProperty) DecimalBinding() (DecimalBinding, bool) {
+	return p.decimalBinding, p.decimalBinding.precision != 0
 }
 
 // Provider returns the dialect used for the bindings.
@@ -114,18 +125,20 @@ func (e *TypeBindingError) Unwrap() error {
 	return e.cause
 }
 
-// BindTypes resolves built-in booleans, signed integers, strings and byte
-// slices from Map to one supported dialect. A single pointer layer preserves
-// declared nullability. The Go int type maps to signed 64-bit storage.
+// BindTypes resolves built-in booleans, signed integers, strings, byte slices
+// and [Decimal] fields from Map to one supported dialect. A single pointer
+// layer preserves declared nullability. The Go int type maps to signed 64-bit
+// storage. Decimal fields require explicit [DecimalPrecision] facets.
 //
 // String lengths are measured in characters for PostgreSQL and MySQL, in
 // UTF-16 units for SQL Server with a supplementary-character collation, and
 // retained as metadata for SQLite. The latter uses TEXT even with a length
 // facet. MySQL text declarations use utf8mb4.
 //
-// The result describes storage types. Codec behavior, identifier quoting,
-// DDL, schema capacity and indexability are separate concerns. Failures return
-// no partial model and can be classified with goeferr.ErrInvalidModel.
+// The result describes storage types and supplies codecs for decimal fields.
+// Identifier quoting, DDL, schema capacity and indexability are separate
+// concerns. Failures return no partial model and can be classified with
+// goeferr.ErrInvalidModel.
 func BindTypes(mapped *MappedModel, target TypeProvider) (*BoundModel, error) {
 	profile, known := scalarProfiles[target]
 	if !known {
@@ -142,14 +155,34 @@ func BindTypes(mapped *MappedModel, target TypeProvider) (*BoundModel, error) {
 			// Map derives every property directly from this struct.
 			field, _ := typ.FieldByName(property.Name)
 			kind := scalarKind(field.Type)
-			storeType, reason := profile.storeType(kind, property.MaxLength)
-			if reason != "" {
-				return nil, invalidTypeBinding(target, i+1, j+1, reason)
+			bound := BoundProperty{
+				Name: property.Name, ColumnName: property.ColumnName, Kind: kind,
+				Nullable: property.Nullable, MaxLength: property.MaxLength, Decimal: property.Decimal,
 			}
-			properties[j] = BoundProperty{
-				Name: property.Name, ColumnName: property.ColumnName, StoreType: storeType,
-				Kind: kind, Nullable: property.Nullable, MaxLength: property.MaxLength,
+			if kind == ScalarDecimal {
+				if property.Decimal.Precision == 0 {
+					return nil, invalidTypeBinding(target, i+1, j+1, "decimal field requires explicit precision and scale")
+				}
+				if property.MaxLength != 0 {
+					return nil, invalidTypeBinding(target, i+1, j+1, "maximum length requires a text field")
+				}
+				binding, err := bindDecimal(target, property.Decimal, i+1, j+1)
+				if err != nil {
+					return nil, err
+				}
+				bound.StoreType = binding.StoreType()
+				bound.decimalBinding = binding
+			} else {
+				if property.Decimal.Precision != 0 {
+					return nil, invalidTypeBinding(target, i+1, j+1, "decimal precision and scale require a decimal field")
+				}
+				storeType, reason := profile.storeType(kind, property.MaxLength)
+				if reason != "" {
+					return nil, invalidTypeBinding(target, i+1, j+1, reason)
+				}
+				bound.StoreType = storeType
 			}
+			properties[j] = bound
 		}
 		entities[i] = BoundEntity{
 			Name: entity.Name, TableName: entity.TableName,
@@ -198,6 +231,8 @@ func scalarKind(typ reflect.Type) ScalarKind {
 		return ScalarString
 	case reflect.TypeFor[[]byte]():
 		return ScalarBytes
+	case reflect.TypeFor[Decimal]():
+		return ScalarDecimal
 	default:
 		return ""
 	}

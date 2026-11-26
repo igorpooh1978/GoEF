@@ -252,16 +252,28 @@
           "testPath": "test/EFCore.SqlServer.Tests/Storage/SqlServerTypeMappingTest.cs",
           "testSymbol": "Create_and_clone_SQL_Server_DateTime_mappings_with_converter",
           "relation": "analogue"
+        },
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore/Metadata/Builders/PropertyBuilder.cs",
+          "symbol": "HasPrecision",
+          "testPath": "test/EFCore.Tests/Metadata/Internal/PropertyTest.cs",
+          "testSymbol": "Throws_when_model_is_readonly",
+          "relation": "analogue"
         }
       ],
       "contract": "Round-trip a supported scalar comparison and value without losing precision under a declared provider type mapping.",
       "goApi": {
         "status": "IMPLEMENTED",
-        "description": "BindTypes resolves built-in scalars. Decimal preserves exact Go text. BindDecimal validates an explicit SQL decimal column and exact fixed-scale conversion."
+        "description": "BindTypes resolves built-in scalars and explicit DecimalPrecision fields. Decimal preserves exact Go text. BindDecimal and bound decimal fields provide exact fixed-scale conversion."
       },
       "wave": "W005",
       "issues": [
-        3
+        3,
+        33
       ],
       "dependencies": [
         "MODEL-MAP-001"
@@ -272,7 +284,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "S01 and S02 have pinned fixtures for explicit decimal and built-in scalar columns. Broader physical type and conversion parity remains outstanding.",
+          "reason": "S01, S02 and S05 have pinned fixtures for explicit decimal, built-in scalar and decimal struct fields. Broader physical type and conversion parity remains outstanding.",
           "evidence": null
         },
         "sqlite": {
@@ -280,7 +292,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "S01 and S02 have pinned fixtures for explicit decimal and built-in scalar columns. Broader physical type and conversion parity remains outstanding.",
+          "reason": "S01, S02 and S05 have pinned fixtures for explicit decimal, built-in scalar and decimal struct fields. Broader physical type and conversion parity remains outstanding.",
           "evidence": null
         },
         "sqlserver": {
@@ -288,7 +300,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "S01 and S02 have pinned fixtures for explicit decimal and built-in scalar columns. Broader physical type and conversion parity remains outstanding.",
+          "reason": "S01, S02 and S05 have pinned fixtures for explicit decimal, built-in scalar and decimal struct fields. Broader physical type and conversion parity remains outstanding.",
           "evidence": null
         },
         "mysql": {
@@ -296,7 +308,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "S01 and S02 have pinned fixtures for explicit decimal and built-in scalar columns. Broader physical type and conversion parity remains outstanding.",
+          "reason": "S01, S02 and S05 have pinned fixtures for explicit decimal, built-in scalar and decimal struct fields. Broader physical type and conversion parity remains outstanding.",
           "evidence": null
         }
       },
@@ -304,18 +316,22 @@
         "MODEL-TYPE-001-S01",
         "MODEL-TYPE-001-S02",
         "MODEL-TYPE-001-S03",
-        "MODEL-TYPE-001-S04"
+        "MODEL-TYPE-001-S04",
+        "MODEL-TYPE-001-S05",
+        "MODEL-TYPE-001-S06"
       ],
       "tests": [
         "test/conformance/driverlab/model_types_test.go#TestModelTypeRoundTrip",
         "model/type_binding_test.go#TestBindTypesMODEL_TYPE_001S02",
         "model/type_binding_test.go#TestBindTypesMODEL_TYPE_001S03",
         "model/decimal_test.go#TestDecimalCanonicalTextAndScale",
-        "test/conformance/driverlab/decimal_binding_test.go#TestDecimalBindingRoundTrip"
+        "test/conformance/driverlab/decimal_binding_test.go#TestDecimalBindingRoundTrip",
+        "model/decimal_field_test.go#TestDecimalFieldsMODEL_TYPE_001S05",
+        "model/decimal_field_test.go#TestDecimalFieldsMODEL_TYPE_001S06"
       ],
       "status": "PARTIAL",
       "deviations": [
-        "Explicit decimal columns have separate bindings. Automatic model field decimal binding and broader type or conversion parity retain separate work.",
+        "Explicit decimal declarations use GoEF's fixed-scale text codec. Decimal struct fields require fluent precision and scale. Other scalar conversions have separate acceptance.",
         "SQLite length is metadata. PostgreSQL and MySQL use characters, and SQL Server nvarchar length is measured in UTF-16 code units under supplementary-character collations."
       ],
       "adr": null,

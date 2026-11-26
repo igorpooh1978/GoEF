@@ -2,6 +2,7 @@ package driverlab
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -37,7 +38,8 @@ func TestDecimalBindingRoundTrip(t *testing.T) {
 
 	var observedVersion string
 	passed := t.Run(provider, func(t *testing.T) {
-		fractional, integral := decimalBindingFacets(t, target.provider)
+		fields, codecs := decimalBindingFacets(t, target.provider)
+		fractional, integral := codecs[0], codecs[1]
 		inputs := decimalBindingInputs()
 		encoded := encodeDecimalFixture(t, fractional, integral, inputs)
 		ctx, cancel := context.WithTimeout(t.Context(), 30*time.Second)
@@ -53,8 +55,14 @@ func TestDecimalBindingRoundTrip(t *testing.T) {
 		}
 
 		// These declarations have been validated against fixed fixture strings.
-		create := "CREATE TABLE " + decimalBindingTable + " (id INTEGER NOT NULL PRIMARY KEY, amount " +
-			fractional.StoreType() + " NOT NULL, whole_amount " + integral.StoreType() + " NOT NULL)"
+		create := "CREATE TABLE " + decimalBindingTable + " (id INTEGER NOT NULL PRIMARY KEY"
+		for _, field := range fields {
+			create += ", " + field.ColumnName + " " + field.StoreType
+			if !field.Nullable {
+				create += " NOT NULL"
+			}
+		}
+		create += ")"
 		if provider == "mysql" {
 			create += " ENGINE=InnoDB"
 		}
@@ -73,6 +81,14 @@ func TestDecimalBindingRoundTrip(t *testing.T) {
 				t.Fatalf("decimal write %d did not affect one row", i+1)
 			}
 		}
+		// A nil driver value represents SQL NULL for the nullable model field.
+		result, err := s.writer.ExecContext(ctx, insert, len(inputs)+1, encoded[0][0], nil)
+		if err != nil {
+			t.Fatalf("nullable decimal write failed (native code %q)", s.code(err))
+		}
+		if affected, err := result.RowsAffected(); err != nil || affected != 1 {
+			t.Fatal("nullable decimal write did not affect one row")
+		}
 		verifyDecimalBindingValues(&s, fractional, integral, inputs)
 		observedVersion = s.facts[target.versionFact]
 		if observedVersion == "" {
@@ -90,9 +106,19 @@ func TestDecimalBindingRoundTrip(t *testing.T) {
 		t.Fatal("could not encode decimal binding evidence")
 	}
 	fmt.Printf("GOEF_DECIMAL_BINDING_RESULT=%s\n", result)
+	// The existing workstation verifier treats a PASS for S01 as mandatory.
+	// This independent marker identifies the additional Code First scenario.
+	codeFirst, err := json.Marshal(map[string]string{
+		"provider": provider, "profile": profile, "scenario": "MODEL-TYPE-001-S05",
+		"engine_version": observedVersion, "status": "PASS",
+	})
+	if err != nil {
+		t.Fatal("could not encode Code First decimal binding evidence")
+	}
+	fmt.Printf("GOEF_DECIMAL_FIELD_BINDING_RESULT=%s\n", codeFirst)
 }
 
-func decimalBindingFacets(t *testing.T, provider model.TypeProvider) (model.DecimalBinding, model.DecimalBinding) {
+func decimalBindingFacets(t *testing.T, provider model.TypeProvider) ([]model.BoundProperty, [2]model.DecimalBinding) {
 	t.Helper()
 	invalid := [][2]int{{0, 0}, {1, -1}, {1, 2}, {model.MaxDecimalDigits + 1, 0}}
 	switch provider {
@@ -107,16 +133,43 @@ func decimalBindingFacets(t *testing.T, provider model.TypeProvider) (model.Deci
 			t.Fatalf("unsupported decimal precision %d scale %d produced a binding or no typed error", facets[0], facets[1])
 		}
 	}
-	fractional := requireDecimalBinding(t, provider, decimalProbeScale)
-	integral := requireDecimalBinding(t, provider, 0)
+	type record struct {
+		ID          int64
+		Amount      model.Decimal  `goef:"column=amount"`
+		WholeAmount *model.Decimal `goef:"column=whole_amount"`
+	}
+	mapped, err := model.Map(model.Struct[record]("DecimalProbe", []string{"ID"},
+		model.DecimalPrecision("Amount", decimalProbePrecision, decimalProbeScale),
+		model.DecimalPrecision("WholeAmount", decimalProbePrecision, 0),
+	))
+	if err != nil {
+		t.Fatal("could not map decimal fields")
+	}
+	modelBinding, err := model.BindTypes(mapped, provider)
+	if err != nil {
+		t.Fatal("could not bind decimal fields")
+	}
+	fields := modelBinding.Entities()[0].Properties[1:]
+	var codecs [2]model.DecimalBinding
+	for i, scale := range [...]int{decimalProbeScale, 0} {
+		field := fields[i]
+		standalone := requireDecimalBinding(t, provider, scale)
+		codec, ok := field.DecimalBinding()
+		if !ok || codec != standalone || field.StoreType != standalone.StoreType() ||
+			field.Kind != model.ScalarDecimal || field.Nullable != (i == 1) ||
+			field.Decimal != (model.DecimalFacets{Precision: decimalProbePrecision, Scale: scale}) {
+			t.Fatalf("mapped decimal field %d differs from the explicit binding", i+1)
+		}
+		codecs[i] = codec
+	}
 	for _, tc := range []struct {
 		binding model.DecimalBinding
 		text    string
 	}{
-		{fractional, "1" + strings.Repeat("0", decimalProbePrecision-decimalProbeScale)},
-		{fractional, "0.0000000001"},
-		{integral, "0.1"},
-		{integral, "1" + strings.Repeat("0", decimalProbePrecision)},
+		{codecs[0], "1" + strings.Repeat("0", decimalProbePrecision-decimalProbeScale)},
+		{codecs[0], "0.0000000001"},
+		{codecs[1], "0.1"},
+		{codecs[1], "1" + strings.Repeat("0", decimalProbePrecision)},
 	} {
 		value, err := model.ParseDecimal(tc.text)
 		if err != nil {
@@ -126,7 +179,7 @@ func decimalBindingFacets(t *testing.T, provider model.TypeProvider) (model.Deci
 			t.Fatal("out-of-range decimal encoded before dispatch")
 		}
 	}
-	return fractional, integral
+	return fields, codecs
 }
 
 func requireDecimalBinding(t *testing.T, provider model.TypeProvider, scale int) model.DecimalBinding {
@@ -199,17 +252,17 @@ func verifyDecimalBindingCatalog(s *scenario) {
 	var query, native string
 	switch s.provider {
 	case "sqlite":
-		query = `SELECT name, lower(type), 0, 0 FROM pragma_table_info(?1)
+		query = `SELECT name, lower(type), 0, 0, CASE "notnull" WHEN 1 THEN 'NO' ELSE 'YES' END FROM pragma_table_info(?1)
 			WHERE name = 'amount' OR name = 'whole_amount' ORDER BY cid`
 		native = "text"
 	case "sqlserver":
-		query = "SELECT COLUMN_NAME, DATA_TYPE, NUMERIC_PRECISION, NUMERIC_SCALE FROM INFORMATION_SCHEMA.COLUMNS " +
+		query = "SELECT COLUMN_NAME, DATA_TYPE, NUMERIC_PRECISION, NUMERIC_SCALE, IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS " +
 			"WHERE TABLE_SCHEMA = SCHEMA_NAME() AND TABLE_NAME = " + s.bind(1) +
 			" AND (COLUMN_NAME = 'amount' OR COLUMN_NAME = 'whole_amount') ORDER BY ORDINAL_POSITION"
 		native = "decimal"
 	default:
 		schema := map[string]string{"postgres": "current_schema()", "mysql": "DATABASE()"}
-		query = "SELECT column_name, data_type, numeric_precision, numeric_scale FROM information_schema.columns " +
+		query = "SELECT column_name, data_type, numeric_precision, numeric_scale, is_nullable FROM information_schema.columns " +
 			"WHERE table_schema = " + schema[s.provider] + " AND table_name = " + s.bind(1) +
 			" AND (column_name = 'amount' OR column_name = 'whole_amount') ORDER BY ordinal_position"
 		native = "decimal"
@@ -223,15 +276,16 @@ func verifyDecimalBindingCatalog(s *scenario) {
 	}
 	defer rows.Close()
 	for i, column := range [...]string{"amount", "whole_amount"} {
-		var name, store string
+		var name, store, nullable string
 		var precision, scale int
 		wantPrecision, wantScale := decimalProbePrecision, [2]int{decimalProbeScale, 0}[i]
 		if s.provider == "sqlite" {
 			// SQLite has TEXT affinity. The encoding boundary supplies facets.
 			wantPrecision, wantScale = 0, 0
 		}
-		if !rows.Next() || rows.Scan(&name, &store, &precision, &scale) != nil ||
-			name != column || store != native || precision != wantPrecision || scale != wantScale {
+		wantNullable := [...]string{"NO", "YES"}[i]
+		if !rows.Next() || rows.Scan(&name, &store, &precision, &scale, &nullable) != nil ||
+			name != column || store != native || precision != wantPrecision || scale != wantScale || nullable != wantNullable {
 			s.t.Fatalf("catalog declaration differs for decimal fixture column %s", column)
 		}
 	}
@@ -275,6 +329,20 @@ func verifyDecimalBindingValues(s *scenario, fractional, integral model.DecimalB
 				s.t.Fatalf("could not decode decimal fixture row %d with its exact scale", i+1)
 			}
 		}
+	}
+	var id int
+	var amount string
+	var optional sql.NullString
+	var storedAmount, storedWhole string
+	dest := []any{&id, &amount, &optional}
+	if s.provider == "sqlite" {
+		dest = append(dest, &storedAmount, &storedWhole)
+	}
+	if !rows.Next() || rows.Scan(dest...) != nil || id != len(cases)+1 || amount != cases[0].fixed || optional.Valid {
+		s.t.Fatal("nullable decimal value did not round-trip as SQL NULL")
+	}
+	if s.provider == "sqlite" && (storedAmount != "text" || storedWhole != "null") {
+		s.t.Fatal("SQLite decimal NULL row did not retain text and null storage classes")
 	}
 	if rows.Next() || rows.Err() != nil {
 		s.t.Fatal("unexpected extra decimal value rows or read failure")

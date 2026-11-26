@@ -13,7 +13,7 @@ from driver_run import (
     ACQUIRE_CANCELLATION_SCENARIO, CANCELLATION_SCENARIO, LOCK_TIMEOUT_SCENARIO, MODULE,
     PRE_DISPATCH_SCENARIO, RESULT_PREFIX, SCENARIOS, driver_test_options,
     verified_acquire_cancellation_facts, verified_cancellation_facts, verified_commit_outcome_results,
-    verified_decimal_binding_result,
+    verified_decimal_binding_result, verified_decimal_field_binding_result,
     verified_lock_timeout_facts, verified_model_type_result, verified_owned_tx_result, verified_pre_dispatch_facts,
     verified_save_changes_results, verified_savepoint_tx_results, verified_tx_options_result,
 )
@@ -238,6 +238,9 @@ def run_driver(tempdir, binary, name, profile, *, model_types, owned_tx, savepoi
         extras["tx_options"] = [verified_tx_options_result(output, "sqlite", name, profile.engine_version)]
     if decimal_binding:
         extras["decimal_binding"] = [verified_decimal_binding_result(output, "sqlite", name, profile.engine_version)]
+        extras["decimal_field_binding"] = [
+            verified_decimal_field_binding_result(output, "sqlite", name, profile.engine_version),
+        ]
     if commit_outcome:
         extras["commit_outcome"] = verified_commit_outcome_results(output, "sqlite", name, profile.engine_version)
     return verified_driver_results(output, name, profile), extras

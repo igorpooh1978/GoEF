@@ -20,9 +20,9 @@ The immutable result records ordered primary keys and direct pointer nullability
 
 `model.BindTypes` binds the Code First model to one explicit PostgreSQL, SQLite, SQL Server or MySQL dialect. The initial binding covers built-in Boolean, signed integer, text and binary fields and their direct nullable pointer forms. It adds the native type declaration, logical scalar kind and original length to each physical property. The physical snapshot has its own format version and dialect identity. Code First mapping snapshot v1 keeps its naming and key format. [Binding guide](../user/MODELS_CODE_FIRST.md#bind-the-mapped-model-to-a-provider) · [Binding evidence](../evidence/W003/PROVIDER_TYPE_BINDING.md)
 
-Value conversion, driver selection, physical key/index validation, table layout, capability negotiation, collations and source generation continue in their respective stages. Unsupported types fail before I/O with a typed error whose coordinates reflect canonical entity and mapped property order. Exact decimal retains the dedicated S01 scenario.
+For exact decimal fields, `model.DecimalPrecision` declares a precision and scale pair. `Map` resolves repeated declarations and records the facets in the logical snapshot. `BindTypes` resolves the dialect limits, the physical declaration and an exact text codec. `Decimal` is required and `*Decimal` is nullable. For both version 1 snapshots the new `decimal` member appears only on configured fields. [Decimal field evidence](../evidence/W003/DECIMAL_FIELD_BINDING.md)
 
-
+Unsupported types fail before I/O with a typed error whose coordinates reflect canonical entity and mapped property order. General value conversion, driver selection, physical key/index validation, table layout, capability negotiation, collations and source generation continue in their respective stages.
 
 ## Freeze and resolve
 
