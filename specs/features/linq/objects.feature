@@ -27,3 +27,18 @@ Feature: Enumerate typed local values
     Given empty, one-zero and two-zero sequences
     When I request the single integer from each sequence
     Then the outcomes are missing, present zero and multiple elements respectively
+
+  @LINQ-OBJECTS-001-S05
+  Scenario: Filtering and projection remain deferred when composed
+    Given a replayable counting iterator yielding 1, 2, 3 and 4 with a cleanup callback
+    When I filter for even values and project each match to its decimal string followed by !
+    Then the iterator, predicate and selector are idle
+    When I stop after the first result
+    Then the result is "2!" and the iterator has consumed 1 and 2
+    And the predicate has seen 1 and 2 and the selector has seen only 2
+    And the iterator has released its resources once
+    When I enumerate the pipeline again to completion
+    Then the results are "2!" and "4!" in that order
+    And the iterator and predicate have seen all four values during the replay
+    And the selector has seen 2 and 4 during the replay
+    And the iterator has released its resources twice in total
