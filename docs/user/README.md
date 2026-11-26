@@ -10,6 +10,7 @@ These proposed guides describe workflows and the evidence needed before they can
 - [Filter and project a database query](QUERYING.md)
 - [Choose a LINQ execution mode](LINQ.md)
 - [Transform an in-memory sequence](LINQ_OBJECTS.md)
+- [Generate a typed LINQ binding](LINQ_GENERATED.md)
 - [Compose a database-backed LINQ query](LINQ_TO_ENTITIES.md)
 - [Move explicitly from SQL to objects](LINQ_CLIENT_SERVER_BOUNDARY.md)
 - [Track edits and save changes](TRACKING_AND_SAVE_CHANGES.md)

@@ -6,6 +6,8 @@ The [GoLINQ Objects guide](../docs/user/LINQ_OBJECTS.md) links runnable examples
 go test -run '^Example' -count=1 -v ./linq/objects
 ```
 
+The [generated customer binding](linq/generated/query.go) binds two city arguments and projects a scalar field. Run `go generate ./examples/linq/generated` and `go test -run '^Example$' -count=1 -v ./examples/linq/generated`. See the [generated binding guide](../docs/user/LINQ_GENERATED.md).
+
 The [language feasibility fixture](../test/bootstrap/go-feasibility/) demonstrates Go compiler behavior. The workflows below still need canonical runnable examples.
 
 | Planned runnable example | Scope | Required acceptance |

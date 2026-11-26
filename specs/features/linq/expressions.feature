@@ -19,5 +19,7 @@ Feature: Compose typed expression trees
   Scenario: A changed declaration invalidates generated code
     Given a generated entrypoint for a marked source declaration
     When the declaration changes without regeneration
-    Then the freshness check identifies the changed declaration
-    And an unsupported expression is diagnosed at its source span on regeneration
+    Then the freshness check returns a stale-output error without rewriting the binding
+    And the check also rejects an edited generated file
+    And regeneration from unchanged source produces identical bytes
+    And an unsupported expression is diagnosed at its source location on regeneration
