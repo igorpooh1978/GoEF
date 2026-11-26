@@ -45,6 +45,27 @@ function Test-LockTimeoutEvidence {
         -not $Facts.Contains('native_code'))
 }
 
+function Test-PreDispatchEvidence {
+    param($Facts)
+
+    if ($Facts -isnot [System.Collections.IDictionary]) {
+        return $false
+    }
+    $expected = @{
+        pre_dispatch_canceled = 'context.Canceled'
+        pre_dispatch_deadline = 'context.DeadlineExceeded'
+        pre_dispatch_calls = '0,0,1'
+        pre_dispatch_pool_in_use_after = '0'
+    }
+    foreach ($key in $expected.Keys) {
+        if ($Facts[$key] -isnot [string] -or $Facts[$key] -cne $expected[$key]) {
+            return $false
+        }
+    }
+    return (-not $Facts.Contains('native_code') -and -not $Facts.Contains('lock_deadline_cause') -and
+        -not $Facts.Contains('lock_wait_observed') -and -not $Facts.Contains('lock_timeout_native'))
+}
+
 function Confirm-DriverResults {
     param(
         [string[]] $Lines,
@@ -54,7 +75,7 @@ function Confirm-DriverResults {
     )
 
     $scenarioIds = 'LAB-DRIVER-001-S01', 'LAB-DRIVER-001-S02', 'LAB-DRIVER-001-S03',
-        'LAB-DRIVER-001-S04', 'LAB-DRIVER-001-S05'
+        'LAB-DRIVER-001-S04', 'LAB-DRIVER-001-S05', 'LAB-DRIVER-001-S06'
     $seenProviders = [System.Collections.Generic.HashSet[string]]::new()
     $failures = [System.Collections.Generic.List[string]]::new()
     if ($ExitCode -ne 0) {
@@ -125,6 +146,9 @@ function Confirm-DriverResults {
             }
             if ($scenario -ceq 'LAB-DRIVER-001-S05' -and -not (Test-LockTimeoutEvidence $facts $provider)) {
                 $failures.Add("Driver scenario $scenario for $expectedProfile did not report both observed waits and the expected lock timeout outcomes.")
+            }
+            if ($scenario -ceq 'LAB-DRIVER-001-S06' -and -not (Test-PreDispatchEvidence $facts)) {
+                $failures.Add("Driver scenario $scenario for $expectedProfile did not report the expected pre-dispatch causes, call counts and released pool.")
             }
             if ($ExpectedFacts.Contains($provider)) {
                 foreach ($expected in $ExpectedFacts[$provider].GetEnumerator()) {
@@ -228,10 +252,11 @@ function Invoke-SqliteCompatibility {
         'LAB-DRIVER-001-S03' = '787'
         'LAB-DRIVER-001-S04' = $null
         'LAB-DRIVER-001-S05' = $null
+        'LAB-DRIVER-001-S06' = $null
     }
     $driverScenarios = $report['driver_scenarios']
     if ($driverScenarios -isnot [array] -or $driverScenarios.Count -ne ($profiles.Count * $nativeCodes.Count)) {
-        throw 'SQLite compatibility must report five driver scenarios for each linked runtime.'
+        throw 'SQLite compatibility must report six driver scenarios for each linked runtime.'
     }
     $seenDriverScenarios = [System.Collections.Generic.HashSet[string]]::new()
     foreach ($result in $driverScenarios) {
@@ -254,6 +279,9 @@ function Invoke-SqliteCompatibility {
         }
         if ($scenario -ceq 'LAB-DRIVER-001-S05' -and -not (Test-LockTimeoutEvidence $facts 'sqlite')) {
             throw "SQLite compatibility did not report both observed waits and the expected lock timeout outcomes for $profileName/$scenario."
+        }
+        if ($scenario -ceq 'LAB-DRIVER-001-S06' -and -not (Test-PreDispatchEvidence $facts)) {
+            throw "SQLite compatibility did not report the expected pre-dispatch causes, call counts and released pool for $profileName/$scenario."
         }
         if ($facts -isnot [System.Collections.IDictionary] -or
             $facts['engine_version'] -isnot [string] -or $facts['engine_version'] -cne $profiles[$profileName].engine_version -or

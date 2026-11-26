@@ -10,8 +10,8 @@ import secrets
 from tempfile import TemporaryDirectory
 
 from driver_run import (
-    CANCELLATION_SCENARIO, LOCK_TIMEOUT_SCENARIO, MODULE, RESULT_PREFIX, SCENARIOS, TEST_ARGS,
-    verified_cancellation_facts, verified_lock_timeout_facts,
+    CANCELLATION_SCENARIO, LOCK_TIMEOUT_SCENARIO, MODULE, PRE_DISPATCH_SCENARIO, RESULT_PREFIX, SCENARIOS, TEST_ARGS,
+    verified_cancellation_facts, verified_lock_timeout_facts, verified_pre_dispatch_facts,
 )
 from runtime import Blocked, LabError, command, inherited, safe_reason
 
@@ -186,6 +186,8 @@ def verified_driver_results(output, name, profile):
             outcome = verified_cancellation_facts(facts)
         elif scenario == LOCK_TIMEOUT_SCENARIO:
             outcome = verified_lock_timeout_facts(facts, "sqlite")
+        elif scenario == PRE_DISPATCH_SCENARIO:
+            outcome = verified_pre_dispatch_facts(facts)
         elif (native is None and "native_code" in facts) or (native is not None and facts.get("native_code") != native):
             raise LabError("The SQLite driver did not report the expected native constraint outcome.")
         results[scenario] = {
@@ -202,7 +204,7 @@ def verified_driver_results(output, name, profile):
             },
         }
     if set(results) != SCENARIOS:
-        raise LabError("The SQLite driver did not report all five required scenarios.")
+        raise LabError("The SQLite driver did not report all six required scenarios.")
     return [results[scenario] for scenario in sorted(results)]
 
 

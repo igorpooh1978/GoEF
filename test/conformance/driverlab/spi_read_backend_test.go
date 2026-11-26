@@ -32,7 +32,8 @@ func (b spiReadBackend) Acquire(ctx context.Context) (provider.Lease, error) {
 }
 
 type spiReadLease struct {
-	conn *sql.Conn
+	conn            *sql.Conn
+	queryDispatches int
 }
 
 func (l *spiReadLease) Query(ctx context.Context, command provider.Command, bindings provider.Bindings) (provider.Rows, error) {
@@ -43,6 +44,10 @@ func (l *spiReadLease) Query(ctx context.Context, command provider.Command, bind
 		command.Columns[0] != (provider.Column{Kind: provider.KindInteger}) {
 		return nil, errors.New("SPI fixture requires an unbound integer query")
 	}
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	l.queryDispatches++
 	rows, err := l.conn.QueryContext(ctx, command.SQL)
 	if err != nil {
 		return nil, spiReadError(ctx, "could not open SPI fixture rows")

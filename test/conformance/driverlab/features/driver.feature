@@ -73,3 +73,16 @@ Feature: Observe transaction outcomes, constraints and reader cancellation with 
       | sqlite    |
       | sqlserver |
       | mysql     |
+
+  @LAB-DRIVER-001-S06
+  Scenario Outline: Stop an already canceled or expired query before dispatch
+    Given a single-connection provider SPI fixture on <provider>
+    When the same lease receives a canceled query, an expired query and a live query
+    Then only the live query reaches database/sql and the lease returns to the pool
+
+    Examples:
+      | provider  |
+      | postgres  |
+      | sqlite    |
+      | sqlserver |
+      | mysql     |
