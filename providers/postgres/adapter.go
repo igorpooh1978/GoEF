@@ -46,7 +46,11 @@ func New(db *sql.DB) (*Backend, error) {
 func closePhysical(ctx context.Context, native any) error {
 	// pgx's database/sql driver may return the connection to a separate
 	// pgxpool.Pool on Close. End the native session before that can happen.
-	return native.(*stdlib.Conn).Conn().Close(ctx)
+	conn, ok := native.(*stdlib.Conn)
+	if !ok {
+		return goeferr.ErrInvalidState
+	}
+	return conn.Conn().Close(ctx)
 }
 
 func classify(err error) (error, string) {

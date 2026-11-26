@@ -49,12 +49,19 @@ func (s *stream) Next() ([]provider.Value, error) {
 		if err := s.rows.Err(); err != nil {
 			return s.fail(err)
 		}
-		if s.rows.NextResultSet() {
-			s.terminal = goeferr.NewUnsupportedFeature()
-		} else if err := s.rows.Err(); err != nil {
+		if err := s.ctx.Err(); err != nil {
 			return s.fail(err)
-		} else {
-			s.terminal = io.EOF
+		}
+		more := s.rows.NextResultSet()
+		if err := s.rows.Err(); err != nil {
+			return s.fail(err)
+		}
+		if err := s.ctx.Err(); err != nil {
+			return s.fail(err)
+		}
+		s.terminal = io.EOF
+		if more {
+			s.terminal = goeferr.NewUnsupportedFeature()
 		}
 		return nil, s.terminal
 	}
@@ -85,7 +92,9 @@ func (s *stream) fail(err error) ([]provider.Value, error) {
 	return nil, s.terminal
 }
 
-func (s *stream) Close(context.Context) error {
+// database/sql has no context-aware Rows.Close. Close synchronously so the
+// leased connection cannot escape while native result cleanup is in progress.
+func (s *stream) Close(_ context.Context) error {
 	if s.rows == nil {
 		return nil
 	}

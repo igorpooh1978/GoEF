@@ -49,7 +49,7 @@ func (b *Backend) Descriptor() provider.Descriptor {
 // Acquire transfers a lease on one physical connection. No user command is
 // dispatched during acquisition.
 func (b *Backend) Acquire(ctx context.Context) (provider.Lease, error) {
-	if ctx == nil {
+	if ctx == nil || b == nil || b.db == nil {
 		return nil, goeferr.NewInvalidState()
 	}
 	conn, err := b.db.Conn(ctx)
@@ -81,8 +81,15 @@ func (l *lease) Query(ctx context.Context, command provider.Command, bindings pr
 	if err != nil {
 		return nil, l.backend.failure(ctx, goeferr.PhaseRead, err)
 	}
+	if err := ctx.Err(); err != nil {
+		primary := l.backend.failure(ctx, goeferr.PhaseRead, err)
+		return nil, errors.Join(primary, l.backend.failure(ctx, goeferr.PhaseRelease, rows.Close()))
+	}
 	names, err := rows.Columns()
 	if err != nil {
+		if rowsErr := rows.Err(); rowsErr != nil {
+			err = rowsErr
+		}
 		primary := l.backend.failure(ctx, goeferr.PhaseRead, err)
 		return nil, errors.Join(primary, l.backend.failure(ctx, goeferr.PhaseRelease, rows.Close()))
 	}
