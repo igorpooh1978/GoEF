@@ -11,6 +11,7 @@ Paths in this table are relative to the adopted module root. The provider execut
 | Application | Root `goef`, one selected provider, and the public packages it uses | The application passes the concrete adapter and its ownership policy to the factory. An Objects-only consumer imports just `linq/objects`. |
 | `goef` | `model`, `provider`, `linq/queryable`, `goeferr`, internal query execution and tracking | The root composes a frozen model, context operation slot, transaction binding and tracker. |
 | `linq/objects` | Standard library | An application can enumerate Go values without linking the ORM. |
+| `transaction` | Standard library `database/sql` and `goeferr` | Owned transaction handles take an application-supplied SQL pool and release one physical lease after completion. |
 | `linq/expressions` | `model` for logical descriptor identities | Typed symbolic inputs carry owner and result types. They require neither an executing context nor a SQL dialect. |
 | `linq/queryable` | `linq/expressions`, internal query IR and execution binding | Set roots and projections refer to the context's execution binding. The binding is defined below the root facade, so queryable has no back edge to `goef`. |
 | `model`, `goeferr` | Standard library, with `model` also using `goeferr` | Frozen logical metadata and portable errors are available to all consumers. Provider-resolved physical mappings are separate. |

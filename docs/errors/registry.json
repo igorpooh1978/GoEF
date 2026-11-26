@@ -472,7 +472,8 @@
       ],
       "docs": [
         "docs/architecture/ERROR_CONTRACT.md",
-        "docs/errors/README.md"
+        "docs/errors/README.md",
+        "docs/user/TRANSACTIONS.md"
       ],
       "testIds": [
         "TEST-GOEF-STATE-0001"
@@ -526,7 +527,8 @@
       ],
       "docs": [
         "docs/architecture/ERROR_CONTRACT.md",
-        "docs/errors/README.md"
+        "docs/errors/README.md",
+        "docs/user/TRANSACTIONS.md"
       ],
       "testIds": [
         "TEST-GOEF-STATE-0002"
@@ -1286,7 +1288,8 @@
       ],
       "docs": [
         "docs/architecture/ERROR_CONTRACT.md",
-        "docs/errors/README.md"
+        "docs/errors/README.md",
+        "docs/user/TRANSACTIONS.md"
       ],
       "testIds": [
         "TEST-GOEF-IO-0003"
@@ -1341,7 +1344,8 @@
       ],
       "docs": [
         "docs/architecture/ERROR_CONTRACT.md",
-        "docs/errors/README.md"
+        "docs/errors/README.md",
+        "docs/user/TRANSACTIONS.md"
       ],
       "testIds": [
         "TEST-GOEF-IO-0004"
@@ -1506,7 +1510,8 @@
       ],
       "docs": [
         "docs/architecture/ERROR_CONTRACT.md",
-        "docs/errors/README.md"
+        "docs/errors/README.md",
+        "docs/user/TRANSACTIONS.md"
       ],
       "testIds": [
         "TEST-GOEF-IO-0007"
@@ -1560,7 +1565,8 @@
       ],
       "docs": [
         "docs/architecture/ERROR_CONTRACT.md",
-        "docs/errors/README.md"
+        "docs/errors/README.md",
+        "docs/user/TRANSACTIONS.md"
       ],
       "testIds": [
         "TEST-GOEF-TX-0001"
@@ -1668,7 +1674,8 @@
       ],
       "docs": [
         "docs/architecture/ERROR_CONTRACT.md",
-        "docs/errors/README.md"
+        "docs/errors/README.md",
+        "docs/user/TRANSACTIONS.md"
       ],
       "testIds": [
         "TEST-GOEF-TX-0003"

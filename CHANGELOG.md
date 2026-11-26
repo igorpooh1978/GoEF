@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add owned transactions on one physical connection with explicit begin, commit, rollback, and pool return ([#2](https://github.com/igorpooh1978/GoEF/issues/2)).
 - Bind Go booleans, signed integers, strings and byte slices to physical types for all four database families ([#3](https://github.com/igorpooh1978/GoEF/issues/3)).
 - Add a terminal `Count` for in-memory iterators and verify complete traversal through `Where` and `Select` ([#4](https://github.com/igorpooh1978/GoEF/issues/4)).
 - Resolve Code First table and property mappings with independent column name and length precedence and deterministic metadata ([#3](https://github.com/igorpooh1978/GoEF/issues/3)).

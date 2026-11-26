@@ -936,8 +936,8 @@
         "docs/architecture/TRANSACTION_ENGINE.md",
         "docs/user/TRANSACTIONS.md"
       ],
-      "test": null,
-      "evidence": null,
+      "test": "test/conformance/driverlab/owned_transaction_test.go#TestOwnedTransaction",
+      "evidence": "docs/evidence/W005/OWNED_TRANSACTION.md",
       "status": "SPECIFIED"
     },
     {

@@ -4,7 +4,8 @@ param(
     [switch] $AcceptSqlServerEula,
     [switch] $AcceptLegacySqlServerEula,
     [switch] $Compatibility,
-    [switch] $ModelTypes
+    [switch] $ModelTypes,
+    [switch] $OwnedTx
 )
 
 Set-StrictMode -Version 3.0
@@ -212,22 +213,25 @@ function Invoke-DriverMatrix {
         [string[]] $Selection,
         [System.Collections.IDictionary] $ExpectedProfiles,
         [System.Collections.IDictionary] $ExpectedFacts = @{},
-        [switch] $ModelTypes
+        [switch] $ModelTypes,
+        [switch] $OwnedTx
     )
 
     $driverArguments = @('-B', 'test/conformance/lab/driver_run.py') + $Selection
     if ($ModelTypes) { $driverArguments += '--model-types' }
+    if ($OwnedTx) { $driverArguments += '--owned-tx' }
     Write-Host "RUN $(Split-Path -Leaf $Python) $($driverArguments -join ' ')"
     $driverOutput = @(& $Python @driverArguments)
     Confirm-DriverResults -Lines $driverOutput -ExitCode $LASTEXITCODE -ExpectedProfiles $ExpectedProfiles -ExpectedFacts $ExpectedFacts
 }
 
 function Invoke-SqliteCompatibility {
-    param([string] $Python, [switch] $ModelTypes)
+    param([string] $Python, [switch] $ModelTypes, [switch] $OwnedTx)
 
     $script = 'test/conformance/lab/sqlite_compat.py'
     $sqliteArguments = @('-B', $script)
     if ($ModelTypes) { $sqliteArguments += '--model-types' }
+    if ($OwnedTx) { $sqliteArguments += '--owned-tx' }
     Write-Host "RUN $(Split-Path -Leaf $Python) $($sqliteArguments -join ' ')"
     $lines = @(& $Python @sqliteArguments)
     $exitCode = $LASTEXITCODE
@@ -445,7 +449,7 @@ try {
     $baselineFacts = @{ sqlserver = @{ version = '16.0.4325.4'; compatibility_level = '160'; generate_series = 'available' } }
     $matrixFailures = [System.Collections.Generic.List[string]]::new()
     try {
-        Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles $baselineProfiles -ExpectedFacts $baselineFacts -ModelTypes:$ModelTypes
+        Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles $baselineProfiles -ExpectedFacts $baselineFacts -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx
         Write-Host 'PASS W002 local checks and all four driver suites'
     }
     catch {
@@ -492,7 +496,7 @@ try {
             }
             try {
                 $expectedFacts = @{ $provider = $entry.Value.Facts }
-                Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles @{ $provider = $profileName } -ExpectedFacts $expectedFacts -ModelTypes:$ModelTypes
+                Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles @{ $provider = $profileName } -ExpectedFacts $expectedFacts -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx
                 Write-Host "PASS W002 $profileName compatibility suite"
             }
             catch {
@@ -500,7 +504,7 @@ try {
             }
         }
         try {
-            Invoke-SqliteCompatibility -Python $python -ModelTypes:$ModelTypes
+            Invoke-SqliteCompatibility -Python $python -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx
         }
         catch {
             $matrixFailures.Add($_.Exception.Message)
@@ -511,6 +515,9 @@ try {
     }
     if ($ModelTypes) {
         Write-Host 'PASS model type round-trip checks on all selected profiles'
+    }
+    if ($OwnedTx) {
+        Write-Host 'PASS owned transaction checks on all selected profiles'
     }
     if ($Compatibility) {
         # SQLite file compatibility reruns the baseline profile and adds one linked runtime.

@@ -1461,10 +1461,10 @@
           "relation": "behavior"
         }
       ],
-      "contract": "Only a transaction owner may complete or dispose its handle. A failed atomic save rolls its own changes back.",
+      "contract": "An owned transaction executes and completes on one physical lease, returns the lease on known completion and exposes terminal state. Only an owner completes its transaction.",
       "goApi": {
-        "status": "PROPOSED",
-        "description": "Explicit owned and externally enlisted transaction handles."
+        "status": "IMPLEMENTED",
+        "description": "Owned default-options transactions over an application-provided database/sql pool. External enlistment and atomic tracker saves remain proposed."
       },
       "wave": "W005",
       "issues": [
@@ -1479,7 +1479,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "Engine and Go driver versions are pending real conformance.",
+          "reason": "S02 has an owned transaction fixture. External enlistment and atomic graph saves remain outstanding.",
           "evidence": null
         },
         "sqlite": {
@@ -1487,7 +1487,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "Engine and Go driver versions are pending real conformance.",
+          "reason": "S02 has an owned transaction fixture. External enlistment and atomic graph saves remain outstanding.",
           "evidence": null
         },
         "sqlserver": {
@@ -1495,7 +1495,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "Engine and Go driver versions are pending real conformance.",
+          "reason": "S02 has an owned transaction fixture. External enlistment and atomic graph saves remain outstanding.",
           "evidence": null
         },
         "mysql": {
@@ -1503,7 +1503,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "Engine and Go driver versions are pending real conformance.",
+          "reason": "S02 has an owned transaction fixture. External enlistment and atomic graph saves remain outstanding.",
           "evidence": null
         }
       },
@@ -1512,9 +1512,13 @@
         "TX-OWN-001-S02",
         "TX-OWN-001-S03"
       ],
-      "tests": [],
-      "status": "SPECIFIED",
-      "deviations": [],
+      "tests": [
+        "test/conformance/driverlab/owned_transaction_test.go#TestOwnedTransaction"
+      ],
+      "status": "PARTIAL",
+      "deviations": [
+        "The initial API covers explicit owned DML and completion. Borrowed transactions and tracked graph saves retain separate acceptance."
+      ],
       "adr": null,
       "docs": [
         "docs/user/TRANSACTIONS.md",

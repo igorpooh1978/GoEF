@@ -11,6 +11,8 @@
 
 ## Read a record
 
+The owned transaction API reports a portable invalid-state error for completed handles. It preserves cancellation and deadline causes, reports failed rollback separately, and surfaces unknown commit outcome without exposing native driver text. [Ownership evidence](../evidence/W005/OWNED_TRANSACTION.md)
+
 The initial `goeferr` package implements `GOEF-MODEL-0001` for model validation, invalid Code First mappings and rejected scalar type bindings. Its tests exercise `errors.Is`, `errors.As`, safe error text and the stable phase, outcome and retry fields. The error registry reserves the wider contract and version fields for release. [Model guide](../user/MODELS_CODE_FIRST.md) · [Validation evidence](../evidence/W003/MODEL_KEY_VALIDATION.md)
 
 Each portable entry declares its trigger, phase, outcome policy, retry class and preconditions, allowlisted metadata, redaction, lifecycle, issue, scenario, planned test identifiers and primary sources. `firstVersion: null` means no released implementation. A policy such as `inspect_transaction` requires runtime evidence before reporting a disposition. `providerMappings` references native rules by ID within the named table. Empty lists mean no seeded native rule; many errors originate entirely in model validation, cardinality or transaction state. `testIds` reserve future case names. The [specifications](../../specs/features/errors/) define intended outcomes and the [public error contract](../architecture/ERROR_CONTRACT.md) defines wrapping, display and CLI behavior.

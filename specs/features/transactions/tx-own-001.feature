@@ -19,9 +19,11 @@ Feature: Honor transaction and connection ownership
 
   @TX-OWN-001-S02
   Scenario Outline: Commit and rollback have observable terminal states
-    Given two successive library-owned transactions on <provider>
-    When one inserts A and commits and the other inserts B and rolls back
-    Then a fresh connection finds A only
+    Given an isolated <provider> pool with capacity for one physical connection
+    When one library-owned transaction inserts A and commits and the next inserts B and rolls back
+    Then each transaction uses the same physical connection for its commands
+    And a queued acquisition can reuse that physical connection after each completion
+    And a fresh physical connection finds A only
     And both handles reject further commands with ErrInvalidState
     And the pool returns to its initial in-use count
 

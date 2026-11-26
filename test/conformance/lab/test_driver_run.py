@@ -154,6 +154,33 @@ class ModelTypeEvidenceTests(unittest.TestCase):
             with self.subTest(output=output), self.assertRaises(driver_run.LabError):
                 verify(output)
 
+    def test_owned_transaction_report_requires_the_requested_engine_and_scenario(self):
+        expected = {
+            "provider": "postgres", "profile": "postgres-18", "engine_version": "18.7",
+            "scenario": "TX-OWN-001-S02", "status": "PASS",
+        }
+
+        def verify(*rows):
+            output = "\n".join("GOEF_OWNED_TX_RESULT=" + json.dumps(row) for row in rows)
+            return driver_run.verified_owned_tx_result(output, "postgres", "postgres-18", "18.7")
+
+        self.assertEqual(verify(expected), expected)
+        for rows in (
+            (), (expected, expected), ({**expected, "scenario": "TX-OWN-001-S01"},),
+            ({**expected, "engine_version": "18.6"},), ({**expected, "status": "SKIP"},),
+        ):
+            with self.subTest(rows=rows), self.assertRaises(driver_run.LabError):
+                verify(*rows)
+
+    def test_optional_cases_can_run_together(self):
+        arguments, environment = driver_run.driver_test_options(model_types=True, owned_tx=True)
+        self.assertEqual(arguments, (
+            "-test.run=^(TestDriverGherkin|TestModelTypeRoundTrip|TestOwnedTransaction)$",
+            *driver_run.TEST_ARGS[1:],
+        ))
+        self.assertEqual(environment, {"GOEF_DRIVERLAB_MODEL_TYPES": "1", "GOEF_DRIVERLAB_OWNED_TX": "1"})
+        self.assertEqual(driver_run.driver_test_options(), (driver_run.TEST_ARGS, {}))
+
 
 class DriverEvidenceTests(unittest.TestCase):
     def result_lines(self, provider="sqlite", native_codes=("2067", "787"), **profile_facts):
