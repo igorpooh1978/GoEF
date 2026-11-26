@@ -114,6 +114,14 @@ func main() {
 
 `Any` stops at the first value, `AnyBy` at the first match, and `All` at the first failure. On an empty source, `Any` and `AnyBy` return `false` and `All` returns `true`. Each call starts a new enumeration. A call on an unbounded source keeps reading until it can decide the answer. [Short-circuit test evidence](../evidence/W008/OBJECTS_QUANTIFIERS.md)
 
+## Select a window of values
+
+`objects.Skip(source, count)` ignores the first `count` elements. A nonpositive count forwards the source from its first value. `objects.Take(source, count)` yields at most `count` values and returns an empty sequence for a nonpositive count without starting the source. Positive `Take` stops on its last yielded value, so a finite window can come from an unbounded sequence. [Runnable paging example](../../linq/objects/paging_example_test.go) · [Paging evidence](../evidence/W008/OBJECTS_SKIP_TAKE.md)
+
+## Join sources and values
+
+`objects.Concat(first, second)` yields the first sequence followed by the second. `objects.Append(source, value)` yields the value after the source ends. `objects.Prepend(source, value)` yields the value before starting the source. They preserve duplicates and encounter order. An early stop reaches the active source and leaves any later source unopened. [Runnable examples and tests](../../linq/objects/concat_test.go) · [Composition evidence](../evidence/W008/OBJECTS_CONCAT.md)
+
 - [LINQ Objects design](../architecture/LINQ_OBJECTS.md)
 - [Where test evidence](../evidence/W008/OBJECTS_WHERE.md)
 - [Select and pipeline test evidence](../evidence/W008/OBJECTS_SELECT.md)

@@ -140,7 +140,13 @@ Use ASCII digits, an optional leading sign, and an optional decimal point with d
 
 Go equality compares canonical values at the same scale. For example, `+01.00` compares equal to `1.00`. Use `MarshalText` and `UnmarshalText` to preserve value and scale through a text round trip. Invalid input leaves the receiver unchanged.
 
-Provider binding for SQL decimal columns is a separate capability. `model.BindTypes` reports `goeferr.ErrInvalidModel` for a `model.Decimal` field. [Runnable decimal example and tests](../../model/decimal_test.go) · [Exact decimal evidence](../evidence/W003/DECIMAL_VALUE.md)
+[Runnable decimal example and tests](../../model/decimal_test.go) · [Exact decimal evidence](../evidence/W003/DECIMAL_VALUE.md)
+
+## Bind an exact SQL decimal column
+
+Use `model.BindDecimal(provider, precision, scale)` to declare a column explicitly and get its `StoreType`. Pass a `model.Decimal` to `binding.Encode` and send the returned text as a parameter. Select the stored value as text and pass it to `binding.Decode`. Both methods validate capacity and preserve the requested scale. Conversion returns an error if it would discard any nonzero digit. [Runnable binding example](../../model/decimal_binding_test.go)
+
+PostgreSQL uses `numeric(p,s)`. With pgx, cast a bound string through `text` before casting it to that numeric type. SQL Server and MySQL use `decimal(p,s)`. SQLite uses `TEXT`, where sorting follows the text collation and the Go codec supplies the precision and scale checks. `BindDecimal` applies to an explicitly declared column. Struct-field bindings still use the built-in scalar set from the earlier table. [Catalog and round-trip evidence](../evidence/W003/DECIMAL_SQL_BINDING.md)
 
 Feature IDs: MODEL-MAP-001, MODEL-NULL-001, MODEL-TYPE-001, MODEL-VALID-001.
 

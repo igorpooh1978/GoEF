@@ -6,6 +6,8 @@ The indexed variants `objects.WhereIndexed` and `objects.SelectIndexed` pass eac
 
 `objects.Any`, `objects.AnyBy`, and `objects.All` are terminal operations. They inspect values in encounter order and stop at the first value, first match, or first failure, respectively. Empty inputs return false for `Any` and `AnyBy` and true for `All`. Each call enumerates its input once, with zero buffering and source-controlled replayability. [Quantifier behavior and verification](../evidence/W008/OBJECTS_QUANTIFIERS.md)
 
+`objects.Skip` and `objects.Take` apply an integer window without buffering. `Take` returns an empty sequence without starting its input for a nonpositive limit, and a positive limit stops on the last requested value. `Concat`, `Append` and `Prepend` consume only the demanded segments in order. [Paging verification](../evidence/W008/OBJECTS_SKIP_TAKE.md) · [Composition verification](../evidence/W008/OBJECTS_CONCAT.md)
+
 | Input | Proposed observation |
 | --- | --- |
 | Slice | Enumerations traverse the current elements of the captured slice. No snapshot or synchronization is implied. Specify mutation timing before accepting concurrent readers. |

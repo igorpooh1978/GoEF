@@ -426,6 +426,36 @@
       "status": "SPECIFIED"
     },
     {
+      "featureId": "LINQ-OBJECTS-001",
+      "scenarioId": "LINQ-OBJECTS-001-S09",
+      "spec": "specs/features/linq/objects.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_OBJECTS.md",
+        "docs/user/LINQ_OBJECTS.md"
+      ],
+      "test": "linq/objects/paging_test.go#TestSkipTakeStopsAndReplays",
+      "evidence": "docs/evidence/W008/OBJECTS_SKIP_TAKE.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-OBJECTS-001",
+      "scenarioId": "LINQ-OBJECTS-001-S10",
+      "spec": "specs/features/linq/objects.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_OBJECTS.md",
+        "docs/user/LINQ_OBJECTS.md"
+      ],
+      "test": "linq/objects/concat_test.go#TestConcatStartsOnlyDemandedSources",
+      "evidence": "docs/evidence/W008/OBJECTS_CONCAT.md",
+      "status": "SPECIFIED"
+    },
+    {
       "featureId": "LINQ-QUERYABLE-001",
       "scenarioId": "LINQ-QUERYABLE-001-S01",
       "spec": "specs/features/linq/queryable.feature",
@@ -776,8 +806,8 @@
       "docs": [
         "docs/user/MODELS_CODE_FIRST.md"
       ],
-      "test": null,
-      "evidence": null,
+      "test": "test/conformance/driverlab/decimal_binding_test.go#TestDecimalBindingRoundTrip",
+      "evidence": "docs/evidence/W003/DECIMAL_SQL_BINDING.md",
       "status": "SPECIFIED"
     },
     {

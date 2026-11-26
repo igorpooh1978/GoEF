@@ -50,6 +50,8 @@ Add `-SaveChanges` to exercise automatic rollback of a failed owned graph and a 
 
 Add `-TxOptions` to exercise explicit isolation, native read-only enforcement where supported, and pool behavior after completion. Both Python launchers accept `--tx-options`. [Isolation evidence](../../../docs/evidence/W005/ISOLATION_OPTIONS.md)
 
+Add `-DecimalBinding` to exercise catalog precision, lossless fixed-scale text and a fresh-session decimal round trip. Both Python launchers accept `--decimal-binding`. [Decimal catalog and round-trip evidence](../../../docs/evidence/W003/DECIMAL_SQL_BINDING.md)
+
 Run `python -B test/conformance/lab/mysql_in_flight_read.py` for both pinned MySQL blocked-read cancellation checks. Run `python -B test/conformance/lab/sqlite_wal_recovery.py` for recovery of a durable WAL commit across the two pinned SQLite runtimes. [MySQL cancellation evidence](../../../docs/evidence/W002/MYSQL_IN_FLIGHT_READ.md) · [SQLite WAL recovery evidence](../../../docs/evidence/W002/SQLITE_WAL_RECOVERY.md)
 
 The SQL Server 2022 profiles also check that `GENERATE_SERIES` returns the expected values at compatibility level 160 and is unavailable at 140 under the fixture's database settings.

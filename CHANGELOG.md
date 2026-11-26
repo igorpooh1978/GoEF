@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Bind explicit exact-decimal columns for PostgreSQL, SQLite, SQL Server and MySQL with checked fixed-scale conversion ([#3](https://github.com/igorpooh1978/GoEF/issues/3)).
+- Add lazy `Skip`, `Take`, `Concat`, `Append` and `Prepend` for in-memory sequences ([#4](https://github.com/igorpooh1978/GoEF/issues/4)).
+
 - Add explicit transaction isolation, native read-only mode where supported, and single-row reads on the bound transaction ([#2](https://github.com/igorpooh1978/GoEF/issues/2)).
 - Add a Go decimal value with exact text round trips that preserve scale ([#3](https://github.com/igorpooh1978/GoEF/issues/3)).
 - Add indexed `WhereIndexed` and `SelectIndexed` transformations and short-circuit `Any`, `AnyBy` and `All` in Objects mode ([#4](https://github.com/igorpooh1978/GoEF/issues/4)).

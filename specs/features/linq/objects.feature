@@ -71,3 +71,17 @@ Feature: Enumerate typed local values
     When I ask whether there is a match, a match satisfying a predicate, or all matches satisfy a predicate
     Then each query stops at its first conclusive result and closes the source before returning
     And an empty sequence has no match and satisfies every universal predicate
+
+  @LINQ-OBJECTS-001-S09
+  Scenario: A lazy window consumes only its skipped prefix and requested values
+    Given a replayable iterator that records reads and cleanup
+    When I skip a fixed prefix and take a limited window
+    Then only the prefix and requested window are read on each replay
+    And taking zero leaves the iterator unopened
+
+  @LINQ-OBJECTS-001-S10
+  Scenario: Composition starts only demanded sequence segments
+    Given two replayable sequences in encounter order and an additional value
+    When I concatenate the sequences or append or prepend the value
+    Then enumeration preserves the order and duplicates
+    And a consumer stopping in an earlier segment leaves a later source unopened

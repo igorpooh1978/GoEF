@@ -257,7 +257,7 @@
       "contract": "Round-trip a supported scalar comparison and value without losing precision under a declared provider type mapping.",
       "goApi": {
         "status": "IMPLEMENTED",
-        "description": "BindTypes resolves built-in scalars. Decimal preserves exact plain text and scale in Go. The SQL decimal storage codecs retain separate validation."
+        "description": "BindTypes resolves built-in scalars. Decimal preserves exact Go text. BindDecimal validates an explicit SQL decimal column and exact fixed-scale conversion."
       },
       "wave": "W005",
       "issues": [
@@ -272,7 +272,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "S02 has a pinned scalar binding fixture. Exact decimal and codec coverage for S01 remain outstanding.",
+          "reason": "S01 and S02 have pinned fixtures for explicit decimal and built-in scalar columns. Broader physical type and conversion parity remains outstanding.",
           "evidence": null
         },
         "sqlite": {
@@ -280,7 +280,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "S02 has a pinned scalar binding fixture. Exact decimal and codec coverage for S01 remain outstanding.",
+          "reason": "S01 and S02 have pinned fixtures for explicit decimal and built-in scalar columns. Broader physical type and conversion parity remains outstanding.",
           "evidence": null
         },
         "sqlserver": {
@@ -288,7 +288,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "S02 has a pinned scalar binding fixture. Exact decimal and codec coverage for S01 remain outstanding.",
+          "reason": "S01 and S02 have pinned fixtures for explicit decimal and built-in scalar columns. Broader physical type and conversion parity remains outstanding.",
           "evidence": null
         },
         "mysql": {
@@ -296,7 +296,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "S02 has a pinned scalar binding fixture. Exact decimal and codec coverage for S01 remain outstanding.",
+          "reason": "S01 and S02 have pinned fixtures for explicit decimal and built-in scalar columns. Broader physical type and conversion parity remains outstanding.",
           "evidence": null
         }
       },
@@ -310,11 +310,12 @@
         "test/conformance/driverlab/model_types_test.go#TestModelTypeRoundTrip",
         "model/type_binding_test.go#TestBindTypesMODEL_TYPE_001S02",
         "model/type_binding_test.go#TestBindTypesMODEL_TYPE_001S03",
-        "model/decimal_test.go#TestDecimalCanonicalTextAndScale"
+        "model/decimal_test.go#TestDecimalCanonicalTextAndScale",
+        "test/conformance/driverlab/decimal_binding_test.go#TestDecimalBindingRoundTrip"
       ],
       "status": "PARTIAL",
       "deviations": [
-        "Physical scalar declarations are available for the built-in subset. Exact decimal codecs and broader type or conversion parity remain planned.",
+        "Explicit decimal columns have separate bindings. Automatic model field decimal binding and broader type or conversion parity retain separate work.",
         "SQLite length is metadata. PostgreSQL and MySQL use characters, and SQL Server nvarchar length is measured in UTF-16 code units under supplementary-character collations."
       ],
       "adr": null,
@@ -2158,7 +2159,7 @@
       "contract": "Filter and project values through lazy typed in-memory iterators. Count enumerates the composed source once and returns its cardinality.",
       "goApi": {
         "status": "IMPLEMENTED",
-        "description": "Where, Select and indexed variants compose over iter.Seq. Count and short-circuiting Any, AnyBy and All are local terminals."
+        "description": "Typed in-memory filters, projections, indexed variants, integer windows and sequence composition over iter.Seq. Count and Any, AnyBy and All are local terminals."
       },
       "wave": "W008",
       "issues": [
@@ -2207,14 +2208,18 @@
         "LINQ-OBJECTS-001-S05",
         "LINQ-OBJECTS-001-S06",
         "LINQ-OBJECTS-001-S07",
-        "LINQ-OBJECTS-001-S08"
+        "LINQ-OBJECTS-001-S08",
+        "LINQ-OBJECTS-001-S09",
+        "LINQ-OBJECTS-001-S10"
       ],
       "tests": [
         "linq/objects/where_test.go#TestWhereConsumesOnlyNecessaryPrefix",
         "linq/objects/select_test.go#TestWhereSelectStopsAtFirstProjectionAndReplays",
         "linq/objects/count_test.go#TestWhereSelectCountConsumesAllProjections",
         "linq/objects/indexed_test.go#TestIndexedWhereSelectStopsAndResetsBothPositions",
-        "linq/objects/quantifiers_test.go#TestQuantifiersShortCircuitThroughPipeline"
+        "linq/objects/quantifiers_test.go#TestQuantifiersShortCircuitThroughPipeline",
+        "linq/objects/paging_test.go#TestSkipTakeStopsAndReplays",
+        "linq/objects/concat_test.go#TestConcatStartsOnlyDemandedSources"
       ],
       "status": "PARTIAL",
       "deviations": [

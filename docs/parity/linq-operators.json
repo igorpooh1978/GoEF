@@ -12767,7 +12767,7 @@
       "tests": [
         "size_test.go#L32"
       ],
-      "status": "DISCOVERED",
+      "status": "PARTIAL",
       "semanticProfile": "composition",
       "providerCells": {
         "postgres": "local",
@@ -12777,9 +12777,12 @@
       },
       "issue": 4,
       "scenarioIds": [
-        "LINQ-CONFORMANCE-001-S01"
+        "LINQ-CONFORMANCE-001-S01",
+        "LINQ-OBJECTS-001-S10"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "linq/objects/concat_test.go#TestAppendAndPrependStartOnlyDemandedValues"
+      ],
       "evidenceSha": null
     },
     {
@@ -12835,7 +12838,7 @@
       "tests": [
         "concat_test.go#L17"
       ],
-      "status": "DISCOVERED",
+      "status": "PARTIAL",
       "semanticProfile": "set",
       "providerCells": {
         "postgres": "local",
@@ -12845,9 +12848,12 @@
       },
       "issue": 4,
       "scenarioIds": [
-        "LINQ-CONFORMANCE-001-S01"
+        "LINQ-CONFORMANCE-001-S01",
+        "LINQ-OBJECTS-001-S10"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "linq/objects/concat_test.go#TestConcatStartsOnlyDemandedSources"
+      ],
       "evidenceSha": null
     },
     {
@@ -13690,7 +13696,7 @@
       "tests": [
         "concat_test.go#L27"
       ],
-      "status": "DISCOVERED",
+      "status": "PARTIAL",
       "semanticProfile": "composition",
       "providerCells": {
         "postgres": "local",
@@ -13700,9 +13706,12 @@
       },
       "issue": 4,
       "scenarioIds": [
-        "LINQ-CONFORMANCE-001-S01"
+        "LINQ-CONFORMANCE-001-S01",
+        "LINQ-OBJECTS-001-S10"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "linq/objects/concat_test.go#TestAppendAndPrependStartOnlyDemandedValues"
+      ],
       "evidenceSha": null
     },
     {
@@ -14071,7 +14080,7 @@
       "tests": [
         "skip_test.go#L5"
       ],
-      "status": "DISCOVERED",
+      "status": "PARTIAL",
       "semanticProfile": "partition",
       "providerCells": {
         "postgres": "local",
@@ -14081,9 +14090,12 @@
       },
       "issue": 4,
       "scenarioIds": [
-        "LINQ-CONFORMANCE-001-S01"
+        "LINQ-CONFORMANCE-001-S01",
+        "LINQ-OBJECTS-001-S09"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "linq/objects/paging_test.go#TestSkipTakeStopsAndReplays"
+      ],
       "evidenceSha": null
     },
     {
@@ -14241,7 +14253,7 @@
       "tests": [
         "take_test.go#L8"
       ],
-      "status": "DISCOVERED",
+      "status": "PARTIAL",
       "semanticProfile": "partition",
       "providerCells": {
         "postgres": "local",
@@ -14251,9 +14263,12 @@
       },
       "issue": 4,
       "scenarioIds": [
-        "LINQ-CONFORMANCE-001-S01"
+        "LINQ-CONFORMANCE-001-S01",
+        "LINQ-OBJECTS-001-S09"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "linq/objects/paging_test.go#TestSkipTakeStopsAndReplays"
+      ],
       "evidenceSha": null
     },
     {
@@ -14788,7 +14803,7 @@
       "tests": [
         "src/libraries/System.Linq/tests/EnumerableTests.cs#L346"
       ],
-      "status": "DISCOVERED",
+      "status": "PARTIAL",
       "semanticProfile": "composition",
       "providerCells": {
         "postgres": "local",
@@ -14798,9 +14813,12 @@
       },
       "issue": 4,
       "scenarioIds": [
-        "LINQ-CONFORMANCE-001-S01"
+        "LINQ-CONFORMANCE-001-S01",
+        "LINQ-OBJECTS-001-S10"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "linq/objects/concat_test.go#TestAppendAndPrependStartOnlyDemandedValues"
+      ],
       "evidenceSha": null
     },
     {
@@ -15072,7 +15090,7 @@
       "tests": [
         "src/libraries/System.Linq/tests/ConcatTests.cs#L34"
       ],
-      "status": "DISCOVERED",
+      "status": "PARTIAL",
       "semanticProfile": "set",
       "providerCells": {
         "postgres": "local",
@@ -15082,9 +15100,12 @@
       },
       "issue": 4,
       "scenarioIds": [
-        "LINQ-CONFORMANCE-001-S01"
+        "LINQ-CONFORMANCE-001-S01",
+        "LINQ-OBJECTS-001-S10"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "linq/objects/concat_test.go#TestConcatStartsOnlyDemandedSources"
+      ],
       "evidenceSha": null
     },
     {
@@ -16713,7 +16734,7 @@
       "tests": [
         "src/libraries/System.Linq/tests/EnumerableTests.cs#L357"
       ],
-      "status": "DISCOVERED",
+      "status": "PARTIAL",
       "semanticProfile": "composition",
       "providerCells": {
         "postgres": "local",
@@ -16723,9 +16744,12 @@
       },
       "issue": 4,
       "scenarioIds": [
-        "LINQ-CONFORMANCE-001-S01"
+        "LINQ-CONFORMANCE-001-S01",
+        "LINQ-OBJECTS-001-S10"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "linq/objects/concat_test.go#TestAppendAndPrependStartOnlyDemandedValues"
+      ],
       "evidenceSha": null
     },
     {
@@ -17195,7 +17219,7 @@
       "tests": [
         "src/libraries/System.Linq/tests/SkipTests.cs#L16"
       ],
-      "status": "DISCOVERED",
+      "status": "PARTIAL",
       "semanticProfile": "partition",
       "providerCells": {
         "postgres": "local",
@@ -17205,9 +17229,12 @@
       },
       "issue": 4,
       "scenarioIds": [
-        "LINQ-CONFORMANCE-001-S01"
+        "LINQ-CONFORMANCE-001-S01",
+        "LINQ-OBJECTS-001-S09"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "linq/objects/paging_test.go#TestSkipTakeStopsAndReplays"
+      ],
       "evidenceSha": null
     },
     {
@@ -17457,7 +17484,7 @@
       "tests": [
         "src/libraries/System.Linq/tests/TakeTests.cs#L19"
       ],
-      "status": "DISCOVERED",
+      "status": "PARTIAL",
       "semanticProfile": "partition",
       "providerCells": {
         "postgres": "local",
@@ -17467,9 +17494,12 @@
       },
       "issue": 4,
       "scenarioIds": [
-        "LINQ-CONFORMANCE-001-S01"
+        "LINQ-CONFORMANCE-001-S01",
+        "LINQ-OBJECTS-001-S09"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "linq/objects/paging_test.go#TestSkipTakeStopsAndReplays"
+      ],
       "evidenceSha": null
     },
     {
