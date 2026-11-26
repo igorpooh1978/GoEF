@@ -112,7 +112,9 @@ func rebuildSQLiteParent(t *testing.T, ctx context.Context, db *sql.DB, interrup
 	}()
 	checkSQLiteRebuildAppID(t, ctx, conn)
 	setSQLiteRebuildForeignKeys(t, ctx, conn, false)
-	tx, err := conn.BeginTx(ctx, nil)
+	// The operation deadline must not cause database/sql to roll back just
+	// before the interrupted worker exits.
+	tx, err := conn.BeginTx(t.Context(), nil)
 	if err != nil {
 		t.Fatal("could not begin the SQLite table rebuild")
 	}
@@ -137,6 +139,9 @@ func rebuildSQLiteParent(t *testing.T, ctx context.Context, db *sql.DB, interrup
 	}
 	assertSQLiteRebuild(t, ctx, tx, true, false)
 	if interrupt {
+		if t.Failed() {
+			return
+		}
 		// Exit with the real DDL transaction open and no new history row.
 		fmt.Fprintln(os.Stderr, marker)
 		os.Exit(sqliteRebuildInterruptedExit)
