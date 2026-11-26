@@ -45,7 +45,7 @@ When the native commit result is inconclusive, the handle reports `StateOutcomeU
 
 ## Choose isolation and read-only mode
 
-Use `transaction.BeginWithOptions(ctx, db, dialect, sql.TxOptions{Isolation: sql.LevelRepeatableRead, ReadOnly: true})` for a read-only PostgreSQL or MySQL transaction. The dialect must match the driver and engine behind `db`. Read one result on the transaction with `tx.Scan(ctx, query, args, &value)`. The method consumes the result before returning and reports `sql.ErrNoRows` for an empty result. Use `Commit`, `Rollback` or deferred `Close` to finish the transaction.
+Use `transaction.BeginWithOptions(ctx, db, dialect, sql.TxOptions{Isolation: sql.LevelReadCommitted, ReadOnly: true})` for a read-only PostgreSQL or MySQL transaction. The dialect must match the driver and engine behind `db`. Read one result on the transaction with `tx.Scan(ctx, query, args, &value)`. The method consumes the result before returning and reports `sql.ErrNoRows` for an empty result. Use `Commit`, `Rollback` or deferred `Close` to finish the transaction.
 
 | Engine | Accepted isolation options | Read-only option |
 | --- | --- | --- |
