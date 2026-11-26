@@ -75,3 +75,15 @@ The focused SQL Server runs at `ba0ae33142cbb82beb34b0027923d94215e280b1` each e
 ### SQL Server 2017 certificate regression
 
 The first integrated run on `f5257ab9677a316db66bbe9711db0a87f310cb79` passed the new profiles and returned exit 1 for the existing SQL Server 2017 profile. A separate local run reproduced the failure on all three scenarios during the initial fixture query. Redacted diagnostics identified Go's TLS certificate parser rejecting the negative serial number in the server-generated certificate. The test harness supplies `GODEBUG=x509negativeserial=1` only to the SQL Server 2017 Go test process inside the owned container. The fixture keeps encrypted transport and the existing loopback endpoint guard. [Microsoft driver troubleshooting](https://learn.microsoft.com/en-us/sql/connect/golang/troubleshooting?view=sql-server-ver17) · [Go certificate parser](https://pkg.go.dev/crypto/x509#ParseCertificate)
+
+### Complete expanded run on 2026-11-26
+
+On `17bb049c5e7eb1e5f53da312c6bf1cc10904e244`, the focused SQL Server 2017 run passed all three scenarios. The complete run below then exited 0 on the Windows workstation with Go 1.27.4 and local Docker Desktop 29.4.0 Linux/amd64. There were 36 distinct driver cases across 12 profiles and four SQLite file cases. All passed. The report contains 39 driver rows because the SQLite file suite reruns the three current SQLite driver cases.
+
+```powershell
+pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -AcceptSqlServerEula -AcceptLegacySqlServerEula
+```
+
+The repository validator, seven bootstrap tests, 34 Python lab tests and Go build, vet, test and module checks passed. The primary driver's unit tests also passed separately with `go test -mod=vendor -race -count=1 -shuffle=on ./...` on the same Go test tree in a local Linux/amd64 container. No lab-owned containers remained after the complete run.
+
+The exact driver module tree is `34d63265c8440e604d56bc1976a8dca5455e2fe3`, the lab tree is `bd6de92664eb31d5b42cca8881632674414864f1`, and the PowerShell blob is `de4baac6e9b206bb3fb5ca95aab0a985fd56f341`. The published evidence uses the same executable artifacts.
