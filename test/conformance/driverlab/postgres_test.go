@@ -19,6 +19,8 @@ func openPostgres(t *testing.T) fixture {
 
 	var expectedVersion, expectedVersionNum string
 	switch os.Getenv("GOEF_DRIVERLAB_PROFILE") {
+	case "postgres-19":
+		expectedVersion, expectedVersionNum = "19.0", "190000"
 	case "", "postgres-18":
 		expectedVersion, expectedVersionNum = "18.7", "180007"
 	case "postgres-17":
@@ -26,7 +28,7 @@ func openPostgres(t *testing.T) fixture {
 	case "postgres-16":
 		expectedVersion, expectedVersionNum = "16.16", "160016"
 	default:
-		t.Fatal("PostgreSQL lab profile must be postgres-18, postgres-17, or postgres-16")
+		t.Fatal("PostgreSQL lab profile must be postgres-19, postgres-18, postgres-17, or postgres-16")
 	}
 
 	password := os.Getenv("GOEF_DRIVERLAB_PASSWORD")

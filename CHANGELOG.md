@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add PostgreSQL 19 and SQL Server 2022 at database compatibility level 140 to the local matrix. Check `GENERATE_SERIES` at levels 140 and 160 on the same SQL Server build ([#31](https://github.com/igorpooh1978/GoEF/issues/31)).
 - Extend the local compatibility suite with PostgreSQL 17, SQL Server 2017 and 2019, and bidirectional SQLite 3.51.3 and 3.54.1 file checks ([#31](https://github.com/igorpooh1978/GoEF/issues/31)).
 - Pin the four W002 Go drivers in an isolated test module and run native Gherkin characterization in local CI. Add PostgreSQL 16 and MySQL 8.0 coverage and record lower-version candidates for SQL Server and SQLite ([#13](https://github.com/igorpooh1978/GoEF/issues/13), [#26](https://github.com/igorpooh1978/GoEF/issues/26), [#31](https://github.com/igorpooh1978/GoEF/issues/31)).
 

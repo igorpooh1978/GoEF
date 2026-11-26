@@ -41,6 +41,7 @@ type sqlServerPin struct {
 	version            string
 	updateLevel        string
 	compatibilityLevel int
+	generateSeries     string
 }
 
 // sqlServerDialer keeps driver-directed routing inside the isolated endpoint.
@@ -64,9 +65,10 @@ func openSQLServer(t *testing.T) fixture {
 		profile = "sqlserver-2022"
 	}
 	expected, ok := map[string]sqlServerPin{
-		"sqlserver-2017": {version: "14.0.3570.2", updateLevel: "CU31", compatibilityLevel: 140},
-		"sqlserver-2019": {version: "15.0.4510.2", updateLevel: "CU32", compatibilityLevel: 150},
-		"sqlserver-2022": {version: "16.0.4325.4", updateLevel: "CU28", compatibilityLevel: 160},
+		"sqlserver-2017":     {version: "14.0.3570.2", updateLevel: "CU31", compatibilityLevel: 140},
+		"sqlserver-2019":     {version: "15.0.4510.2", updateLevel: "CU32", compatibilityLevel: 150},
+		"sqlserver-2022":     {version: "16.0.4325.4", updateLevel: "CU28", compatibilityLevel: 160, generateSeries: "available"},
+		"sqlserver-2022-140": {version: "16.0.4325.4", updateLevel: "CU28", compatibilityLevel: 140, generateSeries: "unavailable"},
 	}[profile]
 	if !ok {
 		t.Fatal("unknown SQL Server fixture profile")
@@ -127,7 +129,7 @@ func openSQLServer(t *testing.T) fixture {
 		t.Fatal("SQL Server fixture session settings differ from the profile")
 	}
 
-	return fixture{
+	testFixture := fixture{
 		db:             db,
 		bind:           func(n int) string { return "@p" + strconv.Itoa(n) },
 		code:           sqlServerNativeCode,
@@ -149,6 +151,61 @@ func openSQLServer(t *testing.T) fixture {
 			"mars":                    "off", // go-mssqldb v1.11.0 sends zero in its TDS prelogin MARS field.
 		},
 	}
+	if expected.generateSeries != "" {
+		verifySQLServerGenerateSeries(t, ctx, db, expected.generateSeries, testFixture.facts)
+	}
+	return testFixture
+}
+
+func verifySQLServerGenerateSeries(t *testing.T, ctx context.Context, db *sql.DB, expected string, facts map[string]string) {
+	t.Helper()
+
+	// SQL Server builds without this scoped option return NULL. If the option
+	// exists, it must be off so the observed behavior depends on compatibility.
+	const overrideSQL = `
+SELECT MAX(CONVERT(int, value))
+FROM sys.database_scoped_configurations
+WHERE name = 'ALLOW_BUILTIN_TVF_IN_ALL_COMPAT_LEVELS';`
+	var override sql.NullInt32
+	if err := db.QueryRowContext(ctx, overrideSQL).Scan(&override); err != nil {
+		t.Fatal("could not read SQL Server built-in TVF compatibility setting")
+	}
+	if override.Valid && override.Int32 != 0 {
+		t.Fatal("SQL Server built-in TVF compatibility override is enabled")
+	}
+
+	rows, err := db.QueryContext(ctx, "SELECT value FROM GENERATE_SERIES(2, 6, 2) ORDER BY value;")
+	if err == nil {
+		defer rows.Close()
+	}
+	if expected == "unavailable" {
+		if err == nil {
+			if rows.Next() {
+				t.Fatal("SQL Server GENERATE_SERIES unexpectedly returned rows")
+			}
+			err = rows.Err()
+		}
+		code := sqlServerNativeCode(err)
+		if code != "208" {
+			t.Fatalf("SQL Server GENERATE_SERIES expected native code 208, got %q", code)
+		}
+		facts["generate_series"] = "unavailable"
+		facts["generate_series_native_code"] = code
+		return
+	}
+	if err != nil {
+		t.Fatal("SQL Server GENERATE_SERIES query failed")
+	}
+	for _, want := range []int{2, 4, 6} {
+		var value int
+		if !rows.Next() || rows.Scan(&value) != nil || value != want {
+			t.Fatal("SQL Server GENERATE_SERIES returned unexpected values")
+		}
+	}
+	if rows.Next() || rows.Err() != nil {
+		t.Fatal("SQL Server GENERATE_SERIES returned extra rows or failed during iteration")
+	}
+	facts["generate_series"] = "available"
 }
 
 func sqlServerNativeCode(err error) string {

@@ -33,6 +33,7 @@ class SQLServerSettings:
     update_level: str
     eula_flag: str
     sqlcmd_path: str = sqlserver.SQLCMD[0]
+    generate_series: str = ""
 
 
 @dataclass(frozen=True)
@@ -48,6 +49,11 @@ class Profile:
 
 PROFILES = {
     "postgres-18": Profile("postgres", "engine_version", "18.7", postgres.IMAGE, "180007"),
+    "postgres-19": Profile(
+        "postgres", "engine_version", "19.0",
+        "docker.io/library/postgres@sha256:3fb624f672a1cb628d0bdc0f533cffad31345421eedf16ab1f85ed1ea0d07d2e",
+        "190000",
+    ),
     "postgres-17": Profile(
         "postgres", "engine_version", "17.12",
         "docker.io/library/postgres@sha256:e711be2c7ff64c9eb8883fc87571621be6caa2f943d825a49e5d20ac5b0221d7",
@@ -61,7 +67,11 @@ PROFILES = {
     "sqlite-3.54": Profile("sqlite", "engine_version", "3.54.1"),
     "sqlserver-2022": Profile(
         "sqlserver", "version", "16.0.4325.4", sqlserver.IMAGE,
-        sqlserver_settings=SQLServerSettings(160, "CU28", SQLSERVER_EULA),
+        sqlserver_settings=SQLServerSettings(160, "CU28", SQLSERVER_EULA, generate_series="available"),
+    ),
+    "sqlserver-2022-140": Profile(
+        "sqlserver", "version", "16.0.4325.4", sqlserver.IMAGE,
+        sqlserver_settings=SQLServerSettings(140, "CU28", SQLSERVER_EULA, generate_series="unavailable"),
     ),
     "sqlserver-2019": Profile(
         "sqlserver", "version", "15.0.4510.2",
@@ -105,6 +115,7 @@ FACT_KEYS = {
     "server_version", "server_version_num", "snapshot_isolation", "source_id", "sql_mode", "storage_engine",
     "time_zone", "transaction_isolation", "user", "variant", "version", "xact_abort",
     "search_path", "login", "default_schema", "transport", "encryption",
+    "generate_series", "generate_series_native_code",
 }
 
 PG_SETUP = r"""
@@ -277,11 +288,17 @@ def verified_results(output, provider, profile_name=None):
         if facts.get(profile.fact) != profile.version:
             raise LabError("The scenario did not report the pinned engine identity.")
         sqlserver_settings = profile.sqlserver_settings
-        if sqlserver_settings is not None and (
-            facts.get("compatibility_level") != str(sqlserver_settings.compatibility_level)
-            or facts.get("product_update_level") != sqlserver_settings.update_level
-        ):
-            raise LabError("The scenario did not report the pinned SQL Server settings.")
+        if sqlserver_settings is not None:
+            if (
+                facts.get("compatibility_level") != str(sqlserver_settings.compatibility_level)
+                or facts.get("product_update_level") != sqlserver_settings.update_level
+            ):
+                raise LabError("The scenario did not report the pinned SQL Server settings.")
+            expected_series = sqlserver_settings.generate_series
+            if expected_series and facts.get("generate_series") != expected_series:
+                raise LabError("The scenario did not report the expected SQL Server GENERATE_SERIES availability.")
+            if expected_series == "unavailable" and facts.get("generate_series_native_code") != "208":
+                raise LabError("The scenario did not report SQL Server native code 208 for GENERATE_SERIES.")
         if scenario != "LAB-DRIVER-001-S01":
             expected = NATIVE_CODES[provider][0 if scenario == "LAB-DRIVER-001-S02" else 1]
             if facts.get("native_code") != expected:

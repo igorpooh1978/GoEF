@@ -61,6 +61,7 @@ class DriverEvidenceTests(unittest.TestCase):
             ("sqlserver-2017", "--accept-sqlserver-eula", "--accept-legacy-sqlserver-eula"),
             ("sqlserver-2019", "--accept-sqlserver-eula", "--accept-legacy-sqlserver-eula"),
             ("sqlserver-2022", "--accept-legacy-sqlserver-eula", "--accept-sqlserver-eula"),
+            ("sqlserver-2022-140", "--accept-legacy-sqlserver-eula", "--accept-sqlserver-eula"),
         )
         for profile, supplied, required in cases:
             with self.subTest(profile=profile):
@@ -96,8 +97,42 @@ class DriverEvidenceTests(unittest.TestCase):
                 with self.assertRaises(driver_run.LabError):
                     driver_run.verified_results(self.output(wrong), "sqlserver", "sqlserver-2017")
 
+    def test_sqlserver_2022_evidence_requires_matching_level_and_generate_series_probe(self):
+        cases = (
+            ("sqlserver-2022", "160", "available", ""),
+            ("sqlserver-2022-140", "140", "unavailable", "208"),
+        )
+        for profile, level, availability, probe_code in cases:
+            with self.subTest(profile=profile):
+                rows = self.result_lines()
+                for row, code in zip(rows, ("", "2627", "547"), strict=True):
+                    row["provider"] = "sqlserver"
+                    row["facts"] = {
+                        "version": "16.0.4325.4", "product_update_level": "CU28",
+                        "compatibility_level": level, "native_code": code,
+                        "generate_series": availability,
+                    }
+                    if probe_code:
+                        row["facts"]["generate_series_native_code"] = probe_code
+                result = driver_run.verified_results(self.output(rows), "sqlserver", profile)
+                self.assertEqual(len(result), 3)
+                self.assertEqual([row["facts"]["generate_series"] for row in result], [availability] * 3)
+                other = "sqlserver-2022-140" if profile == "sqlserver-2022" else "sqlserver-2022"
+                with self.assertRaises(driver_run.LabError):
+                    driver_run.verified_results(self.output(rows), "sqlserver", other)
+                if probe_code:
+                    self.assertEqual([row["facts"]["generate_series_native_code"] for row in result], [probe_code] * 3)
+                    rows[1]["facts"]["generate_series_native_code"] = "229"
+                    with self.assertRaises(driver_run.LabError):
+                        driver_run.verified_results(self.output(rows), "sqlserver", profile)
+                    rows[1]["facts"]["generate_series_native_code"] = probe_code
+                rows[1]["facts"].pop("generate_series")
+                with self.assertRaises(driver_run.LabError):
+                    driver_run.verified_results(self.output(rows), "sqlserver", profile)
+
     def test_explicit_postgres_profile_matches_its_own_identity(self):
-        for profile, version in (("postgres-16", "16.16"), ("postgres-17", "17.12")):
+        profiles = (("postgres-16", "16.16"), ("postgres-17", "17.12"), ("postgres-19", "19.0"))
+        for profile, version in profiles:
             with self.subTest(profile=profile):
                 rows = self.result_lines()
                 for row, code in zip(rows, ("", "23505", "23503"), strict=True):

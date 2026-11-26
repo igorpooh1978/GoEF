@@ -63,3 +63,9 @@ pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -AcceptSqlServerEu
 | 2019 | 15.0.4510.2, CU32 | 150 | PASS | 2627 | 547 |
 
 Both cells used go-mssqldb v1.11.0 and observed TCP, `READ COMMITTED`, `XACT_ABORT ON` and `Latin1_General_100_BIN2`. The driver module tree, lab tree and PowerShell blob listed above are identical to those used for this run. Application adapter conformance and SQL Server 2022 with compatibility level 140 retain separate gates.
+
+## PostgreSQL 19 and SQL Server 2022 at level 140
+
+Both profiles run the same three [native driver scenarios](../../../test/conformance/driverlab/features/driver.feature). The PostgreSQL 19 selector was rejected with exit 2 at baseline `9ce89d78437219984cf5669db720625a384818bd`. It passed all three cases with exit 0 on `2f6e261363af8298061ab5a3a53fd0c280897e90` through `python -B test/conformance/lab/driver_run.py postgres --profile postgres-19`. The fixture observed PostgreSQL 19.0, `server_version_num` 190000, UTF8, C collation, UTC, read committed, `public` search path and pgx v5.13.0 in exec mode. Native uniqueness and foreign-key checks reported `23505` and `23503`. [PostgreSQL 19.0 release](https://www.postgresql.org/docs/release/19.0/)
+
+The PostgreSQL Linux/amd64 manifest is `sha256:3fb624f672a1cb628d0bdc0f533cffad31345421eedf16ab1f85ed1ea0d07d2e`. The SQL Server 2022 profiles both use the existing CU28 Developer image, Linux/amd64 manifest `sha256:4525e3efac9f3e241cb003bb2ff2a82818b502f37e12049d788b1a9fa7e13b7f`, with go-mssqldb v1.11.0. Only the database compatibility level differs between the two profiles. [SQL Server database compatibility levels](https://learn.microsoft.com/en-us/sql/t-sql/statements/alter-database-transact-sql-compatibility-level)

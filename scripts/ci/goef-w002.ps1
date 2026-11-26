@@ -316,9 +316,14 @@ try {
         Pop-Location
     }
 
+    $currentSqlServerConsent = @{
+        Accepted = $AcceptSqlServerEula
+        RunnerFlag = '--accept-sqlserver-eula'
+        ScriptFlag = '-AcceptSqlServerEula'
+    }
     $selection = @('all')
-    if ($AcceptSqlServerEula) {
-        $selection += '--accept-sqlserver-eula'
+    if ($currentSqlServerConsent.Accepted) {
+        $selection += $currentSqlServerConsent.RunnerFlag
     }
     $baselineProfiles = [ordered] @{
         'postgres' = 'postgres-18'
@@ -326,32 +331,53 @@ try {
         'sqlserver' = 'sqlserver-2022'
         'mysql' = 'mysql-8.4'
     }
+    $baselineFacts = @{ sqlserver = @{ version = '16.0.4325.4'; compatibility_level = '160'; generate_series = 'available' } }
     $matrixFailures = [System.Collections.Generic.List[string]]::new()
     try {
-        Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles $baselineProfiles
+        Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles $baselineProfiles -ExpectedFacts $baselineFacts
         Write-Host 'PASS W002 local checks and all four driver suites'
     }
     catch {
         $matrixFailures.Add($_.Exception.Message)
     }
     if ($Compatibility) {
+        $legacySqlServerConsent = @{
+            Accepted = $AcceptLegacySqlServerEula
+            RunnerFlag = '--accept-legacy-sqlserver-eula'
+            ScriptFlag = '-AcceptLegacySqlServerEula'
+        }
         $profiles = [ordered] @{
             'postgres-16' = @{ Provider = 'postgres'; Facts = @{ engine_version = '16.16'; server_version_num = '160016' } }
             'postgres-17' = @{ Provider = 'postgres'; Facts = @{ engine_version = '17.12'; server_version_num = '170012' } }
+            'postgres-19' = @{ Provider = 'postgres'; Facts = @{ engine_version = '19.0'; server_version_num = '190000' } }
             'mysql-8.0' = @{ Provider = 'mysql'; Facts = @{ server_version = '8.0.46' } }
-            'sqlserver-2017' = @{ Provider = 'sqlserver'; Facts = @{ version = '14.0.3570.2'; compatibility_level = '140' } }
-            'sqlserver-2019' = @{ Provider = 'sqlserver'; Facts = @{ version = '15.0.4510.2'; compatibility_level = '150' } }
+            'sqlserver-2017' = @{
+                Provider = 'sqlserver'
+                Consent = $legacySqlServerConsent
+                Facts = @{ version = '14.0.3570.2'; compatibility_level = '140' }
+            }
+            'sqlserver-2019' = @{
+                Provider = 'sqlserver'
+                Consent = $legacySqlServerConsent
+                Facts = @{ version = '15.0.4510.2'; compatibility_level = '150' }
+            }
+            'sqlserver-2022-140' = @{
+                Provider = 'sqlserver'
+                Consent = $currentSqlServerConsent
+                Facts = @{ version = '16.0.4325.4'; compatibility_level = '140'; generate_series = 'unavailable' }
+            }
         }
         foreach ($entry in $profiles.GetEnumerator()) {
             $profileName = $entry.Key
             $provider = $entry.Value.Provider
             $selection = $provider, '--profile', $profileName
-            if ($provider -eq 'sqlserver') {
-                if (-not $AcceptLegacySqlServerEula) {
-                    $matrixFailures.Add("$profileName is BLOCKED. Supply -AcceptLegacySqlServerEula for this run.")
+            $consent = $entry.Value['Consent']
+            if ($null -ne $consent) {
+                if (-not $consent.Accepted) {
+                    $matrixFailures.Add("$profileName is BLOCKED. Supply $($consent.ScriptFlag) for this run.")
                     continue
                 }
-                $selection += '--accept-legacy-sqlserver-eula'
+                $selection += $consent.RunnerFlag
             }
             try {
                 $expectedFacts = @{ $provider = $entry.Value.Facts }
