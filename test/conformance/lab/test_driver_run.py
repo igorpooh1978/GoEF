@@ -417,21 +417,21 @@ class DecimalBindingEvidenceTests(unittest.TestCase):
 
 
 class CommitOutcomeEvidenceTests(unittest.TestCase):
-    def test_requested_commit_outcome_requires_both_exact_results(self):
+    def test_requested_commit_outcome_requires_all_exact_results(self):
         expected = [
             {
                 "provider": "sqlite", "profile": "sqlite-3.54", "engine_version": "3.54.1",
                 "scenario": scenario, "status": "PASS",
             }
-            for scenario in ("TX-OUTCOME-001-S03", "TX-OUTCOME-001-S04")
+            for scenario in (f"TX-OUTCOME-001-S{i:02d}" for i in range(1, 6))
         ]
         prefix = "GOEF_COMMIT_OUTCOME_RESULT="
         markers = [prefix + json.dumps(row) for row in expected]
         outputs = [
             "\n".join(markers),
-            markers[0],
-            "\n".join([markers[0], markers[0]]),
-            "\n".join([markers[0], prefix + json.dumps({**expected[1], "engine_version": "3.51.3"})]),
+            "\n".join(markers[:-1]),
+            "\n".join([*markers[:-1], markers[0]]),
+            "\n".join([*markers[:-1], prefix + json.dumps({**expected[-1], "engine_version": "3.51.3"})]),
             "",
         ]
         stdout = io.StringIO()
@@ -453,6 +453,23 @@ class CommitOutcomeEvidenceTests(unittest.TestCase):
         for call in command.call_args_list[:-1]:
             self.assertEqual(call.args[0][1], "-test.run=^(TestDriverGherkin|TestCommitOutcome)$")
             self.assertEqual(call.kwargs["env"]["GOEF_COMMIT_OUTCOME"], "1")
+
+
+    def test_production_adapter_evidence_requires_all_exact_results(self):
+        expected = [
+            {
+                "provider": "sqlite", "profile": "sqlite-3.54", "engine_version": "3.54.1",
+                "scenario": f"PROVIDER-EXEC-001-S{i:02d}", "status": "PASS",
+            }
+            for i in range(1, 5)
+        ]
+        prefix = "GOEF_PRODUCTION_ADAPTER_RESULT="
+        markers = [prefix + json.dumps(row) for row in expected]
+        verify = driver_run.verified_production_adapter_results
+        self.assertEqual(verify("\n".join(markers), "sqlite", "sqlite-3.54", "3.54.1"), expected)
+        for incomplete in (markers[:-1], [*markers[:-1], markers[0]]):
+            with self.assertRaises(driver_run.LabError):
+                verify("\n".join(incomplete), "sqlite", "sqlite-3.54", "3.54.1")
 
 
 class DriverEvidenceTests(unittest.TestCase):

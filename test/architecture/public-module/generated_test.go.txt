@@ -1,0 +1,14 @@
+package main
+
+import "testing"
+
+func TestGeneratedBinding(t *testing.T) {
+	query := FindCustomer("Tashkent")
+	shape := query.Shape()
+	if shape.Field != "City" || shape.Parameter != "city" || shape.Projection != "Name" {
+		t.Fatalf("unexpected shape: %+v", shape)
+	}
+	if query.Value() != "Tashkent" || query.Project(Customer{Name: "Ada"}) != "Ada" {
+		t.Fatal("generated binding lost its input or projection")
+	}
+}

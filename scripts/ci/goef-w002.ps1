@@ -10,7 +10,8 @@ param(
     [switch] $SaveChanges,
     [switch] $TxOptions,
     [switch] $DecimalBinding,
-    [switch] $CommitOutcome
+    [switch] $CommitOutcome,
+    [switch] $ProductionAdapters
 )
 
 Set-StrictMode -Version 3.0
@@ -224,7 +225,8 @@ function Invoke-DriverMatrix {
         [switch] $SaveChanges,
         [switch] $TxOptions,
         [switch] $DecimalBinding,
-        [switch] $CommitOutcome
+        [switch] $CommitOutcome,
+        [switch] $ProductionAdapters
     )
 
     $driverArguments = @('-B', 'test/conformance/lab/driver_run.py') + $Selection
@@ -235,9 +237,40 @@ function Invoke-DriverMatrix {
     if ($TxOptions) { $driverArguments += '--tx-options' }
     if ($DecimalBinding) { $driverArguments += '--decimal-binding' }
     if ($CommitOutcome) { $driverArguments += '--commit-outcome' }
+    if ($ProductionAdapters) { $driverArguments += '--production-adapters' }
     Write-Host "RUN $(Split-Path -Leaf $Python) $($driverArguments -join ' ')"
     $driverOutput = @(& $Python @driverArguments)
     Confirm-DriverResults -Lines $driverOutput -ExitCode $LASTEXITCODE -ExpectedProfiles $ExpectedProfiles -ExpectedFacts $ExpectedFacts
+}
+
+function Confirm-SqliteRebuildChecks {
+    param(
+        $RebuildChecks,
+        [System.Collections.IDictionary] $Profiles,
+        [string[]] $Modes,
+        [string] $Scenario,
+        [int] $InterruptExit
+    )
+
+    if ($rebuildChecks -isnot [array] -or $rebuildChecks.Count -ne ($profiles.Count * $modes.Count)) {
+        throw "SQLite compatibility must report $Scenario on both profiles in DELETE and WAL modes."
+    }
+    $seenRebuildChecks = [System.Collections.Generic.HashSet[string]]::new()
+    foreach ($check in $rebuildChecks) {
+        if ($check -isnot [System.Collections.IDictionary] -or
+            $check['scenario'] -isnot [string] -or $check['scenario'] -cne $Scenario -or
+            $check['profile'] -isnot [string] -or $check['profile'] -cnotin $profiles.Keys -or
+            $check['journal_mode'] -isnot [string] -or $check['journal_mode'] -cnotin $modes -or
+            $check['interrupted_exit'] -isnot [long] -or $check['interrupted_exit'] -ne $InterruptExit -or
+            $check['status'] -isnot [string] -or $check['status'] -cne 'PASS') {
+            throw "SQLite compatibility emitted an unexpected or failed $Scenario case."
+        }
+        $profileName = $check['profile']
+        if ($check['engine_version'] -isnot [string] -or $check['engine_version'] -cne $profiles[$profileName].engine_version -or
+            -not $seenRebuildChecks.Add("$profileName/$($check['journal_mode'])")) {
+            throw "SQLite compatibility emitted a duplicate $Scenario case or an incorrect engine version."
+        }
+    }
 }
 
 function Invoke-SqliteCompatibility {
@@ -249,7 +282,8 @@ function Invoke-SqliteCompatibility {
         [switch] $SaveChanges,
         [switch] $TxOptions,
         [switch] $DecimalBinding,
-        [switch] $CommitOutcome
+        [switch] $CommitOutcome,
+        [switch] $ProductionAdapters
     )
 
     $script = 'test/conformance/lab/sqlite_compat.py'
@@ -261,6 +295,7 @@ function Invoke-SqliteCompatibility {
     if ($TxOptions) { $sqliteArguments += '--tx-options' }
     if ($DecimalBinding) { $sqliteArguments += '--decimal-binding' }
     if ($CommitOutcome) { $sqliteArguments += '--commit-outcome' }
+    if ($ProductionAdapters) { $sqliteArguments += '--production-adapters' }
     Write-Host "RUN $(Split-Path -Leaf $Python) $($sqliteArguments -join ' ')"
     $lines = @(& $Python @sqliteArguments)
     $exitCode = $LASTEXITCODE
@@ -399,26 +434,8 @@ function Invoke-SqliteCompatibility {
             throw 'SQLite compatibility emitted a duplicate file direction and journal mode.'
         }
     }
-    $rebuildChecks = $report['rebuild_checks']
-    if ($rebuildChecks -isnot [array] -or $rebuildChecks.Count -ne ($profiles.Count * $modes.Count)) {
-        throw 'SQLite compatibility must report interrupted rebuild recovery on both profiles in DELETE and WAL modes.'
-    }
-    $seenRebuildChecks = [System.Collections.Generic.HashSet[string]]::new()
-    foreach ($check in $rebuildChecks) {
-        if ($check -isnot [System.Collections.IDictionary] -or
-            $check['scenario'] -isnot [string] -or $check['scenario'] -cne 'LAB-SQLITE-REBUILD-001-S01' -or
-            $check['profile'] -isnot [string] -or $check['profile'] -cnotin $profiles.Keys -or
-            $check['journal_mode'] -isnot [string] -or $check['journal_mode'] -cnotin $modes -or
-            $check['interrupted_exit'] -isnot [long] -or $check['interrupted_exit'] -ne 68 -or
-            $check['status'] -isnot [string] -or $check['status'] -cne 'PASS') {
-            throw 'SQLite compatibility emitted an unexpected or failed interrupted rebuild check.'
-        }
-        $profileName = $check['profile']
-        if ($check['engine_version'] -isnot [string] -or $check['engine_version'] -cne $profiles[$profileName].engine_version -or
-            -not $seenRebuildChecks.Add("$profileName/$($check['journal_mode'])")) {
-            throw 'SQLite compatibility emitted a duplicate rebuild check or an incorrect engine version.'
-        }
-    }
+    Confirm-SqliteRebuildChecks $report['rebuild_checks'] $profiles $modes 'LAB-SQLITE-REBUILD-001-S01' 68
+    Confirm-SqliteRebuildChecks $report['executor_rebuild_checks'] $profiles $modes 'MIG-SQLITE-001-S03' 69
     Write-Host "PASS W002 SQLite linked-runtime, file compatibility and interrupted rebuild suites (minimum SQLite $($profiles[$minimumProfile].engine_version))"
 }
 
@@ -480,6 +497,23 @@ try {
         Pop-Location
     }
 
+    if ($ProductionAdapters) {
+        foreach ($providerModule in 'postgres', 'sqlite', 'sqlserver', 'mysql') {
+            Write-Host "Go module: providers/$providerModule"
+            Push-Location -LiteralPath "providers/$providerModule"
+            try {
+                Invoke-Check $go @('mod', 'verify')
+                Invoke-Check $go @('mod', 'tidy', '-diff')
+                Invoke-Check $go @('build', '-mod=readonly', './...')
+                Invoke-Check $go @('vet', '-mod=readonly', './...')
+                Invoke-Check $go @('test', '-mod=readonly', '-shuffle=on', '-count=1', './...')
+            }
+            finally {
+                Pop-Location
+            }
+        }
+    }
+
     $currentSqlServerConsent = @{
         Accepted = $AcceptSqlServerEula
         RunnerFlag = '--accept-sqlserver-eula'
@@ -498,7 +532,7 @@ try {
     $baselineFacts = @{ sqlserver = @{ version = '16.0.4325.4'; compatibility_level = '160'; generate_series = 'available' } }
     $matrixFailures = [System.Collections.Generic.List[string]]::new()
     try {
-        Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles $baselineProfiles -ExpectedFacts $baselineFacts -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx -SavepointTx:$SavepointTx -SaveChanges:$SaveChanges -TxOptions:$TxOptions -DecimalBinding:$DecimalBinding -CommitOutcome:$CommitOutcome
+        Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles $baselineProfiles -ExpectedFacts $baselineFacts -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx -SavepointTx:$SavepointTx -SaveChanges:$SaveChanges -TxOptions:$TxOptions -DecimalBinding:$DecimalBinding -CommitOutcome:$CommitOutcome -ProductionAdapters:$ProductionAdapters
         Write-Host 'PASS W002 local checks and all four driver suites'
     }
     catch {
@@ -545,7 +579,7 @@ try {
             }
             try {
                 $expectedFacts = @{ $provider = $entry.Value.Facts }
-                Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles @{ $provider = $profileName } -ExpectedFacts $expectedFacts -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx -SavepointTx:$SavepointTx -SaveChanges:$SaveChanges -TxOptions:$TxOptions -DecimalBinding:$DecimalBinding -CommitOutcome:$CommitOutcome
+                Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles @{ $provider = $profileName } -ExpectedFacts $expectedFacts -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx -SavepointTx:$SavepointTx -SaveChanges:$SaveChanges -TxOptions:$TxOptions -DecimalBinding:$DecimalBinding -CommitOutcome:$CommitOutcome -ProductionAdapters:$ProductionAdapters
                 Write-Host "PASS W002 $profileName compatibility suite"
             }
             catch {
@@ -553,7 +587,7 @@ try {
             }
         }
         try {
-            Invoke-SqliteCompatibility -Python $python -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx -SavepointTx:$SavepointTx -SaveChanges:$SaveChanges -TxOptions:$TxOptions -DecimalBinding:$DecimalBinding -CommitOutcome:$CommitOutcome
+            Invoke-SqliteCompatibility -Python $python -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx -SavepointTx:$SavepointTx -SaveChanges:$SaveChanges -TxOptions:$TxOptions -DecimalBinding:$DecimalBinding -CommitOutcome:$CommitOutcome -ProductionAdapters:$ProductionAdapters
         }
         catch {
             $matrixFailures.Add($_.Exception.Message)
@@ -579,6 +613,9 @@ try {
     }
     if ($CommitOutcome) {
         Write-Host 'PASS commit outcome fault checks on all selected profiles'
+    }
+    if ($ProductionAdapters) {
+        Write-Host 'PASS production adapter application checks on all selected profiles'
     }
     if ($Compatibility) {
         # SQLite file compatibility reruns the baseline profile and adds one linked runtime.

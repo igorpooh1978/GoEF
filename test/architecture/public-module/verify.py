@@ -16,7 +16,7 @@ GO_VERSION = "go1.27.4"
 EXPECTED_OUTPUT = "8 true\n002_customer_notes\n"
 
 
-def verify(commit, version):
+def verify(commit, version, generated_bindings=False):
     with TemporaryDirectory(prefix="goef-public-consumer-") as temporary:
         root = Path(temporary)
         consumer = root / "consumer"
@@ -69,6 +69,8 @@ def verify(commit, version):
         shutil.copyfile(Path(__file__).with_name("consumer.go.txt"), consumer / "main.go")
         go("mod", "edit", f"-require={MODULE}@{resolved}")
         go("mod", "tidy")
+        if generated_bindings:
+            verify_generated_bindings(go, consumer)
         go("mod", "verify")
         selected = json.loads(go("list", "-mod=readonly", "-m", "-json", MODULE))
         if selected.get("Path") != MODULE or selected.get("Version") != resolved or "Replace" in selected:
@@ -86,13 +88,59 @@ def verify(commit, version):
         "goModSum": download["GoModSum"],
         "go": toolchain,
         "consumer": "PASS",
+        **({"generatedBindings": "PASS"} if generated_bindings else {}),
     }
+
+
+def verify_generated_bindings(go, consumer):
+    fixture_dir = Path(__file__).parent
+    source = consumer / "query.go"
+    output = consumer / "query_gen.go"
+    shutil.copyfile(fixture_dir / "query.go.txt", source)
+    command = ("run", "-mod=readonly", f"{MODULE}/cmd/goef-linqgen",
+               "-source", source.name, "-output", output.name)
+    go(*command)
+    expected = output.read_bytes()
+    go(*command)
+    if output.read_bytes() != expected:
+        raise ValueError("public generator output changed on a second run")
+    go(*command, "-check")
+
+    original_source = source.read_bytes()
+    source.write_bytes(original_source.replace(b"row.City == city", b"row.Name == city", 1))
+    verify_stale_check(go, command, output, expected)
+    source.write_bytes(original_source)
+    edited_output = expected + b"\n// stale binding\n"
+    output.write_bytes(edited_output)
+    verify_stale_check(go, command, output, edited_output)
+    go(*command)
+    if output.read_bytes() != expected:
+        raise ValueError("public generator failed to restore the original output")
+    go(*command, "-check")
+
+    shutil.copyfile(fixture_dir / "generated_test.go.txt", consumer / "generated_test.go")
+    go("mod", "tidy")
+    go("test", "-mod=readonly", "-count=1", "./...")
+
+
+def verify_stale_check(go, command, output, unchanged):
+    try:
+        go(*command, "-check")
+    except subprocess.CalledProcessError as error:
+        if error.returncode != 1 or "stale" not in (error.stderr or "").lower():
+            raise
+    else:
+        raise ValueError("public generator accepted a stale binding")
+    if output.read_bytes() != unchanged:
+        raise ValueError("public generator check rewrote stale output")
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("commit", help="expected full Git commit SHA")
     parser.add_argument("--version", help="exact public module version to resolve")
+    parser.add_argument("--generated-bindings", action="store_true",
+                        help="generate and exercise typed LINQ bindings from the downloaded revision")
     args = parser.parse_args()
     if not re.fullmatch(r"[0-9a-f]{40}", args.commit):
         parser.error("commit must be a full lowercase Git SHA")
@@ -100,7 +148,7 @@ def main():
         parser.error("version must be an exact Go module version")
 
     try:
-        print(json.dumps(verify(args.commit, args.version), indent=2))
+        print(json.dumps(verify(args.commit, args.version, args.generated_bindings), indent=2))
     except (OSError, ValueError, subprocess.SubprocessError) as error:
         print(error, file=sys.stderr)
         if isinstance(error, subprocess.CalledProcessError) and error.stderr:

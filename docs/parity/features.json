@@ -4062,6 +4062,75 @@
         "docs/upstream/RESEARCH_INDEX.md"
       ],
       "evidence": null
+    },
+    {
+      "id": "PROVIDER-EXEC-001",
+      "family": "providers",
+      "origin": "GOEF_EXTENSION",
+      "scope": "PORTABLE",
+      "upstream": [],
+      "contract": "Use driver-specific modules to execute typed commands on a physical connection under SPI v1 and report portable errors with redacted native metadata.",
+      "goApi": {
+        "status": "IMPLEMENTED",
+        "description": "Four concrete adapters implement the execution SPI using separately owned native-driver pools."
+      },
+      "wave": "W002",
+      "issues": [
+        13
+      ],
+      "dependencies": [],
+      "providers": {
+        "postgres": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Integrated adapter conformance and coverage acceptance is pending.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Integrated adapter conformance and coverage acceptance is pending.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Integrated adapter conformance and coverage acceptance is pending.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_RUN",
+          "capability": "PROPOSED",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Integrated adapter conformance and coverage acceptance is pending.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "PROVIDER-EXEC-001-S01",
+        "PROVIDER-EXEC-001-S02",
+        "PROVIDER-EXEC-001-S03",
+        "PROVIDER-EXEC-001-S04"
+      ],
+      "tests": [
+        "test/conformance/driverlab/production_adapter_test.go#TestProductionAdapters"
+      ],
+      "status": "IMPLEMENTING",
+      "deviations": [
+        "SQL Server error 547 has multiple meanings and retains its native code without claiming a foreign-key or check classification."
+      ],
+      "adr": "docs/adr/0002-module-and-provider-boundaries.md",
+      "docs": [
+        "docs/architecture/MODULE_GRAPH.md"
+      ],
+      "evidence": null
     }
   ]
 }

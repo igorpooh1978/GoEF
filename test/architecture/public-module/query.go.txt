@@ -1,0 +1,11 @@
+package main
+
+type Customer struct {
+	City string
+	Name string
+}
+
+//goef:query FindCustomer
+func findCustomer(row Customer, city string) (bool, string) {
+	return row.City == city, row.Name
+}

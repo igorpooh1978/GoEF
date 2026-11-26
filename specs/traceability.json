@@ -980,6 +980,62 @@
       "status": "SPECIFIED"
     },
     {
+      "featureId": "PROVIDER-EXEC-001",
+      "scenarioId": "PROVIDER-EXEC-001-S01",
+      "spec": "specs/features/providers/provider-exec-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/13"
+      ],
+      "docs": [
+        "docs/architecture/MODULE_GRAPH.md"
+      ],
+      "test": "test/conformance/driverlab/production_adapter_test.go#TestProductionAdapters",
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "PROVIDER-EXEC-001",
+      "scenarioId": "PROVIDER-EXEC-001-S02",
+      "spec": "specs/features/providers/provider-exec-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/13"
+      ],
+      "docs": [
+        "docs/architecture/MODULE_GRAPH.md"
+      ],
+      "test": "test/conformance/driverlab/production_adapter_test.go#TestProductionAdapters",
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "PROVIDER-EXEC-001",
+      "scenarioId": "PROVIDER-EXEC-001-S03",
+      "spec": "specs/features/providers/provider-exec-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/13"
+      ],
+      "docs": [
+        "docs/architecture/MODULE_GRAPH.md"
+      ],
+      "test": "test/conformance/driverlab/production_adapter_test.go#TestProductionAdapters",
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "PROVIDER-EXEC-001",
+      "scenarioId": "PROVIDER-EXEC-001-S04",
+      "spec": "specs/features/providers/provider-exec-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/13"
+      ],
+      "docs": [
+        "docs/architecture/MODULE_GRAPH.md"
+      ],
+      "test": "test/conformance/driverlab/production_adapter_test.go#TestProductionAdapters",
+      "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
       "featureId": "QUERY-PARAM-001",
       "scenarioId": "QUERY-PARAM-001-S01",
       "spec": "specs/features/query/query-param-001.feature",
