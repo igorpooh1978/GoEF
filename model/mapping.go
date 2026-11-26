@@ -63,8 +63,9 @@ func MaxLength(property string, length int) MappingOption {
 // MappedModel contains validated, provider-neutral Code First metadata.
 // Use [Map] to build a model.
 type MappedModel struct {
-	entities []MappedEntity
-	snapshot []byte
+	entities    []MappedEntity
+	snapshot    []byte
+	sourceTypes map[string]reflect.Type
 }
 
 // MappedEntity describes an entity's table, properties and ordered primary key.
@@ -118,6 +119,7 @@ func (m *MappedModel) Snapshot() []byte {
 func Map(registrations ...EntityMapping) (*MappedModel, error) {
 	declaration := Declaration{Entities: make([]EntityDecl, len(registrations))}
 	entities := make([]MappedEntity, len(registrations))
+	sourceTypes := make(map[string]reflect.Type, len(registrations))
 	for i, registration := range registrations {
 		entity, err := mapEntity(i+1, registration)
 		if err != nil {
@@ -125,6 +127,7 @@ func Map(registrations ...EntityMapping) (*MappedModel, error) {
 		}
 		declaration.Entities[i] = entity.logical()
 		entities[i] = entity
+		sourceTypes[entity.Name] = registration.typ
 	}
 	if err := Validate(declaration); err != nil {
 		return nil, err
@@ -145,7 +148,7 @@ func Map(registrations ...EntityMapping) (*MappedModel, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &MappedModel{entities: entities, snapshot: snapshot}, nil
+	return &MappedModel{entities: entities, snapshot: snapshot, sourceTypes: sourceTypes}, nil
 }
 
 func (e MappedEntity) logical() EntityDecl {

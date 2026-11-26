@@ -15,3 +15,26 @@ Feature: Explicit provider type mapping
       | sqlite    |
       | sqlserver |
       | mysql     |
+
+  @MODEL-TYPE-001-S02
+  Scenario Outline: Store bound Code First scalar values on each provider
+    Given the <provider> target and a Code First model with signed integers, Boolean, bounded and unbounded nullable text and binary fields
+    When the scalar bindings define columns in a disposable table and the pinned driver writes and reads representative values
+    Then the provider catalog shows the bound type and nullability of every column in model order
+    And signed boundary values, Boolean values, Unicode text and binary bytes round-trip exactly
+    And null and present empty text remain distinct
+    And the text length is declared where the provider supports it and retained as model metadata for SQLite
+
+    Examples:
+      | provider  |
+      | postgres  |
+      | sqlite    |
+      | sqlserver |
+      | mysql     |
+
+  @MODEL-TYPE-001-S03
+  Scenario: Reject an unsupported scalar before any database operation
+    Given a mapped Code First entity with a uint64 property
+    When its types are bound for all four targets
+    Then each target produces a portable invalid-model error and no physical model
+    And the error identifies the provider and the field position without revealing model names

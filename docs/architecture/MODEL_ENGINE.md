@@ -14,7 +14,15 @@ Proposed contract for the first model fixtures. Code First consumes explicit reg
 
 `model.Map` resolves the table name and direct exported fields of explicitly registered Go structs. Entity and field names supply defaults. Property tags and fluent options override individual facets. Matching is case-sensitive. Duplicate effective tables or columns and contradictory settings at one precedence yield a typed error with both declaration positions.
 
-The immutable result records ordered primary keys and direct pointer nullability. The version 1 mapping snapshot sorts entities by exact name and preserves field and key-member order. This snapshot describes resolved mapping metadata for the Code First slice. Provider-specific types, quoting, shared-table mapping, schema inspection and source generation have separate acceptance criteria. [Code First guide](../user/MODELS_CODE_FIRST.md) · [Mapping evidence](../evidence/W003/MODEL_MAPPING.md)
+The immutable result records ordered primary keys and direct pointer nullability. The version 1 mapping snapshot sorts entities by exact name and preserves field and key-member order. This snapshot describes resolved mapping metadata for the Code First slice. Provider-specific types use the physical binding below. Quoting, shared-table mapping, schema inspection and source generation have separate acceptance criteria. [Code First guide](../user/MODELS_CODE_FIRST.md) · [Mapping evidence](../evidence/W003/MODEL_MAPPING.md)
+
+## Available physical scalar binding
+
+`model.BindTypes` binds the Code First model to one explicit PostgreSQL, SQLite, SQL Server or MySQL dialect. The initial binding covers built-in Boolean, signed integer, text and binary fields and their direct nullable pointer forms. It adds the native type declaration, logical scalar kind and original length to each physical property. The physical snapshot has its own format version and dialect identity. Code First mapping snapshot v1 keeps its naming and key format. [Binding guide](../user/MODELS_CODE_FIRST.md#bind-the-mapped-model-to-a-provider) · [Binding evidence](../evidence/W003/PROVIDER_TYPE_BINDING.md)
+
+Value conversion, driver selection, physical key/index validation, table layout, capability negotiation, collations and source generation continue in their respective stages. Unsupported types fail before I/O with a typed error whose coordinates reflect canonical entity and mapped property order. Exact decimal retains the dedicated S01 scenario.
+
+
 
 ## Freeze and resolve
 
