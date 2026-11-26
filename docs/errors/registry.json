@@ -1810,7 +1810,7 @@
       "detailType": "*ErrorDetail",
       "category": "migration",
       "message": "Migration history conflicts with the registered set.",
-      "trigger": "A digest, predecessor or migration identity conflicts with the applied lineage.",
+      "trigger": "The ordered migration registry is malformed, or the supplied applied history differs from its exact prefix by ID, predecessor or digest.",
       "phase": "verify-history",
       "outcome": "no_commit_attempted",
       "retryClass": "never",
@@ -1826,30 +1826,34 @@
         "migrationId",
         "operationId"
       ],
-      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages. In-memory validation omits all supplied IDs, predecessors and digests.",
       "firstVersion": null,
       "status": "PROPOSED",
       "deprecated": false,
       "replacement": null,
       "issues": [
-        "https://github.com/igorpooh1978/GoEF/issues/2"
+        "https://github.com/igorpooh1978/GoEF/issues/2",
+        "https://github.com/igorpooh1978/GoEF/issues/34"
       ],
       "featureIds": [
         "MIG-DRIFT-001"
       ],
       "scenarioIds": [
-        "MIG-DRIFT-001-S02"
+        "MIG-DRIFT-001-S02",
+        "MIG-DRIFT-001-S03"
       ],
       "docs": [
         "docs/architecture/ERROR_CONTRACT.md",
-        "docs/errors/README.md"
+        "docs/errors/README.md",
+        "docs/evidence/W004/MIGRATION_PENDING.md"
       ],
       "testIds": [
         "TEST-GOEF-MIG-0002"
       ],
       "upstreamSources": [
         "https://pkg.go.dev/errors",
-        "https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/managing"
+        "https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/managing",
+        "https://github.com/dotnet/efcore/blob/b34c0e9d7e768aa808ded44f19e7f871bea6869f/src/EFCore.Relational/Migrations/Internal/Migrator.cs#L429-L455"
       ],
       "providerMappings": {
         "postgres": [],

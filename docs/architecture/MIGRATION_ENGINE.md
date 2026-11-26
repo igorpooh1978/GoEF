@@ -28,6 +28,10 @@ The initial operation vocabulary covers schemas, tables, columns, sequences, key
 
 An optional CLI, IDE or go generate frontend calls these APIs. Library callers never need a binary or subprocess. Compare CLI and library plans, scripts, exit classification and resulting state for identical inputs. Scripts and bundles remain generated artifacts until explicitly executed. [EF migration management](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/managing) · [Application options](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/applying)
 
+## Verify supplied migration history
+
+`migration.Pending` verifies the complete linear registry and the applied prefix by exact ID, predecessor and artifact digest. A valid plan contains the independent pending suffix. The caller supplies both inputs and the digest bytes. `GOEF-MIG-0002` covers malformed definitions and history mismatches. The call is in memory. Durable history reads and live schema preconditions belong to the executor. [Go guide](../user/MIGRATIONS_IN_GO.md) · [Issue #34](https://github.com/igorpooh1978/GoEF/issues/34)
+
 ## Execute under one lock
 
 1. Pin the target identity, expected history, plan digest, dependencies and approval. Acquire a bounded, cancellable lock covering all conflicting objects and histories in that database. Hold through all commands, checkpoints and final history. Shared objects in separate contexts require the same conflicting lock domain.

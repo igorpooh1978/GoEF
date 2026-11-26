@@ -608,11 +608,13 @@
       "scenarioId": "MIG-DRIFT-001-S01",
       "spec": "specs/features/migrations/mig-drift-001.feature",
       "issues": [
-        "https://github.com/igorpooh1978/GoEF/issues/2"
+        "https://github.com/igorpooh1978/GoEF/issues/2",
+        "https://github.com/igorpooh1978/GoEF/issues/34"
       ],
       "docs": [
         "docs/architecture/MIGRATION_ENGINE.md",
-        "docs/user/MIGRATIONS.md"
+        "docs/user/MIGRATIONS.md",
+        "docs/user/MIGRATIONS_IN_GO.md"
       ],
       "test": null,
       "evidence": null,
@@ -623,14 +625,33 @@
       "scenarioId": "MIG-DRIFT-001-S02",
       "spec": "specs/features/migrations/mig-drift-001.feature",
       "issues": [
-        "https://github.com/igorpooh1978/GoEF/issues/2"
+        "https://github.com/igorpooh1978/GoEF/issues/2",
+        "https://github.com/igorpooh1978/GoEF/issues/34"
       ],
       "docs": [
         "docs/architecture/MIGRATION_ENGINE.md",
-        "docs/user/MIGRATIONS.md"
+        "docs/user/MIGRATIONS.md",
+        "docs/user/MIGRATIONS_IN_GO.md"
       ],
       "test": null,
       "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-DRIFT-001",
+      "scenarioId": "MIG-DRIFT-001-S03",
+      "spec": "specs/features/migrations/mig-drift-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2",
+        "https://github.com/igorpooh1978/GoEF/issues/34"
+      ],
+      "docs": [
+        "docs/architecture/MIGRATION_ENGINE.md",
+        "docs/user/MIGRATIONS.md",
+        "docs/user/MIGRATIONS_IN_GO.md"
+      ],
+      "test": "migration/pending_test.go#TestPendingMIG_DRIFT_001S03",
+      "evidence": "docs/evidence/W004/MIGRATION_PENDING.md",
       "status": "SPECIFIED"
     },
     {

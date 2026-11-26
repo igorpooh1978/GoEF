@@ -1054,16 +1054,28 @@
           "testPath": "test/EFCore.Relational.Specification.Tests/Migrations/MigrationsInfrastructureTestBase.cs",
           "testSymbol": "Can_apply_all_migrations",
           "relation": "analogue"
+        },
+        {
+          "lockId": "efcore",
+          "repository": "https://github.com/dotnet/efcore",
+          "tag": "v10.0.15",
+          "sha": "b34c0e9d7e768aa808ded44f19e7f871bea6869f",
+          "path": "src/EFCore.Relational/Migrations/Internal/Migrator.cs",
+          "symbol": "PopulateMigrations",
+          "testPath": "test/EFCore.Relational.Specification.Tests/Migrations/MigrationsInfrastructureTestBase.cs",
+          "testSymbol": "Can_apply_range_of_migrations",
+          "relation": "analogue"
         }
       ],
-      "contract": "Reject execution when schema or migration history differs from the plan preconditions.",
+      "contract": "Validate the supplied migration lineage and its exact applied prefix. Before execution, also verify plan preconditions against live schema and history.",
       "goApi": {
-        "status": "PROPOSED",
-        "description": "Planner precondition digests and history verification."
+        "status": "IMPLEMENTED",
+        "description": "migration.Pending verifies an in-memory history and returns a copy of the pending suffix. Live schema and durable history validation are proposed."
       },
       "wave": "W006",
       "issues": [
-        2
+        2,
+        34
       ],
       "dependencies": [
         "MIG-API-001"
@@ -1104,17 +1116,22 @@
       },
       "scenarios": [
         "MIG-DRIFT-001-S01",
-        "MIG-DRIFT-001-S02"
+        "MIG-DRIFT-001-S02",
+        "MIG-DRIFT-001-S03"
       ],
-      "tests": [],
-      "status": "SPECIFIED",
+      "tests": [
+        "migration/pending_test.go#TestPendingMIG_DRIFT_001S03"
+      ],
+      "status": "PARTIAL",
       "deviations": [
-        "GoEF adds database preconditions and migration content digests to its own plan."
+        "GoEF adds database preconditions and migration content digests to its own plan.",
+        "GoEF requires byte-for-byte ID and predecessor matches plus an exact artifact digest in registry order. EF Core partitions migrations by case-insensitive ID membership and orders the resulting lists."
       ],
       "adr": null,
       "docs": [
         "docs/user/MIGRATIONS.md",
-        "docs/architecture/MIGRATION_ENGINE.md"
+        "docs/architecture/MIGRATION_ENGINE.md",
+        "docs/user/MIGRATIONS_IN_GO.md"
       ],
       "evidence": null
     },
