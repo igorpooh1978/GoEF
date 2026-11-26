@@ -37,6 +37,7 @@ type ownedTx struct {
 	native       *sql.Tx
 	stopRollback func() bool
 	cleanupErr   error
+	savepoints   savepointStack
 }
 
 // Begin acquires one connection and starts a transaction with the driver defaults.
@@ -92,12 +93,29 @@ func (tx *Tx) State() State {
 // Execution observes both ctx and the transaction lifetime. After a command
 // error, finish the transaction explicitly. A bad connection ends it.
 func (tx *Tx) Exec(ctx context.Context, query string, args ...any) (sql.Result, error) {
+	var result sql.Result
+	err := tx.withCommand(ctx, func(command context.Context, owned *ownedTx) error {
+		nativeResult, err := owned.native.ExecContext(command, query, args...)
+		if errors.Is(err, driver.ErrBadConn) {
+			return errors.Join(operationError(err), owned.rollback(true))
+		}
+		if err != nil {
+			return operationError(commandError(ctx, command, err))
+		}
+		result = safeResult{underlying: nativeResult}
+		return nil
+	})
+	return result, err
+}
+
+// withCommand serializes SQL commands with lifetime cleanup and completion.
+func (tx *Tx) withCommand(ctx context.Context, run func(context.Context, *ownedTx) error) error {
 	if ctx == nil {
-		return nil, goeferr.NewInvalidState()
+		return goeferr.NewInvalidState()
 	}
 	owned, err := tx.lockActive()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer owned.mu.Unlock()
 
@@ -109,21 +127,20 @@ func (tx *Tx) Exec(ctx context.Context, query string, args ...any) (sql.Result, 
 		cancel(nil)
 	}()
 	if err := lifetime.Err(); err != nil {
-		return nil, errors.Join(operationError(err), owned.rollback(false))
+		return errors.Join(operationError(err), owned.rollback(false))
 	}
+	if err := command.Err(); err != nil {
+		return operationError(commandError(ctx, command, err))
+	}
+	return run(command, owned)
+}
 
-	result, err := owned.native.ExecContext(command, query, args...)
-	if err != nil {
-		if errors.Is(err, driver.ErrBadConn) {
-			return nil, errors.Join(operationError(err), owned.rollback(true))
-		}
-		if errors.Is(err, context.Canceled) && ctx.Err() == nil &&
-			context.Cause(command) == context.DeadlineExceeded {
-			err = context.DeadlineExceeded
-		}
-		return nil, operationError(err)
+func commandError(ctx, command context.Context, err error) error {
+	if errors.Is(err, context.Canceled) && ctx.Err() == nil &&
+		context.Cause(command) == context.DeadlineExceeded {
+		return context.DeadlineExceeded
 	}
-	return safeResult{underlying: result}, nil
+	return err
 }
 
 // Commit commits and releases the lease. A native commit error leaves the
@@ -204,6 +221,7 @@ func (o *ownedTx) finish(state State, discard bool) {
 	o.stopRollback()
 	release(o.conn, discard)
 	o.native, o.conn, o.lifetime, o.stopRollback = nil, nil, nil, nil
+	o.savepoints = savepointStack{}
 	o.state.Store(state)
 }
 
