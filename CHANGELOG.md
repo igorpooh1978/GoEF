@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add explicit transaction isolation, native read-only mode where supported, and single-row reads on the bound transaction ([#2](https://github.com/igorpooh1978/GoEF/issues/2)).
+- Add a Go decimal value with exact text round trips that preserve scale ([#3](https://github.com/igorpooh1978/GoEF/issues/3)).
+- Add indexed `WhereIndexed` and `SelectIndexed` transformations and short-circuit `Any`, `AnyBy` and `All` in Objects mode ([#4](https://github.com/igorpooh1978/GoEF/issues/4)).
+- Verify blocked read cancellation on both pinned MySQL versions and bidirectional SQLite recovery of commits still held in WAL after writer process exit ([#13](https://github.com/igorpooh1978/GoEF/issues/13), [#31](https://github.com/igorpooh1978/GoEF/issues/31)).
+
 - Add ordered `SaveChanges` batches for owned and caller-owned transactions. Failed batches roll back to a savepoint when recovery is confirmed, and generated values are accepted after commit ([#2](https://github.com/igorpooh1978/GoEF/issues/2)).
 - Add managed savepoints and non-owning participation in caller transactions ([#2](https://github.com/igorpooh1978/GoEF/issues/2)).
 - Add owned transactions on one physical connection with explicit begin, commit, rollback, and pool return ([#2](https://github.com/igorpooh1978/GoEF/issues/2)).

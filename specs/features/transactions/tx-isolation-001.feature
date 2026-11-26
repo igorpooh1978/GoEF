@@ -4,10 +4,11 @@ Feature: Honor the requested transaction options
   @TX-ISOLATION-001-S01
   Scenario Outline: Demand the advertised effective isolation
     Given an isolated <provider> database with a recorded isolation and read-only capability matrix
-    When the runner begins each declared mode with a separate writer and observer
-    Then the server settings and coordinated reads or locks match the advertised mode
+    When the runner begins each declared mode and coordinates separate physical sessions
+    Then the recorded settings or coordinated visibility and locking match the advertised mode
     And a read-only transaction rejects writes for each advertised read-only mode
-    And an unsupported request returns ErrUnsupportedFeature before the callback or any write
+    And an unsupported option returns ErrUnsupportedFeature before any write
+    And the pool is available for a new default transaction after completion
 
     Examples:
       | provider  |

@@ -41,7 +41,7 @@ A successful batch returns a receipt for explicit acceptance after a known commi
 | Resource | Owner and completion |
 | --- | --- |
 | Pool and borrowed connection | An application owns its pool. A library transaction returns its lease after completion and cleanup. A caller-supplied connection stays open for its owner. |
-| Owned database transaction | Begin binds the physical connection. Explicit isolation and read-only options are planned. Only the owning handle can commit or roll back. Close requests rollback on an active handle and is idempotent. |
+| Owned database transaction | Begin binds the physical connection. BeginWithOptions checks the engine's supported isolation and read-only combinations. Only the owning handle can commit or roll back. Close requests rollback on an active handle and is idempotent. |
 | External transaction | Explicit enlistment borrows the exact native transaction and its physical connection. Participants detach without completing the transaction or closing the connection. Future tracked participants will need an owner signal or a reload before accepting provisional state. |
 | DbContext and tracker | A context has a single active operation. A stream holds that slot until close or terminal exhaustion. An enlisted transaction also serializes access across participating contexts. Concurrent use returns `ErrContextBusy`. Close ends the context lifetime. |
 
@@ -64,6 +64,8 @@ The tracker supplies dependency ordering, generated-key propagation and snapshot
 A callback returning an error triggers cleanup. A panic unwinds after owned resources are cleaned up. A bounded independent cleanup context may run after the caller's context ends. Close readers first, collect late iteration and cleanup errors, then release or discard the connection. Preserve causal cancellation and safe secondary errors through wrapping or joining. Interceptors observe begin, command, savepoint, attempts, final disposition and cleanup with redacted identifiers. An observer failure after confirmed commit cannot turn it into a rolled-back business operation.
 
 ## Options and provider experiments
+
+`BeginWithOptions` accepts the explicit combinations in the [transaction guide](../user/TRANSACTIONS.md#choose-isolation-and-read-only-mode). PostgreSQL and MySQL pass supported options to the native transaction. SQLite checks `read_uncommitted` on the same checkout before beginning explicit Serializable mode. SQL Server uses the native requested mode and discards that session at completion because the protocol reset can retain isolation. `Scan` reads through the bound native transaction under the operation gate. [Local results](../evidence/W005/ISOLATION_OPTIONS.md) · [SQL Server reset protocol](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-tds/ce398f9a-7d47-4ede-8f36-9dd6fc21ca43)
 
 The adapter declares supported effective isolation levels, read-only enforcement, savepoint behavior and transaction options for an engine/driver/configuration tuple. Explicit requests receive their declared behavior or a typed preflight rejection. For the provider default, record the effective server setting as part of the result. The table defines experiments awaiting real fixtures.
 

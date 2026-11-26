@@ -43,6 +43,19 @@ The context passed to `Begin` governs acquisition and the transaction lifetime. 
 
 When the native commit result is inconclusive, the handle reports `StateOutcomeUnknown`, discards the connection and returns an error matching `goeferr.ErrCommitOutcomeUnknown`. Reconcile the operation using an independent, authoritative connection before deciding whether it can be repeated. A failed rollback records `StateFailed` and discards the connection. `Close` returns any recorded `goeferr.ErrRollbackFailed`, including after cancellation has already attempted cleanup. [Transaction state and reconciliation](../architecture/TRANSACTION_ENGINE.md)
 
+## Choose isolation and read-only mode
+
+Use `transaction.BeginWithOptions(ctx, db, dialect, sql.TxOptions{Isolation: sql.LevelRepeatableRead, ReadOnly: true})` for a read-only PostgreSQL or MySQL transaction. The dialect must match the driver and engine behind `db`. Read one result on the transaction with `tx.Scan(ctx, query, args, &value)`. The method consumes the result before returning and reports `sql.ErrNoRows` for an empty result. Use `Commit`, `Rollback` or deferred `Close` to finish the transaction.
+
+| Engine | Accepted isolation options | Read-only option |
+| --- | --- | --- |
+| PostgreSQL | Default, Read Committed, Repeatable Read, Serializable | Native read-only transaction |
+| MySQL | Default, Read Committed, Repeatable Read, Serializable | Native read-only transaction |
+| SQL Server | Default, Read Committed, Repeatable Read, Serializable | Returns `ErrUnsupportedFeature` |
+| SQLite | Default, Serializable with `PRAGMA read_uncommitted` off on the leased connection | Returns `ErrUnsupportedFeature` |
+
+`Default` uses the server and driver defaults. GoEF rejects unsupported options with `goeferr.ErrUnsupportedFeature`; the SQLite Serializable check reads connection state before beginning. SQL Server explicitly configured isolation uses one physical connection throughout, then discards that connection at completion to prevent the isolation setting carrying over into a later checkout. Use transaction-preserving statements and keep session settings fixed during the transaction. [Isolation fixture](../../test/conformance/driverlab/transaction_options_test.go) · [Local results](../evidence/W005/ISOLATION_OPTIONS.md)
+
 ## Use savepoints inside a transaction
 
 Call `tx.Savepoint(ctx, dialect)` on an owned transaction or `external.Savepoint(ctx, dialect)` on an external coordinator. Supply the dialect for the actual driver and database. The package generates point names. Rolling back to a live point reverts transactional writes made after it, keeps that point available and invalidates younger handles. Release the innermost live point when it is no longer needed. A release keeps the writes pending in the enclosing transaction. A retired handle, or an attempt to release an older point first, returns an error matching `goeferr.ErrInvalidState`.

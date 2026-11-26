@@ -38,3 +38,10 @@ Feature: Explicit provider type mapping
     When its types are bound for all four targets
     Then each target produces a portable invalid-model error and no physical model
     And the error identifies the provider and the field position without revealing model names
+
+  @MODEL-TYPE-001-S04
+  Scenario: Preserve arbitrary exact decimal digits in Go text
+    Given plain decimal text with a scale and digits beyond binary floating-point precision
+    When I parse and encode the Go decimal value
+    Then the canonical text round-trips every significant digit and preserves the original scale
+    And invalid syntax and out-of-bound precision leave a previously decoded value unchanged

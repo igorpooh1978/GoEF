@@ -56,3 +56,18 @@ Feature: Enumerate typed local values
     When I count the projected sequence again
     Then the count and traversal are the same
     And the iterator has released its resources twice in total
+
+  @LINQ-OBJECTS-001-S07
+  Scenario: Indexed filtering and projection count their own inputs
+    Given a replayable sequence with values rejected by an indexed filter
+    When I project each accepted value with its position in the filtered sequence
+    Then the filter positions include rejected values and the projection positions count accepted values
+    And an early consumer stop reaches the source
+    And both operators restart their positions at zero on replay
+
+  @LINQ-OBJECTS-001-S08
+  Scenario: Quantifiers finish at the first conclusive result
+    Given a lazy filter and projection over an iterator that records reads and cleanup
+    When I ask whether there is a match, a match satisfying a predicate, or all matches satisfy a predicate
+    Then each query stops at its first conclusive result and closes the source before returning
+    And an empty sequence has no match and satisfies every universal predicate

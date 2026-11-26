@@ -48,6 +48,10 @@ Add `-SavepointTx` to exercise managed savepoints and external ownership on each
 
 Add `-SaveChanges` to exercise automatic rollback of a failed owned graph and a failed caller-owned batch, provisional acceptance after commit, and refusal of an unsupported recovery configuration. The SQL Server fixture checks both `XACT_ABORT` settings. Both Python launchers accept `--save-changes`. [SaveChanges evidence](../../../docs/evidence/W005/SAVE_CHANGES.md)
 
+Add `-TxOptions` to exercise explicit isolation, native read-only enforcement where supported, and pool behavior after completion. Both Python launchers accept `--tx-options`. [Isolation evidence](../../../docs/evidence/W005/ISOLATION_OPTIONS.md)
+
+Run `python -B test/conformance/lab/mysql_in_flight_read.py` for both pinned MySQL blocked-read cancellation checks. Run `python -B test/conformance/lab/sqlite_wal_recovery.py` for recovery of a durable WAL commit across the two pinned SQLite runtimes. [MySQL cancellation evidence](../../../docs/evidence/W002/MYSQL_IN_FLIGHT_READ.md) · [SQLite WAL recovery evidence](../../../docs/evidence/W002/SQLITE_WAL_RECOVERY.md)
+
 The SQL Server 2022 profiles also check that `GENERATE_SERIES` returns the expected values at compatibility level 160 and is unavailable at 140 under the fixture's database settings.
 
 The [SQLite file scenarios](features/sqlite_files.feature) run both directions between SQLite 3.51.3, the W002 minimum, and the 3.54.1 reference. The peer opens the existing file, verifies that an invalid `STRICT` generated value returns native code `3091`, exercises rollback and commits an additive migration. The original runtime then reopens the same file and checks schema, rows and integrity. The suite covers `DELETE` and `WAL` journaling with a schema shared by both versions. The local matrix requires the exact minimum profile and the observed `3091` in each file result.

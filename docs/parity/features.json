@@ -257,7 +257,7 @@
       "contract": "Round-trip a supported scalar comparison and value without losing precision under a declared provider type mapping.",
       "goApi": {
         "status": "IMPLEMENTED",
-        "description": "BindTypes returns a physical mapping for built-in booleans, signed integers, strings and byte slices. Exact decimal and other codecs are separate."
+        "description": "BindTypes resolves built-in scalars. Decimal preserves exact plain text and scale in Go. The SQL decimal storage codecs retain separate validation."
       },
       "wave": "W005",
       "issues": [
@@ -303,12 +303,14 @@
       "scenarios": [
         "MODEL-TYPE-001-S01",
         "MODEL-TYPE-001-S02",
-        "MODEL-TYPE-001-S03"
+        "MODEL-TYPE-001-S03",
+        "MODEL-TYPE-001-S04"
       ],
       "tests": [
         "test/conformance/driverlab/model_types_test.go#TestModelTypeRoundTrip",
         "model/type_binding_test.go#TestBindTypesMODEL_TYPE_001S02",
-        "model/type_binding_test.go#TestBindTypesMODEL_TYPE_001S03"
+        "model/type_binding_test.go#TestBindTypesMODEL_TYPE_001S03",
+        "model/decimal_test.go#TestDecimalCanonicalTextAndScale"
       ],
       "status": "PARTIAL",
       "deviations": [
@@ -1637,8 +1639,8 @@
       ],
       "contract": "Apply the requested advertised isolation or return typed unsupported without starting work. Handle nesting explicitly.",
       "goApi": {
-        "status": "PROPOSED",
-        "description": "Begin with named isolation and read-only options plus capability check."
+        "status": "IMPLEMENTED",
+        "description": "BeginWithOptions verifies supported isolation and read-only modes. Scan reads through the bound transaction."
       },
       "wave": "W009",
       "issues": [
@@ -1685,9 +1687,13 @@
         "TX-ISOLATION-001-S01",
         "TX-ISOLATION-001-S02"
       ],
-      "tests": [],
-      "status": "SPECIFIED",
-      "deviations": [],
+      "tests": [
+        "test/conformance/driverlab/transaction_options_test.go#TestTransactionOptions"
+      ],
+      "status": "PARTIAL",
+      "deviations": [
+        "Unsupported nesting is a separate scenario. Explicit SQL Server isolation discards the session after completion."
+      ],
       "adr": null,
       "docs": [
         "docs/user/TRANSACTIONS.md",
@@ -2152,7 +2158,7 @@
       "contract": "Filter and project values through lazy typed in-memory iterators. Count enumerates the composed source once and returns its cardinality.",
       "goApi": {
         "status": "IMPLEMENTED",
-        "description": "Where and Select compose over iter.Seq with typed Go callbacks. Count consumes a sequence and returns a checked Go int."
+        "description": "Where, Select and indexed variants compose over iter.Seq. Count and short-circuiting Any, AnyBy and All are local terminals."
       },
       "wave": "W008",
       "issues": [
@@ -2199,12 +2205,16 @@
         "LINQ-OBJECTS-001-S03",
         "LINQ-OBJECTS-001-S04",
         "LINQ-OBJECTS-001-S05",
-        "LINQ-OBJECTS-001-S06"
+        "LINQ-OBJECTS-001-S06",
+        "LINQ-OBJECTS-001-S07",
+        "LINQ-OBJECTS-001-S08"
       ],
       "tests": [
         "linq/objects/where_test.go#TestWhereConsumesOnlyNecessaryPrefix",
         "linq/objects/select_test.go#TestWhereSelectStopsAtFirstProjectionAndReplays",
-        "linq/objects/count_test.go#TestWhereSelectCountConsumesAllProjections"
+        "linq/objects/count_test.go#TestWhereSelectCountConsumesAllProjections",
+        "linq/objects/indexed_test.go#TestIndexedWhereSelectStopsAndResetsBothPositions",
+        "linq/objects/quantifiers_test.go#TestQuantifiersShortCircuitThroughPipeline"
       ],
       "status": "PARTIAL",
       "deviations": [

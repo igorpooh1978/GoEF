@@ -396,6 +396,36 @@
       "status": "SPECIFIED"
     },
     {
+      "featureId": "LINQ-OBJECTS-001",
+      "scenarioId": "LINQ-OBJECTS-001-S07",
+      "spec": "specs/features/linq/objects.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_OBJECTS.md",
+        "docs/user/LINQ_OBJECTS.md"
+      ],
+      "test": "linq/objects/indexed_test.go#TestIndexedWhereSelectStopsAndResetsBothPositions",
+      "evidence": "docs/evidence/W008/OBJECTS_INDEXED.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-OBJECTS-001",
+      "scenarioId": "LINQ-OBJECTS-001-S08",
+      "spec": "specs/features/linq/objects.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_OBJECTS.md",
+        "docs/user/LINQ_OBJECTS.md"
+      ],
+      "test": "linq/objects/quantifiers_test.go#TestQuantifiersShortCircuitThroughPipeline",
+      "evidence": "docs/evidence/W008/OBJECTS_QUANTIFIERS.md",
+      "status": "SPECIFIED"
+    },
+    {
       "featureId": "LINQ-QUERYABLE-001",
       "scenarioId": "LINQ-QUERYABLE-001-S01",
       "spec": "specs/features/linq/queryable.feature",
@@ -779,6 +809,20 @@
       "status": "SPECIFIED"
     },
     {
+      "featureId": "MODEL-TYPE-001",
+      "scenarioId": "MODEL-TYPE-001-S04",
+      "spec": "specs/features/model/model-type-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/3"
+      ],
+      "docs": [
+        "docs/user/MODELS_CODE_FIRST.md"
+      ],
+      "test": "model/decimal_test.go#TestDecimalCanonicalTextAndScale",
+      "evidence": "docs/evidence/W003/DECIMAL_VALUE.md",
+      "status": "SPECIFIED"
+    },
+    {
       "featureId": "MODEL-VALID-001",
       "scenarioId": "MODEL-VALID-001-S01",
       "spec": "specs/features/model/model-valid-001.feature",
@@ -861,8 +905,8 @@
         "docs/architecture/TRANSACTION_ENGINE.md",
         "docs/user/TRANSACTIONS.md"
       ],
-      "test": null,
-      "evidence": null,
+      "test": "test/conformance/driverlab/transaction_options_test.go#TestTransactionOptions",
+      "evidence": "docs/evidence/W005/ISOLATION_OPTIONS.md",
       "status": "SPECIFIED"
     },
     {

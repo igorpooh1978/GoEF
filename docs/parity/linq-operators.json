@@ -12656,7 +12656,7 @@
       "tests": [
         "result_test.go#L8"
       ],
-      "status": "DISCOVERED",
+      "status": "PARTIAL",
       "semanticProfile": "cardinality",
       "providerCells": {
         "postgres": "local",
@@ -12666,9 +12666,12 @@
       },
       "issue": 4,
       "scenarioIds": [
-        "LINQ-CONFORMANCE-001-S01"
+        "LINQ-CONFORMANCE-001-S01",
+        "LINQ-OBJECTS-001-S08"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "linq/objects/quantifiers_test.go#TestQuantifiersShortCircuitThroughPipeline"
+      ],
       "evidenceSha": null
     },
     {
@@ -12690,7 +12693,7 @@
       "tests": [
         "result_test.go#L27"
       ],
-      "status": "DISCOVERED",
+      "status": "PARTIAL",
       "semanticProfile": "cardinality",
       "providerCells": {
         "postgres": "local",
@@ -12700,9 +12703,12 @@
       },
       "issue": 4,
       "scenarioIds": [
-        "LINQ-CONFORMANCE-001-S01"
+        "LINQ-CONFORMANCE-001-S01",
+        "LINQ-OBJECTS-001-S08"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "linq/objects/quantifiers_test.go#TestQuantifiersShortCircuitThroughPipeline"
+      ],
       "evidenceSha": null
     },
     {
@@ -12724,7 +12730,7 @@
       "tests": [
         "result_test.go#L44"
       ],
-      "status": "DISCOVERED",
+      "status": "PARTIAL",
       "semanticProfile": "cardinality",
       "providerCells": {
         "postgres": "local",
@@ -12734,9 +12740,12 @@
       },
       "issue": 4,
       "scenarioIds": [
-        "LINQ-CONFORMANCE-001-S01"
+        "LINQ-CONFORMANCE-001-S01",
+        "LINQ-OBJECTS-001-S08"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "linq/objects/quantifiers_test.go#TestQuantifiersShortCircuitThroughPipeline"
+      ],
       "evidenceSha": null
     },
     {
@@ -14699,7 +14708,7 @@
       "tests": [
         "src/libraries/System.Linq/tests/AllTests.cs#L19"
       ],
-      "status": "DISCOVERED",
+      "status": "PARTIAL",
       "semanticProfile": "cardinality",
       "providerCells": {
         "postgres": "local",
@@ -14709,9 +14718,12 @@
       },
       "issue": 4,
       "scenarioIds": [
-        "LINQ-CONFORMANCE-001-S01"
+        "LINQ-CONFORMANCE-001-S01",
+        "LINQ-OBJECTS-001-S08"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "linq/objects/quantifiers_test.go#TestQuantifiersShortCircuitThroughPipeline"
+      ],
       "evidenceSha": null
     },
     {
@@ -14739,7 +14751,7 @@
       "tests": [
         "src/libraries/System.Linq/tests/AnyTests.cs#L19"
       ],
-      "status": "DISCOVERED",
+      "status": "PARTIAL",
       "semanticProfile": "cardinality",
       "providerCells": {
         "postgres": "local",
@@ -14749,9 +14761,12 @@
       },
       "issue": 4,
       "scenarioIds": [
-        "LINQ-CONFORMANCE-001-S01"
+        "LINQ-CONFORMANCE-001-S01",
+        "LINQ-OBJECTS-001-S08"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "linq/objects/quantifiers_test.go#TestQuantifiersShortCircuitThroughPipeline"
+      ],
       "evidenceSha": null
     },
     {
@@ -16898,11 +16913,13 @@
       "scenarioIds": [
         "LINQ-CONFORMANCE-001-S01",
         "LINQ-OBJECTS-001-S05",
-        "LINQ-OBJECTS-001-S06"
+        "LINQ-OBJECTS-001-S06",
+        "LINQ-OBJECTS-001-S07"
       ],
       "executableTests": [
         "linq/objects/select_test.go#TestWhereSelectStopsAtFirstProjectionAndReplays",
-        "linq/objects/count_test.go#TestWhereSelectCountConsumesAllProjections"
+        "linq/objects/count_test.go#TestWhereSelectCountConsumesAllProjections",
+        "linq/objects/indexed_test.go#TestIndexedWhereSelectStopsAndResetsBothPositions"
       ],
       "evidenceSha": null
     },
@@ -17997,12 +18014,14 @@
         "LINQ-CONFORMANCE-001-S01",
         "LINQ-OBJECTS-001-S01",
         "LINQ-OBJECTS-001-S05",
-        "LINQ-OBJECTS-001-S06"
+        "LINQ-OBJECTS-001-S06",
+        "LINQ-OBJECTS-001-S07"
       ],
       "executableTests": [
         "linq/objects/where_test.go#TestWhereConsumesOnlyNecessaryPrefix",
         "linq/objects/select_test.go#TestWhereSelectStopsAtFirstProjectionAndReplays",
-        "linq/objects/count_test.go#TestWhereSelectCountConsumesAllProjections"
+        "linq/objects/count_test.go#TestWhereSelectCountConsumesAllProjections",
+        "linq/objects/indexed_test.go#TestIndexedWhereSelectStopsAndResetsBothPositions"
       ],
       "evidenceSha": null
     },
