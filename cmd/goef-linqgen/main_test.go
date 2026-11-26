@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -195,4 +196,98 @@ func TestPortableGoFileNames(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestInvalidSourceLeavesExistingBinding(t *testing.T) {
+	dir := t.TempDir()
+	source := filepath.Join(dir, "query.go")
+	output := filepath.Join(dir, "query_gen.go")
+	writeFixture(t, source, []byte(querySource))
+	args := []string{"-source", source, "-output", output}
+	mustRun(t, args)
+	original := readFixture(t, output)
+
+	writeFixture(t, source, []byte(strings.Replace(querySource, "==", "!=", 1)))
+	if err := run(args, io.Discard); err == nil || !strings.Contains(err.Error(), "predicate must compare") {
+		t.Fatalf("expected source diagnostic, got %v", err)
+	}
+	if contents := readFixture(t, output); !bytes.Equal(contents, original) {
+		t.Fatalf("generation rewrote the binding with invalid input:\n%s", contents)
+	}
+}
+
+func TestRunReportsInvalidOutputPath(t *testing.T) {
+	dir := t.TempDir()
+	source := filepath.Join(dir, "query.go")
+	output := filepath.Join(dir, strings.Repeat("query", 100)+".go")
+	writeFixture(t, source, []byte(querySource))
+
+	_, pathErr := os.Lstat(output)
+	if pathErr == nil || os.IsNotExist(pathErr) {
+		t.Skip("filesystem does not report long filename errors from Lstat")
+	}
+	var expected, failure *os.PathError
+	if !errors.As(pathErr, &expected) {
+		t.Fatalf("expected a filesystem path error, got %v", pathErr)
+	}
+	err := run([]string{"-source", source, "-output", output}, io.Discard)
+	if !errors.As(err, &failure) || failure.Op != expected.Op || failure.Path != output || !errors.Is(err, expected.Err) {
+		t.Fatalf("expected the output path diagnostic, got %v", err)
+	}
+	entries, err := os.ReadDir(dir)
+	if err != nil || len(entries) != 1 || entries[0].Name() != "query.go" {
+		t.Fatalf("generation left an artifact after rejecting the output path: %v, %v", entries, err)
+	}
+}
+
+func TestRunPreservesUnreadableRegularFiles(t *testing.T) {
+	for _, file := range []string{"source", "output"} {
+		t.Run(file, func(t *testing.T) {
+			dir := t.TempDir()
+			source := filepath.Join(dir, "query.go")
+			output := filepath.Join(dir, "query_gen.go")
+			writeFixture(t, source, []byte(querySource))
+			args := []string{"-source", source, "-output", output}
+			mustRun(t, args)
+
+			protected := source
+			if file == "output" {
+				protected = output
+			}
+			before := readFixture(t, protected)
+			if err := os.Chmod(protected, 0); err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(func() {
+				if err := os.Chmod(protected, 0o600); err != nil {
+					t.Error(err)
+				}
+			})
+			if _, err := os.ReadFile(protected); !errors.Is(err, os.ErrPermission) {
+				t.Skipf("filesystem permits reading this file mode: %v", err)
+			}
+			if err := run(args, io.Discard); !errors.Is(err, os.ErrPermission) {
+				t.Fatalf("expected the read permission error, got %v", err)
+			}
+			if err := os.Chmod(protected, 0o600); err != nil {
+				t.Fatal(err)
+			}
+			if contents := readFixture(t, protected); !bytes.Equal(contents, before) {
+				t.Fatalf("generation changed the protected file:\n%s", contents)
+			}
+		})
+	}
+}
+
+func TestCommandEntryPointGeneratesBinding(t *testing.T) {
+	dir := t.TempDir()
+	source := filepath.Join(dir, "query.go")
+	output := filepath.Join(dir, "query_gen.go")
+	writeFixture(t, source, []byte(querySource))
+
+	prior := os.Args
+	t.Cleanup(func() { os.Args = prior })
+	os.Args = []string{"goef-linqgen", "-source", source, "-output", output}
+	main()
+	mustRun(t, []string{"-source", source, "-output", output, "-check"})
 }
