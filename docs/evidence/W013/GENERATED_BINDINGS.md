@@ -33,3 +33,16 @@ Executed with Go 1.27.4, on Windows amd64 or Ubuntu Linux amd64 as indicated. Pr
 At the implementation revision a fresh external module using a local replacement and `GOPROXY=off` ran `go generate ./...`, `go build -mod=readonly ./...` and `go run -mod=readonly .`. Each exited 0. A source edit made the documented `go run github.com/igorpooh1978/GoEF/cmd/goef-linqgen ... -check` command exit 1 with a stale diagnostic, and the generated file's hash stayed fixed. After regeneration the program projected `Berlin` from the same customer. The unchanged `test/architecture/linq-compile` module also passed build, vet and shuffled tests at that revision.
 
 The generator evidence covers typed declaration validation, argument rebinding and source freshness for this frontend subset. The [public consumer verifier](../../../test/architecture/public-module/verify.py) is the separate check for release-path resolution. [Query architecture](../../architecture/QUERY_ENGINE.md)
+
+## Coverage follow-up
+
+At test revision `f80d3ab722a83eb5fb81fad4a2c94c0ca7a3acf9`, the generator covered 183/191 statements (95.8%) on both Windows and Ubuntu Linux with Go 1.27.4. On Linux the permission checks ran as a non-root user. They removed read permission from the source and output in turn and confirmed that each file retained its original bytes. Windows exercised the same failure paths with exclusive native file handles. The tests also verify the CLI entry point, an invalid output path, preservation of the previous output after an invalid declaration, and rejection of comparison between an interface-typed field and a scalar argument.
+
+| Command | Platform | Exit and result |
+| --- | --- | --- |
+| `go test -shuffle=on -count=1 -coverprofile "$profile" ./cmd/goef-linqgen ./examples/linq/generated` | Windows | 0. Unit cases, native file-sharing failures, sample and Go compiler rejections passed. |
+| `go test -race -shuffle=on -count=1 -coverprofile "$profile" ./cmd/goef-linqgen ./examples/linq/generated` | Linux | 0. Unit cases, two permission-denied paths, sample and Go compiler rejections passed. |
+| `go vet ./cmd/goef-linqgen ./linq/bindings ./examples/linq/generated`, followed by the standalone freshness command above | Windows | Each 0. |
+| `go test -run '^$' -fuzz '^FuzzGenerate$' -fuzztime 5s -parallel 2 ./cmd/goef-linqgen` | Windows | 0. 119,918 fuzz executions. |
+
+[Generator command checks](../../../cmd/goef-linqgen/main_test.go) · [Windows file-sharing checks](../../../cmd/goef-linqgen/main_windows_test.go) · [Validation and fuzz cases](../../../cmd/goef-linqgen/generator_test.go)
