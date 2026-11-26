@@ -6,6 +6,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 import json
 import os
+import re
 from pathlib import Path
 import secrets
 import sys

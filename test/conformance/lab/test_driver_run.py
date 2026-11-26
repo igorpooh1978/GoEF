@@ -4,7 +4,9 @@ from contextlib import nullcontext, redirect_stdout
 import io
 import json
 import os
+from pathlib import Path
 import subprocess
+from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import MagicMock, Mock, patch
 
@@ -416,7 +418,7 @@ class DecimalBindingEvidenceTests(unittest.TestCase):
         self.assertEqual(report["phase"], f"Gherkin {expected[1]['profile']}")
 
 
-class CommitOutcomeEvidenceTests(unittest.TestCase):
+class ApplicationEvidenceTests(unittest.TestCase):
     def test_requested_commit_outcome_requires_all_exact_results(self):
         expected = [
             {
@@ -470,6 +472,26 @@ class CommitOutcomeEvidenceTests(unittest.TestCase):
         for incomplete in (markers[:-1], [*markers[:-1], markers[0]]):
             with self.assertRaises(driver_run.LabError):
                 verify("\n".join(incomplete), "sqlite", "sqlite-3.54", "3.54.1")
+
+
+    def test_production_coverage_uses_only_selected_provider_and_transport(self):
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "provider.cover"
+            root = driver_run.GOEF_MODULE
+            path.write_text(
+                "mode: count\n"
+                f"{root}/providers/sqlite/adapter.go:20.1,21.1 2 1\n"
+                f"{root}/providers/sqlite/adapter.go:24.1,28.1 4 0\n"
+                f"{root}/providers/mysql/adapter.go:25.1,45.1 9 3\n"
+                f"{root}/provider/sqladapter/adapter.go:10.1,13.1 3 4\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(driver_run.production_coverage(path, "sqlite"), {
+                "adapter": {"covered": 2, "total": 6},
+                "transport": {"covered": 3, "total": 3},
+            })
+            with self.assertRaises(driver_run.LabError):
+                driver_run.production_coverage(path, "postgres")
 
 
 class DriverEvidenceTests(unittest.TestCase):
