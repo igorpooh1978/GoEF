@@ -12,7 +12,7 @@ One operation at a time can use the native handle. An overlapping `Exec`, `Commi
 | --- | --- |
 | Commit acknowledged or rollback confirmed | Release the checkout so the pool can reuse it. Commands and explicit completion through the handle return `ErrInvalidState`. |
 | Commit error with unconfirmed result | Report `StateOutcomeUnknown` and `ErrCommitOutcomeUnknown`. Discard the checkout and leave reconciliation to the caller. |
-| Rollback or cleanup failure with uncertain connection health | The connection is discarded and cleanup failure is surfaced. The handle preserves any independently confirmed transaction outcome. |
+| Rollback failure or unusable connection before commit | Discard the connection and record `StateFailed`. An explicit completion call returns any error it observes. Cancellation-driven rollback publishes its state for inspection. |
 
 The behavior of owned transactions is exercised by `TX-OWN-001-S02` through a one-checkout worker and an independent observer on each engine. The design below covers remaining transaction and tracker capabilities. [Ownership scenario](../../specs/features/transactions/tx-own-001.feature)
 
