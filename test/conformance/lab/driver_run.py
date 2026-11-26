@@ -348,11 +348,11 @@ def run_provider(profile_name, binary, accepted_eulas):
                     phase = "set test binary permissions"
                     container.docker(["exec", "--user", "0", container.id, "chmod", "0555", BINARY])
                     phase = "driver execution"
-                    output = container.exec(
-                        [BINARY, *TEST_ARGS],
-                        env={**env, "GOEF_DRIVERLAB_PASSWORD": password, "GOEF_DRIVERLAB_TOKEN": token},
-                        timeout=200,
-                    )
+                    binary_env = {**env, "GOEF_DRIVERLAB_PASSWORD": password, "GOEF_DRIVERLAB_TOKEN": token}
+                    if profile_name == "sqlserver-2017":
+                        # The isolated 2017 image can generate a TLS certificate with a negative serial.
+                        binary_env["GODEBUG"] = "x509negativeserial=1"
+                    output = container.exec([BINARY, *TEST_ARGS], env=binary_env, timeout=200)
         phase = "evidence"
         results = verified_results(output, provider, profile_name)
         return {"provider": provider, "profile": profile_name, "status": "PASS", "scenarios": results}

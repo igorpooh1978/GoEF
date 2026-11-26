@@ -1,10 +1,11 @@
 """Negative controls for the local driver matrix evidence gate."""
 
-from contextlib import redirect_stdout
+from contextlib import nullcontext, redirect_stdout
 import io
 import json
+import os
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import driver_run
 
@@ -96,6 +97,30 @@ class DriverEvidenceTests(unittest.TestCase):
                 wrong[0] = {**rows[0], "facts": {**rows[0]["facts"], field: value}}
                 with self.assertRaises(driver_run.LabError):
                     driver_run.verified_results(self.output(wrong), "sqlserver", "sqlserver-2017")
+
+    def test_negative_certificate_serial_compatibility_is_scoped_to_sqlserver_2017_binary(self):
+        accepted = {driver_run.SQLSERVER_EULA, driver_run.LEGACY_SQLSERVER_EULA}
+        cases = ("sqlserver-2017", "sqlserver-2019", "sqlserver-2022", "sqlserver-2022-140", "postgres-18", "mysql-8.4")
+        for profile_name in cases:
+            with self.subTest(profile=profile_name):
+                provider = driver_run.PROFILES[profile_name].provider
+                container = Mock()
+                container.exec.return_value = ""
+                provision = Mock(return_value=nullcontext(container))
+                with (
+                    patch.dict(os.environ, {"GODEBUG": "host-placeholder"}),
+                    patch.dict(driver_run.SERVER_CONTAINERS, {provider: provision}),
+                    patch.object(driver_run, "verified_results", return_value=[]),
+                ):
+                    result = driver_run.run_provider(profile_name, "driverlab-binary", accepted)
+                    self.assertEqual(os.environ["GODEBUG"], "host-placeholder")
+                self.assertEqual(result["status"], "PASS")
+                container.exec.assert_called_once()
+                binary_env = container.exec.call_args.kwargs["env"]
+                if profile_name == "sqlserver-2017":
+                    self.assertEqual(binary_env["GODEBUG"], "x509negativeserial=1")
+                else:
+                    self.assertNotIn("GODEBUG", binary_env)
 
     def test_sqlserver_2022_evidence_requires_matching_level_and_generate_series_probe(self):
         cases = (

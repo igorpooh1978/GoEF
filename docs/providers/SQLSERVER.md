@@ -20,3 +20,5 @@ Record `SERVERPROPERTY('ProductVersion')`, `ProductUpdateLevel`, edition, databa
 Microsoft Learn MCP returned the SQL Server 2022 build table and the SQL Server 16.x savepoint reference. The smoke confirms the released build identity and applicable T-SQL documentation. [Probe evidence](../evidence/W000/MCP_REPORT.md#sql-server)
 
 The W002 local driver suite passed commit and rollback and the uniqueness and foreign-key cases on Developer builds 14.0.3570.2 at compatibility level 140, 15.0.4510.2 at level 150 and 16.0.4325.4 at level 160. Each used go-mssqldb v1.11.0. The remaining provider and application cases above require their own evidence. [Full local run](../evidence/W002/LEGACY_COMPATIBILITY.md#complete-run-on-2026-11-26)
+
+The same SQL Server 2022 build passed the driver scenarios at level 140. The fixture observed native error `208` for `GENERATE_SERIES` at level 140 and verified the returned values at level 160. [Compatibility evidence](../evidence/W002/LEGACY_COMPATIBILITY.md#postgresql-19-and-sql-server-2022-at-level-140)
