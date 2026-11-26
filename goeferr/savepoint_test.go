@@ -18,6 +18,7 @@ func TestSavepointDetailsMatchTheErrorRegistry(t *testing.T) {
 	}{
 		{"GOEF-CAP-0001", goeferr.ErrUnsupportedFeature, goeferr.NewUnsupportedFeature(), "preflight", "no_commit_attempted", "The requested capability is unavailable."},
 		{"GOEF-TX-0002", goeferr.ErrSavepointFailed, goeferr.NewSavepointFailed(), "savepoint", "inspect_transaction", "The savepoint operation failed."},
+		{"GOEF-TX-0004", goeferr.ErrSaveChangesFailed, goeferr.NewSaveChangesFailed(), "execute", "inspect_transaction", "The save batch could not complete."},
 	} {
 		t.Run(string(tc.id), func(t *testing.T) {
 			err := tc.detail

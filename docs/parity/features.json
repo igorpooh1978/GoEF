@@ -1464,7 +1464,7 @@
       "contract": "An owned transaction executes and completes on one physical lease. Enlisted participants detach without completing or releasing the caller's transaction.",
       "goApi": {
         "status": "IMPLEMENTED",
-        "description": "Owned transactions over database/sql and non-owning participants on one explicit external coordinator."
+        "description": "Owned transactions, non-owning external enlistment and ordered SaveChanges over database/sql."
       },
       "wave": "W005",
       "issues": [
@@ -1479,7 +1479,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "S01 and S02 have pinned fixtures for external and owned transactions. Atomic tracked graph saves remain outstanding.",
+          "reason": "Pinned owned, external and automatic savepoint fixtures cover explicitly ordered batches. Full tracker integration and the broader transaction contract remain outstanding.",
           "evidence": null
         },
         "sqlite": {
@@ -1487,7 +1487,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "S01 and S02 have pinned fixtures for external and owned transactions. Atomic tracked graph saves remain outstanding.",
+          "reason": "Pinned owned, external and automatic savepoint fixtures cover explicitly ordered batches. Full tracker integration and the broader transaction contract remain outstanding.",
           "evidence": null
         },
         "sqlserver": {
@@ -1495,7 +1495,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "S01 and S02 have pinned fixtures for external and owned transactions. Atomic tracked graph saves remain outstanding.",
+          "reason": "Pinned owned, external and automatic savepoint fixtures cover explicitly ordered batches. Full tracker integration and the broader transaction contract remain outstanding.",
           "evidence": null
         },
         "mysql": {
@@ -1503,7 +1503,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "S01 and S02 have pinned fixtures for external and owned transactions. Atomic tracked graph saves remain outstanding.",
+          "reason": "Pinned owned, external and automatic savepoint fixtures cover explicitly ordered batches. Full tracker integration and the broader transaction contract remain outstanding.",
           "evidence": null
         }
       },
@@ -1514,11 +1514,12 @@
       ],
       "tests": [
         "test/conformance/driverlab/owned_transaction_test.go#TestOwnedTransaction",
-        "test/conformance/driverlab/savepoint_transaction_test.go#TestSavepointAndExternalTransaction"
+        "test/conformance/driverlab/savepoint_transaction_test.go#TestSavepointAndExternalTransaction",
+        "test/conformance/driverlab/save_changes_transaction_test.go#TestSaveChangesTransaction"
       ],
       "status": "PARTIAL",
       "deviations": [
-        "The implemented API covers explicit DML and completion. Tracked graph saves and context-wide enlistment retain separate acceptance."
+        "SaveChanges accepts an explicit ordered batch and staged assignments. Automatic model-driven graph saves and context-wide enlistment retain separate acceptance."
       ],
       "adr": null,
       "docs": [
@@ -1712,10 +1713,10 @@
           "relation": "behavior"
         }
       ],
-      "contract": "A managed savepoint rewinds later work within the same transaction. SaveChanges recovery and unsupported atomic plans retain separate acceptance.",
+      "contract": "A managed savepoint rewinds later work in the same transaction. An ordered SaveChanges batch checks the declared recovery capability and creates an automatic savepoint.",
       "goApi": {
         "status": "IMPLEMENTED",
-        "description": "Explicit managed savepoints scoped to an owned transaction or an external coordinator."
+        "description": "Manual and automatic savepoints scoped to an owned transaction or an external coordinator. Failed batches rewind or report unconfirmed recovery."
       },
       "wave": "W009",
       "issues": [
@@ -1731,7 +1732,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "S03 has a pinned explicit savepoint fixture. Tracked SaveChanges scenarios remain outstanding.",
+          "reason": "Pinned owned, external and automatic savepoint fixtures cover explicitly ordered batches. Full tracker integration and the broader transaction contract remain outstanding.",
           "evidence": null
         },
         "sqlite": {
@@ -1739,7 +1740,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "S03 has a pinned explicit savepoint fixture. Tracked SaveChanges scenarios remain outstanding.",
+          "reason": "Pinned owned, external and automatic savepoint fixtures cover explicitly ordered batches. Full tracker integration and the broader transaction contract remain outstanding.",
           "evidence": null
         },
         "sqlserver": {
@@ -1747,7 +1748,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "S03 has a pinned explicit savepoint fixture. Tracked SaveChanges scenarios remain outstanding.",
+          "reason": "Pinned owned, external and automatic savepoint fixtures cover explicitly ordered batches. Full tracker integration and the broader transaction contract remain outstanding.",
           "evidence": null
         },
         "mysql": {
@@ -1755,7 +1756,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "S03 has a pinned explicit savepoint fixture. Tracked SaveChanges scenarios remain outstanding.",
+          "reason": "Pinned owned, external and automatic savepoint fixtures cover explicitly ordered batches. Full tracker integration and the broader transaction contract remain outstanding.",
           "evidence": null
         }
       },
@@ -1765,12 +1766,13 @@
         "TX-SAVEPOINT-001-S03"
       ],
       "tests": [
-        "test/conformance/driverlab/savepoint_transaction_test.go#TestSavepointAndExternalTransaction"
+        "test/conformance/driverlab/savepoint_transaction_test.go#TestSavepointAndExternalTransaction",
+        "test/conformance/driverlab/save_changes_transaction_test.go#TestSaveChangesTransaction"
       ],
       "status": "PARTIAL",
       "deviations": [
         "Release requires the innermost active savepoint, and SQL Server release retires only the GoEF handle.",
-        "Tracked SaveChanges, capability negotiation and SQL Server MARS retain separate acceptance."
+        "The caller declares savepoint support. GoEF checks SQL Server XACT_ABORT on the same transaction. Automatic graph tracking and broader provider capability negotiation retain separate acceptance."
       ],
       "adr": null,
       "docs": [

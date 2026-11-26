@@ -16,7 +16,13 @@ The manual `TestSavepointAndExternalTransaction` fixture checks earlier writes, 
 pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -SavepointTx -AcceptSqlServerEula
 ```
 
-The corresponding Python selector is `--savepoint-tx`. The compatibility flags select the same additional profiles as the owned-transaction run. These scenarios exercise explicit DML and savepoint primitives. Tracked recovery, MARS, distributed transactions and doomed-transaction handling retain their own conformance cases. [Savepoint scenarios](../../../specs/features/transactions/tx-savepoint-001.feature) · [External ownership scenarios](../../../specs/features/transactions/tx-own-001.feature) · [Local driver lab](../driverlab/README.md)
+The corresponding Python selector is `--savepoint-tx`. The compatibility flags select the same additional profiles as the owned-transaction run. These scenarios exercise explicit DML and savepoint primitives. [Savepoint scenarios](../../../specs/features/transactions/tx-savepoint-001.feature) · [External ownership scenarios](../../../specs/features/transactions/tx-own-001.feature) · [Local driver lab](../driverlab/README.md)
+
+Run the ordered `SaveChanges` fixture on the four default profiles with the following command. Add the compatibility flags above to include the other pinned profiles. The corresponding Python selector is `--save-changes`. The fixture checks real partial-write failure, earlier writes, staged values and opt-out before writes. Automatic graph discovery, MARS, distributed transactions and real doomed-transaction recovery retain separate cases. [SaveChanges evidence](../../../docs/evidence/W005/SAVE_CHANGES.md)
+
+```powershell
+pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -SaveChanges -AcceptSqlServerEula
+```
 
 | Experiment | Coordination and assertions |
 | --- | --- |

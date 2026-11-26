@@ -46,6 +46,8 @@ Add `-OwnedTx` to the local PowerShell command to exercise the public owned tran
 
 Add `-SavepointTx` to exercise managed savepoints and external ownership on each selected profile. The two scenario results confirm nested rollback and release, and detached participants leaving the native transaction and connection with their caller. Both Python launchers accept `--savepoint-tx`. [Savepoint scenarios](../../../specs/features/transactions/tx-savepoint-001.feature) · [Issue #2](https://github.com/igorpooh1978/GoEF/issues/2)
 
+Add `-SaveChanges` to exercise automatic rollback of a failed owned graph and a failed caller-owned batch, provisional acceptance after commit, and refusal of an unsupported recovery configuration. The SQL Server fixture checks both `XACT_ABORT` settings. Both Python launchers accept `--save-changes`. [SaveChanges evidence](../../../docs/evidence/W005/SAVE_CHANGES.md)
+
 The SQL Server 2022 profiles also check that `GENERATE_SERIES` returns the expected values at compatibility level 160 and is unavailable at 140 under the fixture's database settings.
 
 The [SQLite file scenarios](features/sqlite_files.feature) run both directions between SQLite 3.51.3, the W002 minimum, and the 3.54.1 reference. The peer opens the existing file, verifies that an invalid `STRICT` generated value returns native code `3091`, exercises rollback and commits an additive migration. The original runtime then reopens the same file and checks schema, rows and integrity. The suite covers `DELETE` and `WAL` journaling with a schema shared by both versions. The local matrix requires the exact minimum profile and the observed `3091` in each file result.

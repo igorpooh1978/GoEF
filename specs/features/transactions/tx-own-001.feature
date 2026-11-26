@@ -38,12 +38,13 @@ Feature: Honor transaction and connection ownership
 
   @TX-OWN-001-S03
   Scenario Outline: An atomic save rolls back a partially executed graph
-    Given <provider> can save a parent and its children atomically
+    Given an owned <provider> transaction has inserted A before an ordered graph save
     And the second child violates a unique constraint after the parent obtains a generated key
     When SaveChanges returns an error in an owned transaction
-    Then no parent or child exists on a fresh connection
-    And the tracker restores original versions and temporary keys
-    And all entries remain pending for correction
+    Then the owner can still commit A and no graph row from that save exists on a fresh connection
+    And the staged versions and temporary keys remain unchanged for correction
+    When the caller saves the corrected graph in a later owned transaction
+    Then accepted keys and versions match the durable parent and both children after commit
 
     Examples:
       | provider  |

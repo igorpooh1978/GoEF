@@ -54,3 +54,4 @@ Feature IDs: ERR-CONTRACT-001, TX-OUTCOME-001.
 | GOEF-TX-0001 | ErrCommitOutcomeUnknown | transaction | resolve_outcome |
 | GOEF-TX-0002 | ErrSavepointFailed | transaction | never |
 | GOEF-TX-0003 | ErrRollbackFailed | transaction | resolve_outcome |
+| GOEF-TX-0004 | ErrSaveChangesFailed | transaction | never |

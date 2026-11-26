@@ -13,6 +13,8 @@ The [version-compatibility matrix](ENGINE_COMPATIBILITY.md) tracks the lower eng
 
 The scalar-binding fixture creates a table from the Go model's physical type declarations and checks the engine catalog and values on the selected profiles. [Scalar scenario](../../specs/features/model/model-type-001.feature) · [Type binding evidence](../evidence/W003/PROVIDER_TYPE_BINDING.md)
 
+The ordered `SaveChanges` fixture checks partial-write recovery, preservation of earlier writes, acceptance of staged values after commit and preflight rejection for unusable recovery settings. [SaveChanges profile results](../evidence/W005/SAVE_CHANGES.md)
+
 ## Acceptance per version
 
 | Suite | Required proof | W000 execution |

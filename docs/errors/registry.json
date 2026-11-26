@@ -1695,6 +1695,60 @@
       }
     },
     {
+      "id": "GOEF-TX-0004",
+      "kind": "SaveChangesFailed",
+      "sentinel": "ErrSaveChangesFailed",
+      "detailType": "*ErrorDetail",
+      "category": "transaction",
+      "message": "The save batch could not complete.",
+      "trigger": "A SaveChanges callback reports an error without a causal cancellation or a classified writer failure.",
+      "phase": "execute",
+      "outcome": "inspect_transaction",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "operation",
+        "provider",
+        "retryClass",
+        "outcome"
+      ],
+      "redaction": "Whitelist these fields. Use application-defined safe aliases. Omit SQL, parameters, DSNs, credentials, row values and driver messages.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "featureIds": [
+        "TX-SAVEPOINT-001"
+      ],
+      "scenarioIds": [
+        "TX-SAVEPOINT-001-S01"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/errors/README.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-TX-0004"
+      ],
+      "upstreamSources": [
+        "https://pkg.go.dev/errors",
+        "https://learn.microsoft.com/en-us/ef/core/saving/transactions"
+      ],
+      "providerMappings": {
+        "postgres": [],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
       "id": "GOEF-MIG-0001",
       "kind": "PendingModelChanges",
       "sentinel": "ErrPendingModelChanges",

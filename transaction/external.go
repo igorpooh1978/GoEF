@@ -83,7 +83,9 @@ func (e *External) withNative(action func(*sql.Tx) error) error {
 // detach must be called with mu held.
 func (s *externalTx) detach() {
 	s.native = nil
-	s.savepoints.invalidate()
+	// The native owner may still commit. Normal detach retires manual points
+	// without revoking the receipts for successful batches.
+	s.savepoints = savepointStack{uncertain: true}
 }
 
 // Participant runs commands in a caller-owned transaction. Copies share
