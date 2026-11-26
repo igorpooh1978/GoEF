@@ -10,6 +10,14 @@ pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -OwnedTx -AcceptSqlServerEula
 
 Add `-Compatibility -AcceptLegacySqlServerEula` to include the other pinned profiles when both SQL Server Developer releases are authorized for the run. The corresponding Python selector is `--owned-tx`. [Local driver lab](../driverlab/README.md)
 
+The manual savepoint and external-transaction fixture checks earlier writes, younger point invalidation, owner visibility after participant detach, and rollback observed independently. Run it on the four default profiles with the following command.
+
+```powershell
+pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -SavepointTx -AcceptSqlServerEula
+```
+
+The corresponding Python selector is `--savepoint-tx`. The compatibility flags select the same additional profiles as the owned-transaction run. These scenarios exercise explicit DML and savepoint primitives. Tracked recovery, MARS, distributed transactions and doomed-transaction handling retain their own conformance cases. [Savepoint scenarios](../../../specs/features/transactions/tx-savepoint-001.feature) · [External ownership scenarios](../../../specs/features/transactions/tx-own-001.feature) · [Local driver lab](../driverlab/README.md)
+
 | Experiment | Coordination and assertions |
 | --- | --- |
 | Ownership and atomic save | Open two independent sessions. Confirm a committed insert survives and a rolled-back insert disappears. Force the second command of a graph save to fail after key generation. Verify actual parent/child counts, original versions, temporary keys and tracker states. Repeat inside an external transaction and observe its owner's subsequent commit/rollback. |

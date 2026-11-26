@@ -1,6 +1,6 @@
 # Transaction engine
 
-The `transaction` package implements the first owned transaction slice in W005. W005 also covers broader transaction options and provider hooks. W006 uses transaction lifetimes for migrations, W008 binds runtime queries, W009 exercises advanced replay and W011 integrates the change tracker. [User guide](../user/TRANSACTIONS.md) · [Transaction scenarios](../../specs/features/transactions/) · [Conformance protocol](../../test/conformance/transactions/README.md) · [Issue #2](https://github.com/igorpooh1978/GoEF/issues/2)
+The `transaction` package implements owned transactions, explicit external enlistment and manual savepoints in W005. W005 also covers broader transaction options and provider hooks. W006 uses transaction lifetimes for migrations, W008 binds runtime queries, W009 exercises advanced replay and W011 integrates the change tracker. [User guide](../user/TRANSACTIONS.md) · [Transaction scenarios](../../specs/features/transactions/) · [Conformance protocol](../../test/conformance/transactions/README.md) · [Issue #2](https://github.com/igorpooh1978/GoEF/issues/2)
 
 ## Implemented owned transaction boundary
 
@@ -14,7 +14,19 @@ One operation at a time can use the native handle. An overlapping `Exec`, `Commi
 | Commit error with unconfirmed result | Report `StateOutcomeUnknown` and `ErrCommitOutcomeUnknown`. Discard the checkout and leave reconciliation to the caller. |
 | Rollback failure or unusable connection before commit | Discard the connection and record `StateFailed`. An explicit completion call returns any error it observes. Cancellation-driven rollback publishes its state for inspection. |
 
-The behavior of owned transactions is exercised by `TX-OWN-001-S02` through a one-checkout worker and an independent observer on each engine. The design below covers remaining transaction and tracker capabilities. [Ownership scenario](../../specs/features/transactions/tx-own-001.feature)
+The behavior of owned transactions is exercised by `TX-OWN-001-S02` through a one-checkout worker and an independent observer on each engine. [Ownership scenario](../../specs/features/transactions/tx-own-001.feature)
+
+## Implemented external enlistment
+
+`transaction.NewExternal` accepts one existing caller-owned `*sql.Tx`. Participants obtained through the same `External` coordinator dispatch through exactly that native transaction and share its operation gate. Statement errors and cancellation leave completion to the native owner. A participant's `Close` detaches just that participant. Closing the coordinator waits for the current managed operation and invalidates all managed handles. Both forms of close leave the native transaction and connection with the caller.
+
+The application uses one coordinator per native transaction and serializes its direct native calls with managed calls. The owner closes the coordinator before native completion. When the owner completes directly, GoEF can observe that outcome on a later native dispatch. The ownership fixture checks that the owner can read pending rows after participants detach, roll those rows back, and keep using its connection. [Ownership scenario](../../specs/features/transactions/tx-own-001.feature) · [EF Core external transaction reference](https://learn.microsoft.com/en-us/ef/core/saving/transactions#cross-context-transaction)
+
+## Implemented manual savepoints
+
+An owned `Tx` and a borrowed `External` each hold a scoped stack of savepoint handles. Savepoint operations pass through the same gate as transaction work. The package generates private names within SQL Server's 32-character limit. A successful rollback to an active point undoes work after the point and invalidates younger handles. Releasing the innermost point keeps its work in the enclosing transaction. SQL Server has no native release statement, so release there retires only the handle. The owner chooses the dialect and uses DML that preserves the transaction boundary. [User guide and dialect rules](../user/TRANSACTIONS.md#use-savepoints-inside-a-transaction)
+
+The manual fixture checks preservation of earlier writes and invalidation of younger handles. The tracked save protocol below adds tracker recovery, capability negotiation and savepoint use around `SaveChanges`. [Savepoint scenarios](../../specs/features/transactions/tx-savepoint-001.feature)
 
 ## Ownership across three lifetimes
 
@@ -22,7 +34,7 @@ The behavior of owned transactions is exercised by `TX-OWN-001-S02` through a on
 | --- | --- |
 | Pool and borrowed connection | An application owns its pool. A library transaction returns its lease after completion and cleanup. A caller-supplied connection stays open for its owner. |
 | Owned database transaction | Begin binds the physical connection. Explicit isolation and read-only options are planned. Only the owning handle can commit or roll back. Close requests rollback on an active handle and is idempotent. |
-| External transaction | Explicit enlistment borrows the exact provider, physical connection, target database and transaction identity. Compatible contexts may share that handle serially. Disposing a participant detaches it and closes its readers. The external owner signals final outcome or participants must reload before accepting provisional state. |
+| External transaction | Explicit enlistment borrows the exact native transaction and its physical connection. Participants detach without completing the transaction or closing the connection. Future tracked participants will need an owner signal or a reload before accepting provisional state. |
 | DbContext and tracker | A context has a single active operation. A stream holds that slot until close or terminal exhaustion. An enlisted transaction also serializes access across participating contexts. Concurrent use returns `ErrContextBusy`. Close ends the context lifetime. |
 
 A bound executor supplies the same transaction to sets, scalar queries, split/follow-up loads, SaveChanges, bulk commands and raw SQL. An incompatible enlistment fails before dispatch. A connection pool with capacity one is an acceptance fixture for accidental out-of-transaction calls. Isolation of the independent observer is explicitly controlled. Ambient or cross-resource enlistment and nested independent begin return `ErrUnsupportedFeature`. An explicit savepoint is the available scoped alternative where the provider supports it. [Go transaction API](https://go.dev/doc/database/execute-transactions) · [EF relational transaction ownership](https://github.com/dotnet/efcore/blob/b34c0e9d7e768aa808ded44f19e7f871bea6869f/src/EFCore.Relational/Storage/RelationalTransaction.cs)
