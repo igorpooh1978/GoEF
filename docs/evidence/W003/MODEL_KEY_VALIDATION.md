@@ -1,4 +1,4 @@
-# Local model key validation prototype
+# Initial model key validation and mapping experiments
 
 [Architecture #3](https://github.com/igorpooh1978/GoEF/issues/3) · [Error contract #2](https://github.com/igorpooh1978/GoEF/issues/2) · [MODEL-VALID-001-S01](../../../specs/features/model/model-valid-001.feature) · [Logical model design](../../architecture/MODEL_ENGINE.md)
 
@@ -10,7 +10,7 @@ The first executable checks failed with a no-op validator. Additional checks rep
 
 On 2026-11-26, `go build -mod=readonly ./...`, `go vet -mod=readonly ./...` and `go test -mod=readonly -shuffle=on -count=1 -cover ./...` exited 0 on the Windows/amd64 workstation with Go 1.27.4. Both prototype packages showed 100% statement coverage. `go test -mod=readonly -race -shuffle=on -count=1 ./...` exited 0 using the same revision and Go version in an isolated local Linux/amd64 container. The prototype imports the standard library and its portable error package. It has no provider or driver dependency.
 
-The prototype code is available in the local model worktree. Acceptance into the implementation branch still requires the [project license decision](https://github.com/igorpooh1978/GoEF/issues/15) and the mapping and application gates for the full model scenario. The four provider entries remain specified pending the application entry point.
+The validator is available through `model.Validate`, with portable classification in `goeferr`. Direct Go tests characterize the validation part of `MODEL-VALID-001-S01`. The four provider entries remain specified pending the application entry point. [Validation tests](../../../model/declaration_test.go) · [Error detail tests](../../../goeferr/model_test.go)
 
 ## Deterministic snapshot prototype
 
@@ -30,4 +30,12 @@ Sorting key members during rendering produced the expected failing AST assertion
 
 Local revision `9a0dfebc9b30133459a3afd55cd107468b4dd31d` resolves a single property's column name and maximum length independently. Fluent configuration can change the name while a tag supplies the length. Equal values at one priority can coexist. Conflicting values at one priority return both stable declaration positions in either registration order, including when a higher-priority value would have replaced them. Invalid input returns no partial result. This is an isolated application of the proposed per-facet mapping rules. [Model engine design](../../architecture/MODEL_ENGINE.md) · [Issue #3](https://github.com/igorpooh1978/GoEF/issues/3)
 
-The deliberately mutated conflict check failed both conflict cases. The restored implementation passed all 14 focused cases, including eight invalid declarations. On Windows/amd64 with Go 1.27.4, `go mod tidy -diff`, `go build -p=1 ./...`, `go vet -p=1 ./...` and `go test -p=1 -count=1 -shuffle=on -cover ./...` exited 0. The local `model` and `goeferr` packages each reported 100% statement coverage. Both packages also passed `go test -mod=readonly -race -count=1 -shuffle=on ./...` in a network-isolated local Go 1.27.4 Linux/amd64 container. The source is retained in the local model worktree pending project license and production model acceptance.
+The deliberately mutated conflict check failed both conflict cases. The restored implementation passed all 14 focused cases, including eight invalid declarations. On Windows/amd64 with Go 1.27.4, `go mod tidy -diff`, `go build -p=1 ./...`, `go vet -p=1 ./...` and `go test -p=1 -count=1 -shuffle=on -cover ./...` exited 0. The local `model` and `goeferr` packages each reported 100% statement coverage. Both packages also passed `go test -mod=readonly -race -count=1 -shuffle=on ./...` in a network-isolated local Go 1.27.4 Linux/amd64 container. The snapshot and facet resolver are internal experiments in `model`. The source renderer is a test fixture. [Facet tests](../../../model/property_facets_test.go) · [Synthetic rendering tests](../../../model/customer_source_test.go)
+
+## Integrated verification
+
+GoEF source uses the [MIT License](../../../LICENSE) recorded by the maintainer in [#15](https://github.com/igorpooh1978/GoEF/issues/15#issuecomment-7190869178). Integrated code revision `9594340c32ca6d6d7b5fc5bee29152c0209cdaed` contains the reviewed `model` and `goeferr` trees from `9a0dfeb` and the `linq/objects` tree from `3c6378a`. On the Windows/amd64 workstation with Go 1.27.4, `go test -mod=readonly -shuffle=on -count=1 -cover ./goeferr ./model ./linq/objects` passed. Each of the three packages reported 100% statement coverage. The two guide examples compiled and ran against these packages, yielding `1 1 1` and `2` respectively. [Model guide](../../user/MODELS_CODE_FIRST.md) · [Where guide](../../user/LINQ_OBJECTS.md)
+
+On 2026-11-26, the local command `pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -AcceptSqlServerEula -AcceptLegacySqlServerEula` exited 0 on the same revision. The compatibility run returned 84 distinct driver scenario results across 12 engine profiles. It produced 91 passing driver rows because the baseline SQLite profile also ran in the linked-runtime suite. Four file cases passed, covering both directions between SQLite 3.51.3 and 3.54.1 in DELETE and WAL modes. [Engine profiles](../W002/LEGACY_COMPATIBILITY.md)
+
+In a network-isolated local Go 1.27.4 Linux/amd64 container, `go test -mod=readonly -race -count=1 -shuffle=on ./...` exited 0 for the root module and `go test -mod=vendor -race -count=1 -shuffle=on ./...` exited 0 for the driver lab module. Independent reviews verified the model and `Where` against their prototype trees and checked the license and documentation against the accepted scope.

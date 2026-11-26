@@ -1,6 +1,6 @@
 # Choose a LINQ execution mode
 
-Status: Proposed. The example is a planned acceptance case and has no runnable GoEF API yet.
+The [in-memory `Where` example](LINQ_OBJECTS.md) runs against the current source. The comparison with a provider-executed query remains a planned acceptance case.
 
 Use the Objects mode for Go collections, Expressions to represent typed operations, and Queryable to build provider-executed plans. A planned fixture computes the same result from a bounded database query and a local sequence with explicit comparison settings.
 

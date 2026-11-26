@@ -4,7 +4,7 @@ W001 adopts `github.com/igorpooh1978/GoEF` as the module path and `goef` as its 
 
 ## Who imports whom
 
-Paths in this table are relative to the adopted module root. The provider execution package exists. The remaining packages describe the planned dependency graph. Each row lists direct project dependencies relevant to the design. Each provider directory is a module boundary, including when several providers live in the same checkout.
+Paths in this table are relative to the adopted module root. The provider execution contract, the initial `model` and `goeferr` packages, and `linq/objects.Where` are available in the current source. The table describes their planned expansion and the remaining dependency graph. Each row lists direct project dependencies relevant to the design. Each provider directory is a module boundary, including when several providers live in the same checkout.
 
 | Importer | Proposed imports | Reason |
 | --- | --- | --- |
