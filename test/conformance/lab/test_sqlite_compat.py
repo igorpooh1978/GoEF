@@ -248,3 +248,51 @@ class SQLiteRebuildEvidenceTests(unittest.TestCase):
             with self.subTest(output=output), patch.object(lab, "command", return_value=output):
                 with self.assertRaises(lab.LabError):
                     lab.run_rebuild_stage(*args)
+
+class SQLiteExecutorRebuildEvidenceTests(unittest.TestCase):
+    def test_product_outline_binds_all_four_examples(self):
+        source = lab.EXECUTOR_REBUILD_FEATURE.read_text(encoding="utf-8")
+        stages = ("seed", "interrupt", "resume", "reopen")
+        expected = [
+            lab.RebuildExample(name, mode, stages)
+            for name in (lab.MINIMUM_PROFILE, lab.CURRENT)
+            for mode in ("delete", "wal")
+        ]
+        self.assertEqual(lab.parse_executor_rebuild_feature(source), expected)
+
+    def test_unbound_executor_outline_stops_before_provisioning(self):
+        source = lab.EXECUTOR_REBUILD_FEATURE.read_text(encoding="utf-8")
+        for original, replacement in (
+            ("@MIG-SQLITE-001-S03", "@MIG-SQLITE-001-S04"),
+            ("@MIG-SQLITE-001-S03", "@MIG-SQLITE-001-S03\n  @MIG-SQLITE-001-S03"),
+            ("When a process exits after the GoEF executor checks the rebuilt table", "When a native transaction exits"),
+            ("| 3.54.1 | wal          |", "| 3.54.1 | delete |"),
+        ):
+            with (
+                self.subTest(original=original, replacement=replacement),
+                patch.object(lab, "EXECUTOR_REBUILD_FEATURE") as feature,
+                patch.object(lab, "build") as build,
+            ):
+                modified = source.replace(original, replacement, 1)
+                self.assertNotEqual(modified, source)
+                feature.read_text.return_value = modified
+                with self.assertRaises(lab.LabError):
+                    lab.run_lab(None, {})
+                build.assert_not_called()
+
+    def test_executor_interruption_requires_its_distinct_exit_and_worker_marker(self):
+        profile = lab.PROFILES[lab.MINIMUM_PROFILE]
+        with patch.object(lab, "command", return_value="") as command:
+            lab.run_rebuild_stage(None, "sqlite", profile, "wal", "interrupt", "unused", executor=True)
+        self.assertIn("^TestSQLiteExecutorRebuildStep$", command.call_args.args[0])
+        self.assertEqual(command.call_args.kwargs["env"]["GOEF_SQLITE_EXECUTOR_REBUILD_STAGE"], "interrupt")
+        self.assertEqual(command.call_args.kwargs["expected_failure"], (
+            69, lab.EXECUTOR_REBUILD_RESULT_PREFIX + "3.51.3/wal/interrupt",
+        ))
+
+    def test_executor_resume_rejects_a_native_rebuild_marker(self):
+        profile = lab.PROFILES[lab.CURRENT]
+        marker = lab.REBUILD_RESULT_PREFIX + "3.54.1/delete/resume"
+        with patch.object(lab, "command", return_value=marker):
+            with self.assertRaises(lab.LabError):
+                lab.run_rebuild_stage(None, "sqlite", profile, "delete", "resume", "unused", executor=True)

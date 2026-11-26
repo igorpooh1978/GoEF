@@ -42,6 +42,12 @@ An optional CLI, IDE or go generate frontend calls these APIs. Library callers n
 
 Use a dedicated migration connection. Connection-owned locks stay on it across commits. A transaction-scoped lock alone cannot protect a chain containing nontransactional commands. Reject incompatible caller transactions before execution. Use finite wait budgets and distinguish cancellation from lock timeout. [EF migrator](https://github.com/dotnet/efcore/blob/b34c0e9d7e768aa808ded44f19e7f871bea6869f/src/EFCore.Relational/Migrations/Internal/Migrator.cs) · [Migration command executor](https://github.com/dotnet/efcore/blob/b34c0e9d7e768aa808ded44f19e7f871bea6869f/src/EFCore.Relational/Migrations/Internal/MigrationCommandExecutor.cs)
 
+### Implemented SQLite transactional executor
+
+`migration/sqlite.Apply` owns one `database/sql` connection and a `BEGIN IMMEDIATE` write transaction on its main database. It verifies the application ID and the exact ordered ID, predecessor and digest history under that writer lock. A reviewed source check authorizes one pending artifact, and a reviewed target check verifies its effect before the executor inserts the history record and commits the group. A history match still requires the target check and a clean foreign-key check. An ambiguous state stops before a new history entry and exposes `ErrMigrationRecoveryRequired`.
+
+SQLite's generalized rebuild procedure moves foreign-key enforcement outside the transaction, so the executor reads and restores the original connection setting and checks final foreign-key integrity inside the transaction. It rolls back known pre-commit failures with a bounded cleanup context and discards uncertain connections. The SQLite executable artifact is a trusted Go callback with explicit schema and data checks. Nontransactional journaling, model diff, other providers and destructive approval automation remain proposed. [Go guide](../user/MIGRATIONS_IN_GO.md#apply-a-reviewed-sqlite-artifact) · [Recovery evidence](../evidence/W002/SQLITE_EXECUTOR_REBUILD.md)
+
 ## Decide after interruption
 
 | Evidence found by a fresh lock owner | Permitted action |

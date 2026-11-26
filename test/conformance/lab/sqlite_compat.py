@@ -2,6 +2,7 @@
 
 import argparse
 from dataclasses import dataclass
+from itertools import takewhile
 import json
 import os
 from pathlib import Path
@@ -62,6 +63,10 @@ REBUILD_FEATURE = MODULE / "features" / "sqlite_rebuild.feature"
 REBUILD_SCENARIO = "LAB-SQLITE-REBUILD-001-S01"
 REBUILD_RESULT_PREFIX = "GOEF_SQLITE_REBUILD_RESULT="
 REBUILD_INTERRUPTED_EXIT = 68
+EXECUTOR_REBUILD_FEATURE = MODULE.parents[2] / "specs" / "features" / "migrations" / "mig-sqlite-001.feature"
+EXECUTOR_REBUILD_SCENARIO = "MIG-SQLITE-001-S03"
+EXECUTOR_REBUILD_RESULT_PREFIX = "GOEF_SQLITE_EXECUTOR_REBUILD_RESULT="
+EXECUTOR_REBUILD_INTERRUPTED_EXIT = 69
 GO_VERSION = "go1.27.4"
 
 
@@ -160,12 +165,44 @@ def parse_rebuild_feature(source):
         for step in steps:
             expect(step)
     expect("Examples:")
+    return parse_rebuild_examples(lines, tuple(stage for stage, _ in bindings))
+
+
+def parse_executor_rebuild_feature(source):
+    spec_lines = [line.strip() for line in source.splitlines() if line.strip()]
+    tag = f"@{EXECUTOR_REBUILD_SCENARIO}"
+    if spec_lines.count(tag) != 1:
+        raise LabError("The SQLite migration executor rebuild scenario must appear exactly once.")
+    lines = takewhile(
+        lambda line: not re.fullmatch(r"@MIG-SQLITE-001-S[0-9]+", line),
+        spec_lines[spec_lines.index(tag) + 1:],
+    )
+    bindings = (
+        ("seed", ("Given a file-backed SQLite <engine> database in <journal_mode> mode with a verified applied lineage",)),
+        ("interrupt", ("When a process exits after the GoEF executor checks the rebuilt table and before it publishes history",)),
+        ("resume", (
+            "Then another executor acquires the writer lock and checks the original schema, values and history",
+            "And the executor rejects ambiguous state and commits a proven unapplied rebuild with its history exactly once",
+        )),
+        ("reopen", ("And a separate reader verifies the committed values, history and foreign-key integrity",)),
+    )
+    if next(lines, None) != "Scenario Outline: Resume a reviewed transactional rebuild after process exit":
+        raise LabError("The SQLite migration executor scenario does not match the executable contract.")
+    for _, steps in bindings:
+        for step in steps:
+            if next(lines, None) != step:
+                raise LabError("The SQLite migration executor scenario contains a missing or unbound step.")
+    if next(lines, None) != "Examples:":
+        raise LabError("The SQLite migration executor scenario examples are missing.")
+    return parse_rebuild_examples(lines, tuple(stage for stage, _ in bindings))
+
+
+def parse_rebuild_examples(lines, stages):
     if not re.fullmatch(r"\|\s*engine\s*\|\s*journal_mode\s*\|", next(lines, "")):
         raise LabError("The SQLite rebuild feature requires engine and journal_mode examples columns.")
 
     profile_names = {profile.engine_version: name for name, profile in PROFILES.items()}
     remaining = {(version, mode) for version in profile_names for mode in FILE_JOURNALS}
-    stages = tuple(stage for stage, _ in bindings)
     examples = []
     for _ in range(len(remaining)):
         row = re.fullmatch(r"\|\s*([0-9.]+)\s*\|\s*([a-z]+)\s*\|", next(lines, ""))
@@ -335,38 +372,50 @@ def allocate_file_case(tempdir, case):
     return directory, token
 
 
-def run_rebuild_stage(directory, binary, profile, journal, stage, token):
-    expected = f"{REBUILD_RESULT_PREFIX}{profile.engine_version}/{journal}/{stage}"
+def run_rebuild_stage(directory, binary, profile, journal, stage, token, *, executor=False):
+    if executor:
+        test, stage_key = "TestSQLiteExecutorRebuildStep", "GOEF_SQLITE_EXECUTOR_REBUILD_STAGE"
+        prefix, exit_code = EXECUTOR_REBUILD_RESULT_PREFIX, EXECUTOR_REBUILD_INTERRUPTED_EXIT
+    else:
+        test, stage_key = "TestSQLiteRebuildStep", "GOEF_SQLITE_REBUILD_STAGE"
+        prefix, exit_code = REBUILD_RESULT_PREFIX, REBUILD_INTERRUPTED_EXIT
+    expected = f"{prefix}{profile.engine_version}/{journal}/{stage}"
     interrupted = stage == "interrupt"
     output = command(
-        [str(binary), "-test.v", "-test.run", "^TestSQLiteRebuildStep$", "-test.timeout", "30s"],
+        [str(binary), "-test.v", "-test.run", f"^{test}$", "-test.timeout", "30s"],
         cwd=directory, timeout=35,
         env={
             "GOEF_SQLITE_COMPAT_JOURNAL": journal,
             "GOEF_SQLITE_COMPAT_TOKEN": token,
-            "GOEF_SQLITE_REBUILD_STAGE": stage,
+            stage_key: stage,
         },
-        expected_failure=(REBUILD_INTERRUPTED_EXIT, expected) if interrupted else None,
+        expected_failure=(exit_code, expected) if interrupted else None,
     )
     if not interrupted:
-        markers = [line for line in output.splitlines() if line.startswith(REBUILD_RESULT_PREFIX)]
+        markers = [line for line in output.splitlines() if line.startswith(prefix)]
         if markers != [expected]:
             raise LabError("The SQLite rebuild did not report the requested stage and pinned engine.")
 
 
-def run_rebuild_checks(tempdir, binaries, examples, report):
+def run_rebuild_checks(tempdir, binaries, examples, report, *, executor=False):
+    if executor:
+        scenario, exit_code = EXECUTOR_REBUILD_SCENARIO, EXECUTOR_REBUILD_INTERRUPTED_EXIT
+        result_key = "executor_rebuild_checks"
+    else:
+        scenario, exit_code = REBUILD_SCENARIO, REBUILD_INTERRUPTED_EXIT
+        result_key = "rebuild_checks"
     for example in examples:
         name, journal = example.profile, example.journal
         profile = PROFILES[name]
-        case = f"{REBUILD_SCENARIO} {name} {journal}"
+        case = f"{scenario} {name} {journal}"
         report["phase"] = f"{case} setup"
-        directory, token = allocate_file_case(tempdir, f"{REBUILD_SCENARIO}-{name}-{journal}")
+        directory, token = allocate_file_case(tempdir, f"{scenario}-{name}-{journal}")
         for stage in example.stages:
             report["phase"] = f"{case} {stage}"
-            run_rebuild_stage(directory, binaries[name], profile, journal, stage, token)
-        report["rebuild_checks"].append({
-            "scenario": REBUILD_SCENARIO, "profile": name, "engine_version": profile.engine_version,
-            "journal_mode": journal, "interrupted_exit": REBUILD_INTERRUPTED_EXIT, "status": "PASS",
+            run_rebuild_stage(directory, binaries[name], profile, journal, stage, token, executor=executor)
+        report[result_key].append({
+            "scenario": scenario, "profile": name, "engine_version": profile.engine_version,
+            "journal_mode": journal, "interrupted_exit": exit_code, "status": "PASS",
         })
 
 
@@ -377,6 +426,8 @@ def run_lab(tempdir, report, *, model_types=False, owned_tx=False, savepoint_tx=
     examples = parse_file_feature(FILE_FEATURE.read_text(encoding="utf-8"))
     report["phase"] = "SQLite rebuild feature discovery"
     rebuild_examples = parse_rebuild_feature(REBUILD_FEATURE.read_text(encoding="utf-8"))
+    report["phase"] = "SQLite migration executor feature discovery"
+    executor_examples = parse_executor_rebuild_feature(EXECUTOR_REBUILD_FEATURE.read_text(encoding="utf-8"))
     binaries = {}
     for name, profile in PROFILES.items():
         report["phase"] = f"build {name}"
@@ -417,6 +468,7 @@ def run_lab(tempdir, report, *, model_types=False, owned_tx=False, savepoint_tx=
             "strict_generated_native_code": strict_generated_native_code, "status": "PASS",
         })
     run_rebuild_checks(tempdir, binaries, rebuild_examples, report)
+    run_rebuild_checks(tempdir, binaries, executor_examples, report, executor=True)
 
 
 def main(argv=None):
@@ -432,7 +484,8 @@ def main(argv=None):
     args = parser.parse_args(argv)
     report = {
         "status": "FAIL", "go_version": GO_VERSION, "minimum_profile": MINIMUM_PROFILE, "profiles": {},
-        "driver_scenarios": [], "checks": [], "rebuild_checks": [], "phase": "allocate temporary directory",
+        "driver_scenarios": [], "checks": [], "rebuild_checks": [], "executor_rebuild_checks": [],
+        "phase": "allocate temporary directory",
     }
     try:
         with TemporaryDirectory(prefix="goef-sqlite-compat-") as directory:
