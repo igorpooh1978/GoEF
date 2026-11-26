@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"errors"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -173,6 +174,9 @@ func TestCommitFailureReportsUnknownAndDiscards(t *testing.T) {
 		detail.Phase() != "commit" || detail.Outcome() != "unknown" ||
 		detail.RetryClass() != "resolve_outcome" {
 		t.Fatalf("unsafe commit result = %v", err)
+	}
+	if strings.Contains(err.Error(), privateError.Error()) {
+		t.Fatal("commit error exposes a private driver diagnostic")
 	}
 	checkState(t, tx, db, transaction.StateOutcomeUnknown, 0)
 	replacement := begin(t, t.Context(), db)

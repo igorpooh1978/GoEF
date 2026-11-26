@@ -24,3 +24,9 @@ Baseline `dc13ff64370f7e7348f0f7958dbf996819177a90`. Windows/amd64 used Go 1.27.
 The checked Go blobs are `55e456923e3db6187604c778048e0248cdf5fe26` for the planner, `4de672baaaec442400fdb674eda84e30ace55523` for its tests, `a1fd87fadc7b4e7fad222b4a819ca3a7a6889a20` for the runnable example and `187fddadbe7c32ca0e3eca6f9ba77137b9f87c97` for the portable error detail. [Contract test](../../../migration/pending_test.go) · [Runnable example](../../../migration/example_test.go) · [Error registry](../../errors/README.md)
 
 The executable cases cover empty and complete history, registry order, independent output, duplicate and malformed IDs, a broken predecessor or missing digest anywhere in the registry, and unknown, skipped, reordered or changed applied entries. They verify case sensitivity and the absence of normalization or redaction leaks. Real-engine tests apply to durable history and execution in [issue #13](https://github.com/igorpooh1978/GoEF/issues/13).
+
+## Integrated acceptance
+
+The independent review confirmed the planner and error contract on `36d7e36e7ba9938c20db56d019b9e6c72db8a0a2`. Windows Go 1.27.4 build, vet, shuffled tests, the runnable example and the bootstrap checks passed. Linux/amd64 Go 1.27.4 with cgo passed race detection for all six root packages. The planner covered 14/14 statements. Merged planner and portable error coverage was 38/38. The aggregate root coverage was 980/1007 (97.3%), including 21/21 transport statements after the separate provider contract tests.
+
+The corrected upstream references were included at `32a79ef3a39a6ea6c33f32389264d1b9e472f8e2`. Its Windows root test and coverage command exited 0, preserved the planner's 14/14 statements, and covered 1007/1034 root statements (97.4%). The Linux root race command also exited 0 on that commit. The reviewed planner, test and example blobs are identical at both revisions.

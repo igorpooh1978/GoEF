@@ -28,4 +28,10 @@ On the same commit, the local workstation built the Linux fixture once with `dri
 | SQLite | 3.51.3, 3.54.1 | modernc.org/sqlite v1.47.0 and v1.63.0 |
 | MySQL | 8.0.46, 8.4.13.1 | go-sql-driver/mysql v1.10.0 |
 
-The standard SQL Server Developer and legacy Developer commands returned BLOCKED without the consent options (exit 1). The combined source candidate will carry SQL Server and independent acceptance evidence.
+The standard SQL Server Developer and legacy Developer commands returned BLOCKED without the consent options at this source revision (exit 1).
+
+## Integrated verification
+
+The authorized combined matrix on `32a79ef3a39a6ea6c33f32389264d1b9e472f8e2` exited 0. S05 passed on all 12 pinned profiles, including SQL Server 2017 at compatibility level 140, 2019 at level 150, and 2022 at levels 140 and 160 using go-mssqldb v1.11.0. The run also preserved all 12 existing explicit decimal binding checks. The runner verified the catalog metadata and SQL NULL, exact signed values and the declared precision and scale. The root suite passed the S06 invalid-declaration cases. [Command and integrated matrix](../W002/COMMIT_OUTCOME_FAULT.md#integrated-verification)
+
+Independent review used that exact source commit. The Go 1.27.4 model suite and runnable example passed, including 410/414 model statements (99.0%). All 79 lab runner tests passed. Linux race verification of the root and driver lab modules passed.
