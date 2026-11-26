@@ -30,12 +30,28 @@ class CommandError(LabError):
     """A command returned a nonzero status or exceeded its deadline."""
 
 
+class CommandTimedOut(CommandError):
+    """A subprocess exceeded its own deadline."""
+
+
 class CommandFailed(CommandError):
     """Only the exit code is retained from an unsuccessful child process."""
 
     def __init__(self, returncode):
         self.returncode = returncode
         super().__init__(f"Command exited with status {returncode}.")
+
+
+class ReadinessTimedOut(LabError):
+    """The engine did not become ready within the polling budget."""
+
+
+class CleanupFailed(LabError):
+    """Failure of the requested operation and its subsequent cleanup."""
+
+    def __init__(self, primary, cleanup):
+        self.primary = primary
+        super().__init__(f"Smoke failed ({safe_reason(primary)}). Cleanup failed ({safe_reason(cleanup)}).")
 
 
 def safe_reason(error):
@@ -68,7 +84,7 @@ def command(argv, *, cwd, env=None, stdin=None, timeout=15, missing=None, expect
     except FileNotFoundError:
         raise Blocked("A required executable is unavailable.") from None
     except subprocess.TimeoutExpired:
-        raise CommandError("Command timed out.") from None
+        raise CommandTimedOut("Command timed out.") from None
     except OSError:
         raise LabError("Could not execute the lab command.") from None
     if expected_failure is not None:
@@ -123,7 +139,7 @@ class Container:
                 return self.exec(argv, env=env, timeout=min(10, remaining))
             except CommandError:
                 time.sleep(min(1, max(0, deadline - time.monotonic())))
-        raise LabError("Engine readiness deadline expired.")
+        raise ReadinessTimedOut("Engine readiness deadline expired.")
 
 
 class Lab:
@@ -209,7 +225,7 @@ class Lab:
             try:
                 self._cleanup(docker, target, owner)
             except Exception as cleanup:
-                raise LabError(f"Smoke failed ({safe_reason(primary)}). Cleanup failed ({safe_reason(cleanup)}).") from None
+                raise CleanupFailed(primary, cleanup) from None
             raise
         else:
             self._cleanup(docker, target, owner)

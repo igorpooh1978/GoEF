@@ -15,7 +15,10 @@ sys.dont_write_bytecode = True
 import mysql
 import postgres
 import sqlserver
-from runtime import Blocked, CommandError, Lab, LabError, command, inherited, safe_reason
+from runtime import (
+    Blocked, CleanupFailed, CommandError, CommandFailed, CommandTimedOut, Lab, LabError, ReadinessTimedOut,
+    command, inherited, safe_reason,
+)
 
 
 PROVIDERS = ("postgres", "sqlite", "sqlserver", "mysql")
@@ -211,11 +214,21 @@ GRANT SELECT ON performance_schema.data_lock_waits TO 'goef_driver'@'%';
         yield container
 
 
+class _SQLServerIdentityMismatch(LabError):
+    REASON = "SQL Server provisioning target does not match the pin."
+
+    def __init__(self):
+        super().__init__(self.REASON)
+
+
 @contextmanager
-def sqlserver_container(lab, password, token, profile, *, lock_observer_password):
+def sqlserver_container(lab, password, token, profile, *, lock_observer_password, report_stage=None):
     expected = profile.sqlserver_settings
     if not lab.allow_sqlserver:
         raise Blocked(f"SQL Server requires {expected.eula_flag} for this local run.")
+    if report_stage is None:
+        report_stage = lambda _stage: None
+    report_stage("docker-startup")
     provision_password = "GoEF9!" + secrets.token_hex(24)
     environment = {
         "ACCEPT_EULA": "Y",
@@ -225,10 +238,13 @@ def sqlserver_container(lab, password, token, profile, *, lock_observer_password
     with lab.container(profile.image, environment) as container:
         settings = {"SQLCMDPASSWORD": provision_password}
         client = [expected.sqlcmd_path, *sqlserver.SQLCMD[1:], "-N", "-d", "master"]
+        report_stage("engine-readiness")
         container.wait([*client, "-Q", "SELECT 1;"], env=settings)
+        report_stage("engine-identity")
         identity = container.exec([*client, "-Q", sqlserver.SERVER_IDENTITY], env=settings)
         if identity.strip() != f"{profile.version}|{expected.update_level}|Developer Edition (64-bit)":
-            raise LabError("SQL Server provisioning target does not match the pin.")
+            raise _SQLServerIdentityMismatch()
+        report_stage("fixture-setup")
         container.exec(
             [*client, "-Q", "CREATE DATABASE [goef_smoke] COLLATE Latin1_General_100_BIN2;"],
             env=settings,
@@ -389,10 +405,33 @@ def missing_eula(profile, accepted_eulas):
     return None
 
 
+def sqlserver_provisioning_reason(error):
+    # Select fixed diagnostics without exposing exception messages or subprocess data.
+    if isinstance(error, CleanupFailed):
+        return f"{sqlserver_provisioning_reason(error.primary)} Cleanup failed."
+    if isinstance(error, CommandTimedOut):
+        return "Command timed out."
+    if isinstance(error, ReadinessTimedOut):
+        return "Engine readiness deadline expired."
+    if isinstance(error, _SQLServerIdentityMismatch):
+        return _SQLServerIdentityMismatch.REASON
+    if isinstance(error, CommandFailed) and type(error.returncode) is int:
+        return f"Command exited with status {error.returncode}."
+    if isinstance(error, Blocked):
+        return "A SQL Server provisioning prerequisite is unavailable."
+    return "SQL Server provisioning failed."
+
+
 def run_provider(profile_name, binary, accepted_eulas):
     profile = PROFILES[profile_name]
     provider = profile.provider
     phase = "build"
+    provisioning_stage = None
+
+    def report_stage(stage):
+        nonlocal provisioning_stage
+        provisioning_stage = stage
+
     try:
         required_flag = missing_eula(profile, accepted_eulas)
         if required_flag is not None:
@@ -414,6 +453,7 @@ def run_provider(profile_name, binary, accepted_eulas):
                 if provider == "sqlserver":
                     lock_observer_password = "GoEF9!" + secrets.token_hex(24)
                     provision_options["lock_observer_password"] = lock_observer_password
+                    provision_options["report_stage"] = report_stage
                     env["GOEF_DRIVERLAB_SQLSERVER_OBSERVER_PASSWORD"] = lock_observer_password
                 with SERVER_CONTAINERS[provider](lab, password, token, profile, **provision_options) as container:
                     phase = "copy test binary"
@@ -429,10 +469,17 @@ def run_provider(profile_name, binary, accepted_eulas):
         phase = "evidence"
         results = verified_results(output, provider, profile_name)
         return {"provider": provider, "profile": profile_name, "status": "PASS", "scenarios": results}
-    except Blocked as error:
-        return {"provider": provider, "profile": profile_name, "status": "BLOCKED", "reason": safe_reason(error)}
     except Exception as error:
-        return {"provider": provider, "profile": profile_name, "status": "FAIL", "phase": phase, "reason": safe_reason(error)}
+        blocked = isinstance(error, Blocked)
+        report = {"provider": provider, "profile": profile_name, "status": "BLOCKED" if blocked else "FAIL"}
+        if not blocked:
+            report["phase"] = phase
+        if phase == "provisioning" and provisioning_stage is not None:
+            report["stage"] = provisioning_stage
+            report["reason"] = sqlserver_provisioning_reason(error)
+        else:
+            report["reason"] = safe_reason(error)
+        return report
 
 
 def main(argv=None):

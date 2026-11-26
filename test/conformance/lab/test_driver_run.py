@@ -4,10 +4,129 @@ from contextlib import nullcontext, redirect_stdout
 import io
 import json
 import os
+import subprocess
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import driver_run
+
+
+class SQLServerProvisioningDiagnosticsTests(unittest.TestCase):
+    def mock_lab(self):
+        container = Mock()
+        container.exec.return_value = "16.0.4325.4|CU28|Developer Edition (64-bit)"
+        lab = Mock(allow_sqlserver=True)
+        lab.container.return_value = nullcontext(container)
+        return lab, container
+
+    def timeout(self):
+        # Model a real subprocess timeout that carries private argv and output.
+        with patch("runtime.subprocess.run", side_effect=subprocess.TimeoutExpired(
+            ["sqlcmd", "private-password"], 15, stderr="private-SQL",
+        )):
+            driver_run.command(["sqlcmd"], cwd=".")
+
+    def test_reports_each_provisioning_stage_for_a_timeout(self):
+        for stage in ("docker-startup", "engine-readiness", "engine-identity", "fixture-setup"):
+            with self.subTest(stage=stage):
+                lab, container = self.mock_lab()
+                if stage == "docker-startup":
+                    lab.container.return_value = MagicMock()
+                    lab.container.return_value.__enter__.side_effect = self.timeout
+                elif stage == "engine-readiness":
+                    container.wait.side_effect = lambda *_args, **_kwargs: self.timeout()
+                elif stage == "engine-identity":
+                    container.exec.side_effect = lambda *_args, **_kwargs: self.timeout()
+                else:
+                    def execute(argv, **_kwargs):
+                        if argv[-1] == driver_run.sqlserver.SERVER_IDENTITY:
+                            return container.exec.return_value
+                        self.timeout()
+
+                    container.exec.side_effect = execute
+                with patch.object(driver_run, "Lab", return_value=lab):
+                    result = driver_run.run_provider(
+                        "sqlserver-2022", "driverlab-binary", {driver_run.SQLSERVER_EULA},
+                    )
+                self.assertEqual(result, {
+                    "provider": "sqlserver", "profile": "sqlserver-2022", "status": "FAIL",
+                    "phase": "provisioning", "stage": stage, "reason": "Command timed out.",
+                })
+                container.docker.assert_not_called()
+
+    def test_identity_mismatch_keeps_its_safe_reason(self):
+        lab, container = self.mock_lab()
+        container.exec.return_value = "unexpected-private-build"
+        with patch.object(driver_run, "Lab", return_value=lab):
+            result = driver_run.run_provider(
+                "sqlserver-2022", "driverlab-binary", {driver_run.SQLSERVER_EULA},
+            )
+        self.assertEqual(result, {
+            "provider": "sqlserver", "profile": "sqlserver-2022", "status": "FAIL",
+            "phase": "provisioning", "stage": "engine-identity",
+            "reason": "SQL Server provisioning target does not match the pin.",
+        })
+        self.assertEqual(container.exec.call_count, 1)
+        container.docker.assert_not_called()
+
+    def test_unreviewed_provisioning_exception_is_redacted(self):
+        lab, container = self.mock_lab()
+        container.wait.side_effect = driver_run.LabError("private-password; private-SQL")
+        with patch.object(driver_run, "Lab", return_value=lab):
+            result = driver_run.run_provider(
+                "sqlserver-2022", "driverlab-binary", {driver_run.SQLSERVER_EULA},
+            )
+        self.assertEqual(result["status"], "FAIL")
+        self.assertEqual(result["phase"], "provisioning")
+        self.assertEqual(result["stage"], "engine-readiness")
+        self.assertNotIn("private-", json.dumps(result))
+
+    def test_readiness_and_cleanup_failure_remain_visible_without_private_details(self):
+        lab, container = self.mock_lab()
+        container.wait.side_effect = driver_run.CleanupFailed(
+            driver_run.ReadinessTimedOut("private-readiness"),
+            driver_run.LabError("private-cleanup"),
+        )
+        with patch.object(driver_run, "Lab", return_value=lab):
+            result = driver_run.run_provider(
+                "sqlserver-2022", "driverlab-binary", {driver_run.SQLSERVER_EULA},
+            )
+        self.assertEqual(result, {
+            "provider": "sqlserver", "profile": "sqlserver-2022", "status": "FAIL",
+            "phase": "provisioning", "stage": "engine-readiness",
+            "reason": "Engine readiness deadline expired. Cleanup failed.",
+        })
+
+    def test_startup_prerequisite_stays_blocked_without_private_details(self):
+        lab, container = self.mock_lab()
+        lab.container.return_value = MagicMock()
+        lab.container.return_value.__enter__.side_effect = driver_run.Blocked("private-endpoint")
+        with patch.object(driver_run, "Lab", return_value=lab):
+            result = driver_run.run_provider(
+                "sqlserver-2022", "driverlab-binary", {driver_run.SQLSERVER_EULA},
+            )
+        self.assertEqual(result, {
+            "provider": "sqlserver", "profile": "sqlserver-2022", "status": "BLOCKED",
+            "stage": "docker-startup", "reason": "A SQL Server provisioning prerequisite is unavailable.",
+        })
+        container.docker.assert_not_called()
+
+    def test_success_report_keeps_its_existing_shape(self):
+        lab, container = self.mock_lab()
+        scenarios = [{"provider": "sqlserver", "scenario": "LAB-DRIVER-001-S01", "status": "PASS"}]
+        stdout = io.StringIO()
+        with (
+            patch.object(driver_run, "Lab", return_value=lab),
+            patch.object(driver_run, "build_binary", return_value="driverlab-binary"),
+            patch.object(driver_run, "verified_results", return_value=scenarios),
+            redirect_stdout(stdout),
+        ):
+            self.assertEqual(driver_run.main(["sqlserver", "--accept-sqlserver-eula"]), 0)
+        self.assertEqual(json.loads(stdout.getvalue()), {
+            "provider": "sqlserver", "profile": "sqlserver-2022", "status": "PASS", "scenarios": scenarios,
+        })
+        container.wait.assert_called_once()
+        self.assertEqual(container.docker.call_count, 2)
 
 
 class DriverEvidenceTests(unittest.TestCase):
