@@ -10,7 +10,7 @@ The sources below are research references for the W000 documentation. The W000 s
 | Npgsql EF Core provider v10.0.4 | [PostgreSQL License](https://github.com/npgsql/efcore.pg/blob/fe1109ecf52646ed6fc718a9a233353ef2e7baf9/LICENSE), Npgsql | The pinned license preserves the copyright and license paragraphs in copies. |
 | Pomelo EF Core provider 9.0.0 | [MIT, LICENSE](https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql/blob/58dd6883cb9616fe49f671b943a826b459c0117f/LICENSE), Pomelo Foundation | Review source headers and preserve the upstream copyright and permission notice where required. |
 
-The [source lock](docs/upstream/lock.json) records commit and license blob IDs. For any copied or adapted material or approved dependency, record upstream repository, exact commit, file and symbol in a reviewed ADR. Check the exact headers, terms and relevant notices, and update distribution attributions before release. GoEF's own license decision is tracked in [#15](https://github.com/igorpooh1978/GoEF/issues/15) and the release workflow.
+The [source lock](docs/upstream/lock.json) records commit and license blob IDs. For any copied or adapted material or approved dependency, record upstream repository, exact commit, file and symbol in a reviewed ADR. Check the exact headers, terms and relevant notices, and update distribution attributions before release. GoEF's own work is licensed under the [MIT License](LICENSE), with copyright attributed to Igor Pukhlikov. The upstream references and test dependencies have the terms recorded here. [Maintainer decision #15](https://github.com/igorpooh1978/GoEF/issues/15)
 
 ## W002 test module dependencies
 

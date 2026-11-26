@@ -8,4 +8,5 @@ The core module contains the frozen provider execution contract. The four-engine
 - [Master plan](docs/roadmap/MASTER_PLAN.md)
 - [Project checkpoint](docs/roadmap/CHECKPOINT.md)
 - [Contributing](CONTRIBUTING.md)
+- [MIT License](LICENSE)
 - [Bootstrap tracking issue](https://github.com/igorpooh1978/GoEF/issues/1)
