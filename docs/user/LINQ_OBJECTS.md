@@ -57,6 +57,63 @@ func main() {
 
 An empty sequence returns zero. A second count starts a new enumeration, so a replayable source can produce the same count and an exhausted single-use source returns zero. The counter uses constant space and completes upstream callbacks synchronously. The source must be non-nil. `Count` panics if the source yields more than `math.MaxInt` values.
 
+## Filter or project by position
+
+Use `objects.WhereIndexed` or `objects.SelectIndexed` when a callback needs the element and its zero-based position. The predicate counts every input, including rejected values. The selector numbers its own input, so after a filter it counts the matches. This example prints `0 elm` and `1 fir`. [Runnable indexed example](../../linq/objects/indexed_test.go)
+
+```go
+package main
+
+import (
+	"fmt"
+	"slices"
+
+	"github.com/igorpooh1978/GoEF/linq/objects"
+)
+
+func main() {
+	source := slices.Values([]string{"oak", "elm", "ash", "fir"})
+	alternating := objects.WhereIndexed(source, func(_ string, index int) bool {
+		return index%2 == 1
+	})
+	numbered := objects.SelectIndexed(alternating, func(tree string, index int) string {
+		return fmt.Sprintf("%d %s", index, tree)
+	})
+	for line := range numbered {
+		fmt.Println(line)
+	}
+}
+```
+
+Both operators start counting at zero on each enumeration and stop with the consumer. On a single-use input the next enumeration numbers the remaining elements. The index is a Go `int`. If the source yields another value after position `math.MaxInt`, the operator panics before invoking the callback for that value. [Indexed behavior and test evidence](../evidence/W008/OBJECTS_INDEXED.md)
+
+## Check whether values match
+
+`objects.Any` checks whether the source yields a value. `objects.AnyBy` checks whether at least one value matches a predicate. `objects.All` checks whether every value matches. The following example prints `true`, `true`, and `false` on separate lines. [Runnable quantifier example](../../linq/objects/quantifiers_example_test.go)
+
+```go
+package main
+
+import (
+	"fmt"
+	"slices"
+
+	"github.com/igorpooh1978/GoEF/linq/objects"
+)
+
+func main() {
+	values := slices.Values([]int{4, 7, 12})
+	evens := objects.Where(values, func(value int) bool { return value%2 == 0 })
+	doubled := objects.Select(evens, func(value int) int { return value * 2 })
+
+	fmt.Println(objects.Any(values))
+	fmt.Println(objects.AnyBy(doubled, func(value int) bool { return value > 10 }))
+	fmt.Println(objects.All(doubled, func(value int) bool { return value < 20 }))
+}
+```
+
+`Any` stops at the first value, `AnyBy` at the first match, and `All` at the first failure. On an empty source, `Any` and `AnyBy` return `false` and `All` returns `true`. Each call starts a new enumeration. A call on an unbounded source keeps reading until it can decide the answer. [Short-circuit test evidence](../evidence/W008/OBJECTS_QUANTIFIERS.md)
+
 - [LINQ Objects design](../architecture/LINQ_OBJECTS.md)
 - [Where test evidence](../evidence/W008/OBJECTS_WHERE.md)
 - [Select and pipeline test evidence](../evidence/W008/OBJECTS_SELECT.md)

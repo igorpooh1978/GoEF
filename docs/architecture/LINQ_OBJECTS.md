@@ -1,6 +1,10 @@
 # LINQ to Objects
 
-`objects.Where` and `objects.Select` compose lazily over `iter.Seq`. A caller can filter orders, project matches to IDs and stop after one result. A consumer's stop signal travels back through both operators. A terminal `objects.Count` enumerates the whole sequence once, runs the upstream callbacks for the demanded items and counts every projected value. Its Go `int` result is checked for overflow. The remaining obligations below describe planned behavior. [Examples](../user/LINQ_OBJECTS.md) · [Issue #4](https://github.com/igorpooh1978/GoEF/issues/4)
+`objects.Where` and `objects.Select` compose lazily over `iter.Seq`. A caller can filter orders, project matches to IDs and stop after one result. A consumer's stop signal travels back through both operators. A terminal `objects.Count` enumerates the whole sequence once, runs the upstream callbacks for the demanded items and counts every projected value. Its Go `int` result is checked for overflow. [Examples](../user/LINQ_OBJECTS.md) · [Issue #4](https://github.com/igorpooh1978/GoEF/issues/4)
+
+The indexed variants `objects.WhereIndexed` and `objects.SelectIndexed` pass each value and its zero-based position to the callback. Positions belong to the operator's immediate source and restart on each enumeration. A filter advances its position for rejected inputs. Each operator checks the Go `int` boundary before invoking the callback for another value. Early stop propagates to the source, which owns its own cleanup. [Indexed behavior and verification](../evidence/W008/OBJECTS_INDEXED.md)
+
+`objects.Any`, `objects.AnyBy`, and `objects.All` are terminal operations. They inspect values in encounter order and stop at the first value, first match, or first failure, respectively. Empty inputs return false for `Any` and `AnyBy` and true for `All`. Each call enumerates its input once, with zero buffering and source-controlled replayability. [Quantifier behavior and verification](../evidence/W008/OBJECTS_QUANTIFIERS.md)
 
 | Input | Proposed observation |
 | --- | --- |
@@ -9,14 +13,14 @@
 | String | Yield Unicode code points in iteration order. Indexed operators count elements. Byte-offset APIs need distinct names. |
 | Native iterator | Forward early stop. Replayability follows the source. A factory can supply a fresh iterator when replay is required. |
 | Channel | Receive consumes values once. The producer owns closure. Cancellation and early exit require an agreed producer shutdown mechanism. |
-| Empty/nil | Specify nil slice/map as empty and test both. A nil channel can block, so a channel adapter needs a cancellation policy. The current `Where` and `Select` take non-nil iterator and callback functions. |
+| Empty/nil | Specify nil slice/map as empty and test both. A nil channel can block, so a channel adapter needs a cancellation policy. Supply a non-nil source and non-nil callbacks wherever the operator takes them. |
 
-### Operator obligations
+### Planned operator obligations
 
 | Operations | Required distinction and test |
 | --- | --- |
-| Where, Select, SelectMany, Zip | Preserve source encounter order. An indexed callback counts input positions before filtering. Flatten in outer-then-inner order. Zip stops at the shorter input and closes any pulled iterators. Test side effects, including how many values were read from each input. |
-| Any, All, First, Single | Any over empty is false and All is true. First may stop after one match. Single must distinguish zero, one and at least two matches. Distinguish missing from a present Go zero value. Define explicit default value overloads. |
+| SelectMany, Zip | Preserve source encounter order. Flatten in outer-then-inner order. Zip stops at the shorter input and closes any pulled iterators. Test side effects, including how many values were read from each input. |
+| First, Single | First may stop after one match. Single must distinguish zero, one and at least two matches. Distinguish missing from a present Go zero value. Define explicit default value overloads. |
 | Skip, Take, Chunk, Last, Range | Cover negative counts, bounds from the end, short final chunks and steps in both directions. Taking a finite prefix must terminate on an infinite source. Several suffix and from-end forms need buffering or complete traversal. |
 | OrderBy, ThenBy, Reverse, Shuffle | Stable sort preserves encounter order on ties. ThenBy refines that order. Reverse needs the tail before it yields the head. For Shuffle compare permutations with multiplicity and use a reproducible random fixture. Unbounded inputs cannot yield a fully sorted result. |
 | Distinct, Union, Intersect, Except, Concat | Specify first occurrence, multiplicity and encounter order separately. Concat keeps duplicates. Set operations require equivalent hash/equality contracts. A projected comparable key or explicit equality function can accommodate slices and map-containing structs. Cost can be quadratic when only pairwise equality is available. |
