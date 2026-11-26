@@ -14,7 +14,7 @@ Independent acceptance on 2026-11-26 for the original bootstrap scopes under [#1
 | [#9](https://github.com/igorpooh1978/GoEF/issues/9) | PASS for the test, coverage and release gate definitions | The integrated validator and all seven regression checks passed. The [testing](../../development/TESTING.md), [coverage](../../development/COVERAGE.md) and [release](../../development/RELEASE_GATES.md) policies require actual runtime and failure evidence. [#13](https://github.com/igorpooh1978/GoEF/issues/13) retains engine harness and coverage work. |
 | [#14](https://github.com/igorpooh1978/GoEF/issues/14) | PASS for the proposed guide and reference publication | The 19 user guides and eight reference pages are published, with the proposed Go migration flow and explicit SQL-to-Objects conversion documented. Six existing local Objects examples compiled and produced their documented outputs. Generated reference determinism and the stale-output control `DOC-EXAMPLE-001-S01` and `DOC-FRESH-001-S01` remain specified in the [scenario index](../../../specs/traceability.json). |
 
-W000 remains partial while its dedicated PostgreSQL and MySQL documentation-route issues are open. This review covers the listed bootstrap scopes. [#10](https://github.com/igorpooh1978/GoEF/issues/10) · [#11](https://github.com/igorpooh1978/GoEF/issues/11)
+PostgreSQL and MySQL exact-version documentation remained pending at the reviewed baseline. The [follow-up probe](MCP_EXACT_RELEASES.md) supplied the missing evidence for #10 and #11.
 
 ## Reproduction
 

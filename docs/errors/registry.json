@@ -1853,7 +1853,7 @@
       "upstreamSources": [
         "https://pkg.go.dev/errors",
         "https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/managing",
-        "https://github.com/dotnet/efcore/blob/b34c0e9d7e768aa808ded44f19e7f871bea6869f/src/EFCore.Relational/Migrations/Internal/Migrator.cs#L429-L455"
+        "https://github.com/dotnet/efcore/blob/b34c0e9d7e768aa808ded44f19e7f871bea6869f/src/EFCore.Relational/Migrations/Internal/Migrator.cs#L465-L524"
       ],
       "providerMappings": {
         "postgres": [],

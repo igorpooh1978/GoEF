@@ -45,7 +45,7 @@ At 17:25–17:27 UTC, broad Context7 resolution led to a catalog entry advertisi
 
 The official MCP Registry's public listing API was queried with `version=latest` and searches for `postgresql`, `mysql` and `context7`. It returned 3 PostgreSQL entries, 26 MySQL entries and 3 Context7-related entries, each with no next cursor. This bounded search did not identify another vendor-backed exact-version documentation route for PostgreSQL 18.7 or MySQL 8.4.13.1. Engine query and inspection entries were excluded from documentation readiness. The Context7 listings included a fork and a third-party wrapper. [Registry API reference](https://github.com/modelcontextprotocol/registry/blob/main/docs/reference/api/official-registry-api.md)
 
-The [2026-11-26 follow-up](MCP_EXACT_RELEASES.md) supplies the exact-version evidence for [#10](https://github.com/igorpooh1978/GoEF/issues/10) and [#11](https://github.com/igorpooh1978/GoEF/issues/11). [#8](https://github.com/igorpooh1978/GoEF/issues/8) and [#6](https://github.com/igorpooh1978/GoEF/issues/6) track remaining adoption, driver/engine pin and conformance work for SQLite and SQL Server. Project configuration remains pending for both documentation endpoints. The [matrix](../../parity/PROVIDER_MATRIX.md) records the four runtime cells separately.
+The [2026-11-26 follow-up](MCP_EXACT_RELEASES.md) supplies the exact-version evidence for [#10](https://github.com/igorpooh1978/GoEF/issues/10) and [#11](https://github.com/igorpooh1978/GoEF/issues/11). The documentation probes ran standalone. [#13](https://github.com/igorpooh1978/GoEF/issues/13) tracks engine and driver conformance. The [matrix](../../parity/PROVIDER_MATRIX.md) records the four runtime cells separately.
 
 ## Optional inspection candidates
 
