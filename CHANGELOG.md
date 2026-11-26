@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Bind Go booleans, signed integers, strings and byte slices to physical types for all four database families ([#3](https://github.com/igorpooh1978/GoEF/issues/3)).
+- Add a terminal `Count` for in-memory iterators and verify complete traversal through `Where` and `Select` ([#4](https://github.com/igorpooh1978/GoEF/issues/4)).
 - Resolve Code First table and property mappings with independent column name and length precedence and deterministic metadata ([#3](https://github.com/igorpooh1978/GoEF/issues/3)).
 - Add lazy, type-changing `Select` and verify that `Where` followed by `Select` preserves order and stops upstream when the consumer stops ([#4](https://github.com/igorpooh1978/GoEF/issues/4)).
 - Adopt the MIT License for GoEF with copyright attributed to Igor Pukhlikov ([#15](https://github.com/igorpooh1978/GoEF/issues/15)).

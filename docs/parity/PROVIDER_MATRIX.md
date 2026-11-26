@@ -11,6 +11,8 @@ Tracked by [W000 #1](https://github.com/igorpooh1978/GoEF/issues/1). This is the
 
 The [version-compatibility matrix](ENGINE_COMPATIBILITY.md) tracks the lower engine profiles, driver pins and feature gates. The [local driver suite](../evidence/W002/DRIVER_GHERKIN.md) provides separate native Go-driver evidence.
 
+The scalar-binding fixture creates a table from the Go model's physical type declarations and checks the engine catalog and values on the selected profiles. [Scalar scenario](../../specs/features/model/model-type-001.feature) · [Type binding evidence](../evidence/W003/PROVIDER_TYPE_BINDING.md)
+
 ## Acceptance per version
 
 | Suite | Required proof | W000 execution |

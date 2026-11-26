@@ -1,6 +1,6 @@
 # Choose a LINQ execution mode
 
-The in-memory `Where` and `Select` example runs against the current source. The comparison with a provider-executed query remains a planned acceptance case. [In-memory example](LINQ_OBJECTS.md)
+The in-memory `Where`, `Select` and `Count` examples run against the current source. The comparison with a provider-executed query remains a planned acceptance case. [In-memory examples](LINQ_OBJECTS.md)
 
 Use the Objects mode for Go collections, Expressions to represent typed operations, and Queryable to build provider-executed plans. A planned fixture computes the same result from a bounded database query and a local sequence with explicit comparison settings.
 

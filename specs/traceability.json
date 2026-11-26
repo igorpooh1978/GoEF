@@ -381,6 +381,21 @@
       "status": "SPECIFIED"
     },
     {
+      "featureId": "LINQ-OBJECTS-001",
+      "scenarioId": "LINQ-OBJECTS-001-S06",
+      "spec": "specs/features/linq/objects.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_OBJECTS.md",
+        "docs/user/LINQ_OBJECTS.md"
+      ],
+      "test": "linq/objects/count_test.go#TestWhereSelectCountConsumesAllProjections",
+      "evidence": "docs/evidence/W008/OBJECTS_COUNT.md",
+      "status": "SPECIFIED"
+    },
+    {
       "featureId": "LINQ-QUERYABLE-001",
       "scenarioId": "LINQ-QUERYABLE-001-S01",
       "spec": "specs/features/linq/queryable.feature",
@@ -733,6 +748,34 @@
       ],
       "test": null,
       "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MODEL-TYPE-001",
+      "scenarioId": "MODEL-TYPE-001-S02",
+      "spec": "specs/features/model/model-type-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/3"
+      ],
+      "docs": [
+        "docs/user/MODELS_CODE_FIRST.md"
+      ],
+      "test": "test/conformance/driverlab/model_types_test.go#TestModelTypeRoundTrip",
+      "evidence": "docs/evidence/W003/PROVIDER_TYPE_BINDING.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MODEL-TYPE-001",
+      "scenarioId": "MODEL-TYPE-001-S03",
+      "spec": "specs/features/model/model-type-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/3"
+      ],
+      "docs": [
+        "docs/user/MODELS_CODE_FIRST.md"
+      ],
+      "test": "model/type_binding_test.go#TestBindTypesMODEL_TYPE_001S03",
+      "evidence": "docs/evidence/W003/PROVIDER_TYPE_BINDING.md",
       "status": "SPECIFIED"
     },
     {

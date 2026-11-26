@@ -256,8 +256,8 @@
       ],
       "contract": "Round-trip a supported scalar comparison and value without losing precision under a declared provider type mapping.",
       "goApi": {
-        "status": "PROPOSED",
-        "description": "Provider type mapping and codec resolved from logical type and facets."
+        "status": "IMPLEMENTED",
+        "description": "BindTypes returns a physical mapping for built-in booleans, signed integers, strings and byte slices. Exact decimal and other codecs are separate."
       },
       "wave": "W005",
       "issues": [
@@ -272,7 +272,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "Engine and Go driver versions are pending real conformance.",
+          "reason": "S02 has a pinned scalar binding fixture. Exact decimal and codec coverage for S01 remain outstanding.",
           "evidence": null
         },
         "sqlite": {
@@ -280,7 +280,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "Engine and Go driver versions are pending real conformance.",
+          "reason": "S02 has a pinned scalar binding fixture. Exact decimal and codec coverage for S01 remain outstanding.",
           "evidence": null
         },
         "sqlserver": {
@@ -288,7 +288,7 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "Engine and Go driver versions are pending real conformance.",
+          "reason": "S02 has a pinned scalar binding fixture. Exact decimal and codec coverage for S01 remain outstanding.",
           "evidence": null
         },
         "mysql": {
@@ -296,16 +296,25 @@
           "capability": "PROPOSED",
           "engineVersions": [],
           "driverVersions": [],
-          "reason": "Engine and Go driver versions are pending real conformance.",
+          "reason": "S02 has a pinned scalar binding fixture. Exact decimal and codec coverage for S01 remain outstanding.",
           "evidence": null
         }
       },
       "scenarios": [
-        "MODEL-TYPE-001-S01"
+        "MODEL-TYPE-001-S01",
+        "MODEL-TYPE-001-S02",
+        "MODEL-TYPE-001-S03"
       ],
-      "tests": [],
-      "status": "SPECIFIED",
-      "deviations": [],
+      "tests": [
+        "test/conformance/driverlab/model_types_test.go#TestModelTypeRoundTrip",
+        "model/type_binding_test.go#TestBindTypesMODEL_TYPE_001S02",
+        "model/type_binding_test.go#TestBindTypesMODEL_TYPE_001S03"
+      ],
+      "status": "PARTIAL",
+      "deviations": [
+        "Physical scalar declarations are available for the built-in subset. Exact decimal codecs and broader type or conversion parity remain planned.",
+        "SQLite length is metadata. PostgreSQL and MySQL use characters, and SQL Server nvarchar length is measured in UTF-16 code units under supplementary-character collations."
+      ],
       "adr": null,
       "docs": [
         "docs/user/MODELS_CODE_FIRST.md"
@@ -2103,12 +2112,34 @@
           "testPath": "select_test.go",
           "testSymbol": "TestSelect_TypeChanging",
           "relation": "analogue"
+        },
+        {
+          "lockId": "dotnet-runtime",
+          "repository": "https://github.com/dotnet/runtime",
+          "tag": "v10.0.0",
+          "sha": "60629d14374c56f1cb51819049ad1fa529307f8d",
+          "path": "src/libraries/System.Linq/src/System/Linq/Count.cs",
+          "symbol": "Enumerable.Count",
+          "testPath": "src/libraries/System.Linq/tests/CountTests.cs",
+          "testSymbol": "SameResultsRepeatCallsIntQuery",
+          "relation": "behavior"
+        },
+        {
+          "lockId": "go-linq-stable",
+          "repository": "https://github.com/ahmetb/go-linq",
+          "tag": "v5.0.0",
+          "sha": "6ebc43b7c971a8a4cb9e38742f6cb491d4032cbb",
+          "path": "result.go",
+          "symbol": "Query.Count",
+          "testPath": "result_test.go",
+          "testSymbol": "TestCount",
+          "relation": "analogue"
         }
       ],
-      "contract": "Filter and project values through lazy, typed in-memory iterators. Consume values in source order and stop upstream once the consumer stops.",
+      "contract": "Filter and project values through lazy typed in-memory iterators. Count enumerates the composed source once and returns its cardinality.",
       "goApi": {
         "status": "IMPLEMENTED",
-        "description": "The Where and Select functions compose over iter.Seq with typed Go predicates and selectors."
+        "description": "Where and Select compose over iter.Seq with typed Go callbacks. Count consumes a sequence and returns a checked Go int."
       },
       "wave": "W008",
       "issues": [
@@ -2154,15 +2185,18 @@
         "LINQ-OBJECTS-001-S02",
         "LINQ-OBJECTS-001-S03",
         "LINQ-OBJECTS-001-S04",
-        "LINQ-OBJECTS-001-S05"
+        "LINQ-OBJECTS-001-S05",
+        "LINQ-OBJECTS-001-S06"
       ],
       "tests": [
         "linq/objects/where_test.go#TestWhereConsumesOnlyNecessaryPrefix",
-        "linq/objects/select_test.go#TestWhereSelectStopsAtFirstProjectionAndReplays"
+        "linq/objects/select_test.go#TestWhereSelectStopsAtFirstProjectionAndReplays",
+        "linq/objects/count_test.go#TestWhereSelectCountConsumesAllProjections"
       ],
       "status": "PARTIAL",
       "deviations": [
-        "The current functions take iter.Seq and non-nil callbacks. Indexed overloads and the other Objects scenarios retain separate acceptance requirements."
+        "The current functions take iter.Seq and non-nil callbacks. Indexed overloads and the other Objects scenarios retain separate acceptance requirements.",
+        "Count returns Go int rather than a fixed-width .NET Int32 and always enumerates its iter.Seq input."
       ],
       "adr": null,
       "docs": [

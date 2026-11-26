@@ -129,6 +129,32 @@ class SQLServerProvisioningDiagnosticsTests(unittest.TestCase):
         self.assertEqual(container.docker.call_count, 2)
 
 
+class ModelTypeEvidenceTests(unittest.TestCase):
+    def test_requires_one_exact_result_for_requested_profile(self):
+        expected = {
+            "provider": "sqlite", "profile": "sqlite-3.51", "engine_version": "3.51.3",
+            "scenario": "MODEL-TYPE-001-S02", "status": "PASS",
+        }
+
+        def line(value):
+            return "GOEF_MODEL_TYPES_RESULT=" + json.dumps(value)
+
+        def verify(output):
+            return driver_run.verified_model_type_result(output, "sqlite", "sqlite-3.51", "3.51.3")
+
+        marker = line(expected)
+        self.assertEqual(verify(f"=== RUN   TestModelTypeRoundTrip\n{marker}\nPASS"), expected)
+        for output in (
+            "PASS", f"{marker}\n{marker}", "GOEF_MODEL_TYPES_RESULT={invalid",
+            line({**expected, "profile": "sqlite-3.54"}),
+            line({**expected, "engine_version": "3.54.1"}),
+            line({**expected, "status": "SKIP"}),
+            line({**expected, "unexpected": "private-data"}),
+        ):
+            with self.subTest(output=output), self.assertRaises(driver_run.LabError):
+                verify(output)
+
+
 class DriverEvidenceTests(unittest.TestCase):
     def result_lines(self, provider="sqlite", native_codes=("2067", "787"), **profile_facts):
         if not profile_facts:

@@ -128,6 +128,8 @@ NATIVE_CODES = {
 LOCK_TIMEOUT_CODES = {"postgres": "55P03", "sqlite": "5", "sqlserver": "1222", "mysql": "1205/HY000"}
 
 TEST_ARGS = ("-test.run=^TestDriverGherkin$", "-test.v", "-test.count=1", "-test.timeout=3m")
+MODEL_TYPES_TEST_ARGS = ("-test.run=^(TestDriverGherkin|TestModelTypeRoundTrip)$", *TEST_ARGS[1:])
+MODEL_TYPES_RESULT_PREFIX = "GOEF_MODEL_TYPES_RESULT="
 FACT_KEYS = {
     "autocommit", "busy_timeout_ms", "character_set_connection", "collation", "collation_connection",
     "compatibility_level", "compile_options_count", "compile_options_sha256", "database", "driver", "edition",
@@ -398,6 +400,26 @@ def verified_results(output, provider, profile_name=None):
     return [results[key] for key in sorted(results)]
 
 
+def verified_model_type_result(output, provider, profile, engine_version):
+    markers = [
+        line.removeprefix(MODEL_TYPES_RESULT_PREFIX)
+        for line in output.splitlines() if line.startswith(MODEL_TYPES_RESULT_PREFIX)
+    ]
+    if len(markers) != 1:
+        raise LabError("The model type test must emit exactly one result.")
+    try:
+        observed = json.loads(markers[0])
+    except ValueError:
+        raise LabError("The model type test emitted malformed evidence.") from None
+    expected = {
+        "provider": provider, "profile": profile, "engine_version": engine_version,
+        "scenario": "MODEL-TYPE-001-S02", "status": "PASS",
+    }
+    if observed != expected:
+        raise LabError("The model type test did not verify the selected profile and outcome.")
+    return expected
+
+
 def missing_eula(profile, accepted_eulas):
     settings = profile.sqlserver_settings
     if settings is not None and settings.eula_flag not in accepted_eulas:
@@ -422,7 +444,7 @@ def sqlserver_provisioning_reason(error):
     return "SQL Server provisioning failed."
 
 
-def run_provider(profile_name, binary, accepted_eulas):
+def run_provider(profile_name, binary, accepted_eulas, *, model_types=False):
     profile = PROFILES[profile_name]
     provider = profile.provider
     phase = "build"
@@ -441,9 +463,13 @@ def run_provider(profile_name, binary, accepted_eulas):
         with TemporaryDirectory(prefix="goef-driver-cell-") as directory:
             path = Path(directory)
             env = {"GOEF_DRIVERLAB_PROVIDER": provider, "GOEF_DRIVERLAB_PROFILE": profile_name}
+            test_args = TEST_ARGS
+            if model_types:
+                env["GOEF_DRIVERLAB_MODEL_TYPES"] = "1"
+                test_args = MODEL_TYPES_TEST_ARGS
             if provider == "sqlite":
                 phase = "driver execution"
-                output = command([str(binary), *TEST_ARGS], cwd=path, env=env, timeout=200)
+                output = command([str(binary), *test_args], cwd=path, env=env, timeout=200)
             else:
                 password = "GoEF9!" + secrets.token_hex(24) if provider == "sqlserver" else secrets.token_hex(32)
                 token = secrets.token_hex(32)
@@ -465,10 +491,13 @@ def run_provider(profile_name, binary, accepted_eulas):
                     if profile_name == "sqlserver-2017":
                         # The isolated 2017 image can generate a TLS certificate with a negative serial.
                         binary_env["GODEBUG"] = "x509negativeserial=1"
-                    output = container.exec([BINARY, *TEST_ARGS], env=binary_env, timeout=200)
+                    output = container.exec([BINARY, *test_args], env=binary_env, timeout=200)
         phase = "evidence"
         results = verified_results(output, provider, profile_name)
-        return {"provider": provider, "profile": profile_name, "status": "PASS", "scenarios": results}
+        report = {"provider": provider, "profile": profile_name, "status": "PASS", "scenarios": results}
+        if model_types:
+            report["model_types"] = verified_model_type_result(output, provider, profile_name, profile.version)
+        return report
     except Exception as error:
         blocked = isinstance(error, Blocked)
         report = {"provider": provider, "profile": profile_name, "status": "BLOCKED" if blocked else "FAIL"}
@@ -486,6 +515,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("providers", nargs="+", choices=(*PROVIDERS, "all"))
     parser.add_argument("--profile", choices=tuple(PROFILES))
+    parser.add_argument("--model-types", action="store_true", help="also run the model type round-trip scenario")
     parser.add_argument(SQLSERVER_EULA, action="store_true", help="accept the SQL Server 2022 Developer EULA")
     parser.add_argument(LEGACY_SQLSERVER_EULA, action="store_true", help="accept the selected SQL Server 2017 or 2019 Developer EULA")
     args = parser.parse_args(argv)
@@ -516,7 +546,7 @@ def main(argv=None):
             tasks = [
                 pool.submit(run_provider, name,
                             binaries.get("host" if provider == "sqlite" else "linux"),
-                            accepted_eulas)
+                            accepted_eulas, model_types=args.model_types)
                 for provider, name in selected.items()
             ]
             for task in tasks:

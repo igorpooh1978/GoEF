@@ -40,6 +40,8 @@ The executable [Gherkin feature](features/driver.feature) uses tagged scenario o
 
 A scenario passes only after its cleanup. Unbound steps, duplicate or missing examples, wrong engine versions and missing reports fail the gate.
 
+Add `-ModelTypes` to the local PowerShell command to run the scalar type binding round trip on every selected profile. The Go fixture builds the table from `model.BindTypes`, inspects the native column metadata and checks parameterized values and nulls. Both Python launchers accept `--model-types` when selecting profiles directly. [Type binding scenario](../../../specs/features/model/model-type-001.feature) · [Issue #3](https://github.com/igorpooh1978/GoEF/issues/3)
+
 The SQL Server 2022 profiles also check that `GENERATE_SERIES` returns the expected values at compatibility level 160 and is unavailable at 140 under the fixture's database settings.
 
 The [SQLite file scenarios](features/sqlite_files.feature) run both directions between SQLite 3.51.3, the W002 minimum, and the 3.54.1 reference. The peer opens the existing file, verifies that an invalid `STRICT` generated value returns native code `3091`, exercises rollback and commits an additive migration. The original runtime then reopens the same file and checks schema, rows and integrity. The suite covers `DELETE` and `WAL` journaling with a schema shared by both versions. The local matrix requires the exact minimum profile and the observed `3091` in each file result.

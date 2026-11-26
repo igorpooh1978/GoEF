@@ -33,11 +33,13 @@
       ],
       "featureIds": [
         "ERR-CONTRACT-001",
-        "MODEL-MAP-001"
+        "MODEL-MAP-001",
+        "MODEL-TYPE-001"
       ],
       "scenarioIds": [
         "ERR-CONTRACT-001-S01",
-        "MODEL-MAP-001-S03"
+        "MODEL-MAP-001-S03",
+        "MODEL-TYPE-001-S03"
       ],
       "docs": [
         "docs/architecture/ERROR_CONTRACT.md",

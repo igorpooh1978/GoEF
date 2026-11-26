@@ -10,9 +10,10 @@ import secrets
 from tempfile import TemporaryDirectory
 
 from driver_run import (
-    ACQUIRE_CANCELLATION_SCENARIO, CANCELLATION_SCENARIO, LOCK_TIMEOUT_SCENARIO, MODULE, PRE_DISPATCH_SCENARIO,
+    ACQUIRE_CANCELLATION_SCENARIO, CANCELLATION_SCENARIO, LOCK_TIMEOUT_SCENARIO, MODEL_TYPES_TEST_ARGS,
+    MODULE, PRE_DISPATCH_SCENARIO,
     RESULT_PREFIX, SCENARIOS, TEST_ARGS, verified_acquire_cancellation_facts, verified_cancellation_facts,
-    verified_lock_timeout_facts, verified_pre_dispatch_facts,
+    verified_lock_timeout_facts, verified_model_type_result, verified_pre_dispatch_facts,
 )
 from runtime import Blocked, LabError, command, inherited, safe_reason
 
@@ -211,12 +212,17 @@ def verified_driver_results(output, name, profile):
     return [results[scenario] for scenario in sorted(results)]
 
 
-def run_driver(tempdir, binary, name, profile):
+def run_driver(tempdir, binary, name, profile, model_types):
+    env = {"GOEF_DRIVERLAB_PROVIDER": "sqlite"}
+    test_args = TEST_ARGS
+    if model_types:
+        env.update(GOEF_DRIVERLAB_MODEL_TYPES="1", GOEF_DRIVERLAB_PROFILE=name)
+        test_args = MODEL_TYPES_TEST_ARGS
     output = command(
-        [str(binary), *TEST_ARGS], cwd=tempdir,
-        env={"GOEF_DRIVERLAB_PROVIDER": "sqlite"}, timeout=200,
+        [str(binary), *test_args], cwd=tempdir, env=env, timeout=200,
     )
-    return verified_driver_results(output, name, profile)
+    model_result = verified_model_type_result(output, "sqlite", name, profile.engine_version) if model_types else None
+    return verified_driver_results(output, name, profile), model_result
 
 
 def run_exchange_stage(directory, binary, profile, journal, stage, token):
@@ -239,7 +245,7 @@ def run_exchange_stage(directory, binary, profile, journal, stage, token):
     return profile.engine_version, native_code
 
 
-def run_lab(tempdir, report):
+def run_lab(tempdir, report, *, model_types=False):
     report["phase"] = "SQLite file feature discovery"
     examples = parse_file_feature(FILE_FEATURE.read_text(encoding="utf-8"))
     binaries = {}
@@ -247,7 +253,7 @@ def run_lab(tempdir, report):
         report["phase"] = f"build {name}"
         binaries[name], platform = build(tempdir, name, profile)
         report["phase"] = f"Gherkin {name}"
-        results = run_driver(tempdir, binaries[name], name, profile)
+        results, model_result = run_driver(tempdir, binaries[name], name, profile, model_types)
         report["profiles"][name] = {
             "engine_version": profile.engine_version,
             "source_id": profile.source_id,
@@ -257,6 +263,8 @@ def run_lab(tempdir, report):
             "facts": results[0]["facts"],
         }
         report["driver_scenarios"].extend(results)
+        if model_result is not None:
+            report.setdefault("model_types", []).append(model_result)
 
     for example in examples:
         scenario, journal = example.scenario, example.journal
@@ -282,14 +290,15 @@ def run_lab(tempdir, report):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.parse_args(argv)
+    parser.add_argument("--model-types", action="store_true", help="also run the model type round-trip scenario")
+    args = parser.parse_args(argv)
     report = {
         "status": "FAIL", "go_version": GO_VERSION, "minimum_profile": MINIMUM_PROFILE, "profiles": {},
         "driver_scenarios": [], "checks": [], "phase": "allocate temporary directory",
     }
     try:
         with TemporaryDirectory(prefix="goef-sqlite-compat-") as directory:
-            run_lab(Path(directory), report)
+            run_lab(Path(directory), report, model_types=args.model_types)
             report["phase"] = "cleanup"
     except Blocked as error:
         report.update(status="BLOCKED", reason=safe_reason(error))

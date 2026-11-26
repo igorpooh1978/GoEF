@@ -1,6 +1,6 @@
 # LINQ to Objects
 
-`objects.Where` and `objects.Select` compose over `iter.Seq`. A caller can filter orders with a Go predicate, project matches to order IDs and stop after one result. Building the pipeline consumes zero values. Requesting the first result calls the predicate once per inspected item and the selector once for the match. The consumer's stop signal travels back through both operators. The remaining obligations below describe planned behavior. [Examples](../user/LINQ_OBJECTS.md) · [Issue #4](https://github.com/igorpooh1978/GoEF/issues/4)
+`objects.Where` and `objects.Select` compose lazily over `iter.Seq`. A caller can filter orders, project matches to IDs and stop after one result. A consumer's stop signal travels back through both operators. A terminal `objects.Count` enumerates the whole sequence once, runs the upstream callbacks for the demanded items and counts every projected value. Its Go `int` result is checked for overflow. The remaining obligations below describe planned behavior. [Examples](../user/LINQ_OBJECTS.md) · [Issue #4](https://github.com/igorpooh1978/GoEF/issues/4)
 
 | Input | Proposed observation |
 | --- | --- |
