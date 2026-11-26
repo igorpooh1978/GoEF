@@ -14,3 +14,11 @@ The Windows checks use Go 1.27.4. The Linux/amd64 checks use the local Go 1.27.4
 The former Linux race gap for the architecture fixtures is resolved. The authority to run a CLI lab against engines establishes neither GoEF adapter semantics nor generated binding freshness. [Generated binding and release resolution follow-up #24](https://github.com/igorpooh1978/GoEF/issues/24) retains these gates beyond the scoped architecture review. The [W002 lab](../W002/LAB_SMOKE.md) records engine checks separately.
 
 The verified provider and external-fixture trees are `c335b07d4a32061204c22af28efdafb8d4ffb49d` and `1e8d080adfc4e4d6e70d116856b0e41a25c80867`. Compare them using `git rev-parse HEAD:provider HEAD:test/architecture/provider-spi`.
+
+## W002 binding validation coverage
+
+[Issue #13](https://github.com/igorpooh1978/GoEF/issues/13) · [Package tests](../../../provider/transport_test.go)
+
+At baseline `7a08d90b215d11904109b109c1381ba19c881f35`, the package tests covered 8 of 21 statements. The instrumented external fixture covered 17 of 21 statements through its fixture adapter. Package tests now check every concrete transport kind, nil binary as empty data, explicit nullable NULL, positional layout, count errors, invalid slot kinds, nil and wrapped values, and diagnostics that omit SQL, slot names and bound values.
+
+On Windows/amd64 with Go 1.27.4, `go test -mod=readonly -count=1 -shuffle=on -coverprofile=<profile> ./provider` covered 21 of 21 statements. `go vet -mod=readonly ./provider` exited 0. On Linux/amd64 under Ubuntu WSL with Go 1.27.4 and GCC 13.3.0, `CGO_ENABLED=1 go test -mod=readonly -race -count=1 -shuffle=on ./provider` exited 0. In `test/architecture/provider-spi`, `go test -mod=readonly -count=1 -shuffle=on -coverpkg=github.com/igorpooh1978/GoEF/provider ./...` separately exited 0 and retained 17 of 21 statements. The package suite exercises the driver-free contract. Actual engine adapter checks follow the [W002 conformance gates](../../development/CONFORMANCE_LAB.md).
