@@ -41,9 +41,13 @@ func TestCommitOutcome(t *testing.T) {
 	for _, tc := range []struct {
 		id            string
 		commitDurably bool
+		verify        verificationMode
 	}{
-		{"TX-OUTCOME-001-S03", true},
-		{"TX-OUTCOME-001-S04", false},
+		{"TX-OUTCOME-001-S01", true, verifyPrimary},
+		{"TX-OUTCOME-001-S02", true, verifyUnavailable},
+		{"TX-OUTCOME-001-S03", true, verifyNone},
+		{"TX-OUTCOME-001-S04", false, verifyNone},
+		{"TX-OUTCOME-001-S05", false, verifyPrimary},
 	} {
 		var version string
 		passed := t.Run(tc.id, func(t *testing.T) {
@@ -51,7 +55,7 @@ func TestCommitOutcome(t *testing.T) {
 			defer cancel()
 			s := commitOutcomeFixture{scenario{fixture: providers[provider](t), t: t, provider: provider, ctx: ctx}}
 			s.createTables()
-			s.exercise(tc.commitDurably)
+			s.exercise(tc.commitDurably, tc.verify)
 			version = s.facts[engine.version]
 			if version == "" {
 				t.Fatal("commit outcome fixture did not observe the engine version")
@@ -90,7 +94,22 @@ func (s commitOutcomeFixture) createTables() {
 		"DROP TABLE "+outcomeAggregateTable)
 }
 
-func (s commitOutcomeFixture) exercise(commitDurably bool) {
+type verificationMode uint8
+
+const (
+	verifyNone verificationMode = iota
+	verifyPrimary
+	verifyUnavailable
+)
+
+type aggregateSnapshot struct {
+	id          int
+	original    int
+	pending     int
+	needsInsert bool
+}
+
+func (s commitOutcomeFixture) exercise(commitDurably bool, verify verificationMode) {
 	s.t.Helper()
 	if s.connector == nil {
 		s.t.Fatal("commit outcome fixture requires the native driver connector")
@@ -121,7 +140,10 @@ func (s commitOutcomeFixture) exercise(commitDurably bool) {
 	}
 
 	const id, amount = 7, 31
-	callbacks, acceptedAmount := 0, -1
+	callbacks := 0
+	pending := aggregateSnapshot{id: -1, pending: amount, needsInsert: true}
+	tracked := pending
+	confirmed := aggregateSnapshot{id: id, original: amount, pending: amount}
 	receipt, err := tx.SaveChanges(s.ctx, transaction.SaveOptions{
 		Dialect: savepointDialects[s.provider], Savepoints: true,
 	}, func(w *transaction.SaveWriter) error {
@@ -133,9 +155,15 @@ func (s commitOutcomeFixture) exercise(commitDurably bool) {
 			s.bind(1)+", "+s.bind(2)+")", id, amount); err != nil {
 			return err
 		}
-		return transaction.StageValue(w, &acceptedAmount, amount)
+		var fromDB aggregateSnapshot
+		if err := w.Scan("SELECT id, amount FROM "+outcomeAggregateTable+" WHERE id = "+s.bind(1),
+			[]any{id}, &fromDB.id, &fromDB.original); err != nil {
+			return err
+		}
+		fromDB.pending = tracked.pending
+		return transaction.StageValue(w, &tracked, fromDB)
 	})
-	if err != nil || receipt == nil || acceptedAmount != -1 {
+	if err != nil || receipt == nil || tracked != pending {
 		s.t.Fatal("the batch did not write two effects and stage its value")
 	}
 
@@ -147,11 +175,18 @@ func (s commitOutcomeFixture) exercise(commitDurably bool) {
 		errors.Is(commitErr, io.ErrUnexpectedEOF) || tx.State() != transaction.StateOutcomeUnknown {
 		s.t.Fatal("the hidden delivery result did not produce a safe typed unknown outcome")
 	}
-	if !errors.Is(receipt.Accept(), goeferr.ErrInvalidState) || acceptedAmount != -1 {
+	if !errors.Is(receipt.Accept(), goeferr.ErrInvalidState) || tracked != pending {
 		s.t.Fatal("the unknown outcome permitted acceptance of a provisional value")
 	}
 	if !errors.Is(tx.Commit(), goeferr.ErrInvalidState) || !errors.Is(tx.Rollback(), goeferr.ErrInvalidState) {
 		s.t.Fatal("the terminal handle allowed another completion attempt")
+	}
+
+	if fault.opens.Load() != 1 || fault.closes.Load() != 1 || worker.Stats().InUse != 0 || worker.Stats().OpenConnections != 0 {
+		s.t.Fatal("the worker did not discard and release the affected physical connection")
+	}
+	if verify != verifyNone {
+		s.reconcile(tx, fault, receipt, &tracked, pending, confirmed, verify)
 	}
 
 	var wantCommits, wantRollbacks int32 = 1, 0
@@ -162,15 +197,124 @@ func (s commitOutcomeFixture) exercise(commitDurably bool) {
 		fault.rollbacks.Load() != wantRollbacks {
 		s.t.Fatal("the injected phase did not complete exactly once or the batch replayed")
 	}
-	if fault.opens.Load() != 1 || fault.closes.Load() != 1 || worker.Stats().InUse != 0 || worker.Stats().OpenConnections != 0 {
-		s.t.Fatal("the worker did not discard and release the affected physical connection")
-	}
 	var check int
 	if err := worker.QueryRowContext(s.ctx, "SELECT 1").Scan(&check); err != nil || check != 1 ||
 		fault.opens.Load() != 2 || worker.Stats().InUse != 0 {
 		s.t.Fatal("the worker pool did not recover with a fresh physical connection")
 	}
 	s.observe(commitDurably, id, amount)
+}
+
+func (s commitOutcomeFixture) reconcile(
+	tx *transaction.Tx, fault *commitFaultConnector, receipt *transaction.SavedChanges,
+	tracked *aggregateSnapshot, pending, confirmed aggregateSnapshot, verify verificationMode,
+) {
+	s.t.Helper()
+
+	// This pool has never seen the failed transaction, so its first checkout
+	// reads from a new connection to the same isolated primary.
+	primary := sql.OpenDB(s.connector)
+	if verify == verifyUnavailable {
+		if err := primary.Close(); err != nil {
+			s.t.Fatal("could not make the authoritative verifier unavailable")
+		}
+	} else {
+		defer s.closePool(primary)
+	}
+	calls := 0
+	readFailed := false
+	verifyOutcome := func(finalRollback bool) transaction.CommitVerifier {
+		return func(ctx context.Context) (transaction.CommitVerification, error) {
+			calls++
+			if tx.State() != transaction.StateOutcomeUnknown || *tracked != pending {
+				s.t.Error("verification started after provisional state was accepted")
+			}
+			conn, err := primary.Conn(ctx)
+			if err != nil {
+				readFailed = true
+				return transaction.CommitUnverified, err
+			}
+			defer func() {
+				if err := conn.Close(); err != nil {
+					s.t.Error("could not release the authoritative verifier connection")
+				}
+			}()
+			if s.provider != "sqlite" {
+				s.verifyMarker(ctx, conn.QueryContext)
+			}
+			return s.verifyDurable(ctx, conn, confirmed, finalRollback)
+		}
+	}
+	finalRollback := fault.rollbacks.Load() == 1
+	if finalRollback {
+		err := tx.ReconcileCommit(s.ctx, verifyOutcome(false))
+		if !errors.Is(err, goeferr.ErrCommitOutcomeUnknown) || tx.State() != transaction.StateOutcomeUnknown ||
+			!errors.Is(receipt.Accept(), goeferr.ErrInvalidState) || *tracked != pending || calls != 1 {
+			s.t.Fatal("a negative primary read without finality resolved the transaction")
+		}
+		// The fault fixture observed a successful native rollback before
+		// commit. A production caller needs its own finality proof.
+		primary.SetMaxIdleConns(0)
+		calls = 0
+	}
+	err := tx.ReconcileCommit(s.ctx, verifyOutcome(finalRollback))
+	if calls != 1 || *tracked != pending {
+		s.t.Fatal("reconciliation missed its verifier or published staged state")
+	}
+
+	switch {
+	case verify == verifyUnavailable:
+		if !readFailed || !errors.Is(err, goeferr.ErrCommitOutcomeUnknown) ||
+			tx.State() != transaction.StateOutcomeUnknown {
+			s.t.Fatal("an unavailable authoritative connection changed the unknown result")
+		}
+	case fault.commitDurably:
+		if err != nil || tx.State() != transaction.StateCommitted {
+			s.t.Fatal("the matching durable writes did not confirm commit")
+		}
+		if err := receipt.Accept(); err != nil || *tracked != confirmed {
+			s.t.Fatal("explicit acceptance did not publish the verified snapshot")
+		}
+		if err := receipt.Accept(); !errors.Is(err, goeferr.ErrInvalidState) || *tracked != confirmed {
+			s.t.Fatal("a settled receipt accepted the same changes twice")
+		}
+		return
+	default:
+		if err != nil || tx.State() != transaction.StateRolledBack {
+			s.t.Fatal("known-native rollback and absent durable writes did not confirm rollback")
+		}
+	}
+	if err := receipt.Accept(); !errors.Is(err, goeferr.ErrInvalidState) || *tracked != pending {
+		s.t.Fatal("uncommitted writes changed the original snapshot or pending edits")
+	}
+}
+
+func (s commitOutcomeFixture) verifyDurable(ctx context.Context, conn *sql.Conn, expected aggregateSnapshot, finalRollback bool) (transaction.CommitVerification, error) {
+	var foundMarker, foundAggregate int
+	marker := "SELECT COUNT(*) FROM " + outcomeMarkerTable + " WHERE id = " + s.bind(1)
+	if err := conn.QueryRowContext(ctx, marker, expected.id).Scan(&foundMarker); err != nil {
+		return transaction.CommitUnverified, err
+	}
+	aggregate := "SELECT COUNT(*) FROM " + outcomeAggregateTable + " WHERE id = " + s.bind(1) + " AND amount = " + s.bind(2)
+	if err := conn.QueryRowContext(ctx, aggregate, expected.id, expected.original).Scan(&foundAggregate); err != nil {
+		return transaction.CommitUnverified, err
+	}
+	if foundMarker == 1 && foundAggregate == 1 {
+		return transaction.CommitConfirmed, nil
+	}
+	if finalRollback && foundMarker == 0 {
+		// Do not mistake a conflicting payload under the same key for an
+		// absent operation.
+		var matchingID int
+		query := "SELECT COUNT(*) FROM " + outcomeAggregateTable + " WHERE id = " + s.bind(1)
+		if err := conn.QueryRowContext(ctx, query, expected.id).Scan(&matchingID); err != nil {
+			return transaction.CommitUnverified, err
+		}
+		if matchingID == 0 {
+			return transaction.RollbackConfirmed, nil
+		}
+	}
+	return transaction.CommitUnverified, nil
 }
 
 func (s commitOutcomeFixture) closePool(db *sql.DB) {

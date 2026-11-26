@@ -141,7 +141,7 @@ func (tx *Tx) withCommand(ctx context.Context, run func(context.Context, *ownedT
 	if ctx == nil {
 		return goeferr.NewInvalidState()
 	}
-	owned, err := tx.lockActive()
+	owned, err := tx.lockState(StateActive)
 	if err != nil {
 		return err
 	}
@@ -172,10 +172,11 @@ func commandError(ctx, command context.Context, err error) error {
 }
 
 // Commit commits and releases the lease. A native commit error leaves the
-// outcome unknown and discards the connection. Reconcile before considering
-// retry. If lifetime cancellation is already known, Commit rolls back first.
+// outcome unknown and discards the connection. Call [Tx.ReconcileCommit]
+// before considering retry. If lifetime cancellation is already known,
+// Commit rolls back first.
 func (tx *Tx) Commit() error {
-	owned, err := tx.lockActive()
+	owned, err := tx.lockState(StateActive)
 	if err != nil {
 		return err
 	}
@@ -195,7 +196,7 @@ func (tx *Tx) Commit() error {
 // Rollback aborts the transaction and releases the lease. A failed rollback
 // discards the connection. Repeated completion returns ErrInvalidState.
 func (tx *Tx) Rollback() error {
-	owned, err := tx.lockActive()
+	owned, err := tx.lockState(StateActive)
 	if err != nil {
 		return err
 	}
@@ -218,15 +219,15 @@ func (tx *Tx) Close() error {
 	return owned.rollback(false)
 }
 
-func (tx *Tx) lockActive() (*ownedTx, error) {
-	if tx.State() != StateActive {
+func (tx *Tx) lockState(expected State) (*ownedTx, error) {
+	if tx.State() != expected {
 		return nil, goeferr.NewInvalidState()
 	}
 	owned := tx.owned
 	if !owned.mu.TryLock() {
 		return nil, goeferr.NewContextBusy()
 	}
-	if tx.State() != StateActive {
+	if tx.State() != expected {
 		owned.mu.Unlock()
 		return nil, goeferr.NewInvalidState()
 	}

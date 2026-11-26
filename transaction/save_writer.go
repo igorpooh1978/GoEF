@@ -137,7 +137,9 @@ func (r saveWriterResult) read(read func(sql.Result) (int64, error)) (int64, err
 // SavedChanges holds assignments staged by a successful SaveChanges. They
 // remain provisional until the caller explicitly accepts a confirmed commit
 // that includes those writes. Discard the receipt after rollback, or keep it
-// unapplied while the outcome is unknown. Copies share acceptance.
+// unapplied while the outcome is unknown. After [Tx.ReconcileCommit]
+// confirms a commit, the same rules apply to an owned receipt. Copies share
+// acceptance.
 type SavedChanges struct {
 	shared *savedChangesState
 }

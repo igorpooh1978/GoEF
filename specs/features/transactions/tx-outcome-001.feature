@@ -62,3 +62,20 @@ Feature: Reconcile lost commit acknowledgements
       | sqlite    |
       | sqlserver |
       | mysql     |
+
+  @TX-OUTCOME-001-S05
+  Scenario Outline: An authoritative negative after final rollback retains pending edits
+    Given a GoEF-owned transaction on <provider> has staged changes and its native rollback completed before commit
+    When the lost-response fixture reports an unknown commit outcome
+    And the verifier finds neither the marker nor the aggregate without knowing whether the prior unit is final
+    Then the outcome remains unknown and the receipt remains unaccepted
+    When a fresh primary read again finds neither write and the verifier has proof of the prior native rollback
+    Then reconciliation confirms rollback and the receipt cannot publish the staged values
+    And the original snapshot and pending edits stay intact without replay
+
+    Examples:
+      | provider  |
+      | postgres  |
+      | sqlite    |
+      | sqlserver |
+      | mysql     |
