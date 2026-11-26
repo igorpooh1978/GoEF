@@ -18,3 +18,5 @@ Tracking [#6](https://github.com/igorpooh1978/GoEF/issues/6). W000 research cell
 Record `SERVERPROPERTY('ProductVersion')`, `ProductUpdateLevel`, edition, database compatibility, collation, isolation settings, runner architecture and driver version. Exercise savepoint rollback, failure with an uncommittable transaction, timeout/cancel cleanup, migration failure after schema changes, and shared scenarios `TX-ISOLATION-001-S01` and `TX-RETRY-001-S01`.
 
 Microsoft Learn MCP returned the SQL Server 2022 build table and the SQL Server 16.x savepoint reference. The smoke confirms the released build identity and applicable T-SQL documentation. [Probe evidence](../evidence/W000/MCP_REPORT.md#sql-server)
+
+The W002 local driver suite passed commit and rollback and the uniqueness and foreign-key cases on Developer builds 14.0.3570.2 at compatibility level 140, 15.0.4510.2 at level 150 and 16.0.4325.4 at level 160. Each used go-mssqldb v1.11.0. The remaining provider and application cases above require their own evidence. [Full local run](../evidence/W002/LEGACY_COMPATIBILITY.md#complete-run-on-2026-11-26)

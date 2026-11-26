@@ -49,4 +49,17 @@ On 2026-11-25 the command below passed the repository validator, seven bootstrap
 pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -AcceptSqlServerEula
 ```
 
-The full [local command](../../../test/conformance/driverlab/README.md) also takes `-AcceptLegacySqlServerEula` for an authorized run of SQL Server 2017 and 2019. The older SQL Server runner has startup and guard tests, with real-engine characterization pending for the two legacy profiles.
+### Complete run on 2026-11-26
+
+The authorized run below tested `77f432f03695bdb247289ba25743d3e274a4c81d` on the Windows workstation with Go 1.27.4 and the local Docker Desktop 29.4.0 Linux/amd64 daemon. It exited 0. All ten engine profiles passed 30 distinct driver cases and the four SQLite file cases passed. The driver report contains 33 passing rows because the SQLite file suite also reruns the three current SQLite driver cases. The repository validator, seven bootstrap tests, 32 Python lab tests and Go build, vet, test and module verification passed. No lab-owned containers remained after the run.
+
+```powershell
+pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -AcceptSqlServerEula -AcceptLegacySqlServerEula
+```
+
+| SQL Server Developer profile | Observed build | Database compatibility level | Commit and rollback | Unique code | Foreign-key code |
+| --- | --- | --- | --- | --- | --- |
+| 2017 | 14.0.3570.2, CU31 | 140 | PASS | 2627 | 547 |
+| 2019 | 15.0.4510.2, CU32 | 150 | PASS | 2627 | 547 |
+
+Both cells used go-mssqldb v1.11.0 and observed TCP, `READ COMMITTED`, `XACT_ABORT ON` and `Latin1_General_100_BIN2`. The driver module tree, lab tree and PowerShell blob listed above are identical to those used for this run. Application adapter conformance and SQL Server 2022 with compatibility level 140 retain separate gates.
