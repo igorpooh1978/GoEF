@@ -1,9 +1,62 @@
-"""Check executable binding and evidence for the SQLite file feature."""
+"""Check SQLite driver evidence and the executable file feature binding."""
 
+import json
 import unittest
 from unittest.mock import patch
 
 import sqlite_compat as lab
+
+
+class SQLiteDriverEvidenceTests(unittest.TestCase):
+    def result_lines(self, profile):
+        common = {
+            "engine_version": profile.engine_version, "source_id": profile.source_id,
+            "journal_mode": "wal", "foreign_keys": "1", "busy_timeout_ms": "1000",
+            "compile_options_count": "55", "compile_options_sha256": "a" * 64,
+        }
+        outcomes = (
+            {}, {"native_code": "2067"}, {"native_code": "787"},
+            {"cancel_cause": "context.Canceled", "pool_in_use_after": "0"},
+        )
+        return [
+            {
+                "provider": "sqlite", "scenario": f"LAB-DRIVER-001-S0{index}", "status": "PASS",
+                "facts": {**common, **outcome, "ignored_secret": "fixture"},
+            }
+            for index, outcome in enumerate(outcomes, 1)
+        ]
+
+    def output(self, rows):
+        return "\n".join(lab.RESULT_PREFIX + json.dumps(row) for row in rows)
+
+    def test_cancellation_is_required_on_both_linked_runtimes(self):
+        for name, profile in lab.PROFILES.items():
+            with self.subTest(profile=name):
+                rows = self.result_lines(profile)
+                results = lab.verified_driver_results(self.output(rows), name, profile)
+                self.assertEqual(len(results), 4)
+                self.assertEqual(results[3]["profile"], name)
+                facts = results[3]["facts"]
+                self.assertEqual(facts["cancel_cause"], "context.Canceled")
+                self.assertEqual(facts["pool_in_use_after"], "0")
+                self.assertNotIn("native_code", facts)
+                self.assertNotIn("ignored_secret", facts)
+                for altered in (rows[:-1], [*rows, rows[3]]):
+                    with self.assertRaises(lab.LabError):
+                        lab.verified_driver_results(self.output(altered), name, profile)
+
+    def test_cancellation_rejects_invalid_facts(self):
+        name = lab.MINIMUM_PROFILE
+        profile = lab.PROFILES[name]
+        for field, value in (
+            ("cancel_cause", "context.DeadlineExceeded"), ("pool_in_use_after", "1"),
+            ("pool_in_use_after", 0), ("native_code", "787"),
+        ):
+            with self.subTest(field=field, value=value):
+                rows = self.result_lines(profile)
+                rows[3]["facts"][field] = value
+                with self.assertRaisesRegex(lab.LabError, "cancellation"):
+                    lab.verified_driver_results(self.output(rows), name, profile)
 
 
 class SQLiteFileFeatureTests(unittest.TestCase):

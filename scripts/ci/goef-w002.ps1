@@ -25,6 +25,15 @@ function Invoke-Check {
     Write-Host "PASS $command"
 }
 
+function Test-CancellationEvidence {
+    param($Facts)
+
+    return ($Facts -is [System.Collections.IDictionary] -and
+        $Facts['cancel_cause'] -is [string] -and $Facts['cancel_cause'] -ceq 'context.Canceled' -and
+        $Facts['pool_in_use_after'] -is [string] -and $Facts['pool_in_use_after'] -ceq '0' -and
+        -not $Facts.Contains('native_code'))
+}
+
 function Confirm-DriverResults {
     param(
         [string[]] $Lines,
@@ -33,7 +42,7 @@ function Confirm-DriverResults {
         [System.Collections.IDictionary] $ExpectedFacts = @{}
     )
 
-    $scenarioIds = 'LAB-DRIVER-001-S01', 'LAB-DRIVER-001-S02', 'LAB-DRIVER-001-S03'
+    $scenarioIds = 'LAB-DRIVER-001-S01', 'LAB-DRIVER-001-S02', 'LAB-DRIVER-001-S03', 'LAB-DRIVER-001-S04'
     $seenProviders = [System.Collections.Generic.HashSet[string]]::new()
     $failures = [System.Collections.Generic.List[string]]::new()
     if ($ExitCode -ne 0) {
@@ -98,8 +107,11 @@ function Confirm-DriverResults {
                 $failures.Add("Driver scenario $scenario for $provider did not pass.")
                 continue
             }
+            $facts = $result['facts']
+            if ($scenario -ceq 'LAB-DRIVER-001-S04' -and -not (Test-CancellationEvidence $facts)) {
+                $failures.Add("Driver scenario $scenario for $expectedProfile did not report the expected cancellation cause and released connection pool.")
+            }
             if ($ExpectedFacts.Contains($provider)) {
-                $facts = $result['facts']
                 foreach ($expected in $ExpectedFacts[$provider].GetEnumerator()) {
                     if ($facts -isnot [System.Collections.IDictionary] -or
                         $facts[$expected.Key] -isnot [string] -or $facts[$expected.Key] -cne $expected.Value) {
@@ -199,10 +211,11 @@ function Invoke-SqliteCompatibility {
         'LAB-DRIVER-001-S01' = $null
         'LAB-DRIVER-001-S02' = '2067'
         'LAB-DRIVER-001-S03' = '787'
+        'LAB-DRIVER-001-S04' = $null
     }
     $driverScenarios = $report['driver_scenarios']
     if ($driverScenarios -isnot [array] -or $driverScenarios.Count -ne ($profiles.Count * $nativeCodes.Count)) {
-        throw 'SQLite compatibility must report three driver scenarios for each linked runtime.'
+        throw 'SQLite compatibility must report four driver scenarios for each linked runtime.'
     }
     $seenDriverScenarios = [System.Collections.Generic.HashSet[string]]::new()
     foreach ($result in $driverScenarios) {
@@ -220,6 +233,9 @@ function Invoke-SqliteCompatibility {
         }
         $facts = $result['facts']
         $nativeCode = $nativeCodes[$scenario]
+        if ($scenario -ceq 'LAB-DRIVER-001-S04' -and -not (Test-CancellationEvidence $facts)) {
+            throw "SQLite compatibility did not report the expected cancellation cause and released connection pool for $profileName/$scenario."
+        }
         if ($facts -isnot [System.Collections.IDictionary] -or
             $facts['engine_version'] -isnot [string] -or $facts['engine_version'] -cne $profiles[$profileName].engine_version -or
             $facts['source_id'] -isnot [string] -or $facts['source_id'] -cne $profiles[$profileName].source_id -or

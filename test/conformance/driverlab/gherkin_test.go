@@ -50,6 +50,12 @@ var bindings = map[string][]step{
 		{"Then the driver reports the native foreign key code", (*scenario).checkForeignKeyCode},
 		{"And the observer reads only the original parent and child", (*scenario).checkFamily},
 	},
+	"LAB-DRIVER-001-S04": {
+		{"Given a single-connection provider SPI fixture on <provider>", (*scenario).setupSPICancel},
+		{"When the reader reads the first row and the caller cancels", (*scenario).cancelSPIReader},
+		{"Then the reader reports caller cancellation and releases its connection", (*scenario).checkSPICancellation},
+		{"And a fresh reader reads both rows and releases its connection", (*scenario).checkSPIRecovery},
+	},
 }
 
 type example struct {
@@ -127,8 +133,8 @@ func tableCell(line string) string {
 
 func TestDriverFeature(t *testing.T) {
 	examples, err := parseDriverFeature(driverFeature)
-	if err != nil || len(examples) != 12 {
-		t.Fatalf("expected twelve bound examples, got %d: %v", len(examples), err)
+	if err != nil || len(examples) != 16 {
+		t.Fatalf("expected sixteen bound examples, got %d: %v", len(examples), err)
 	}
 	for _, test := range []struct{ name, before, after string }{
 		{"unknown step", "When the writer commits", "When the reader commits"},
@@ -141,6 +147,7 @@ func TestDriverFeature(t *testing.T) {
 		{"unclosed row", "| mysql     |", "| mysql"},
 		{"duplicate scenario", "@LAB-DRIVER-001-S03", "@LAB-DRIVER-001-S02"},
 		{"unknown scenario", "@LAB-DRIVER-001-S03", "@LAB-DRIVER-001-S99"},
+		{"missing cancellation assertion", "Then the reader reports caller cancellation and releases its connection", ""},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			source := strings.Replace(driverFeature, test.before, test.after, 1)
@@ -149,7 +156,7 @@ func TestDriverFeature(t *testing.T) {
 			}
 		})
 	}
-	withoutLast, _, _ := strings.Cut(driverFeature, "@LAB-DRIVER-001-S03")
+	withoutLast, _, _ := strings.Cut(driverFeature, "@LAB-DRIVER-001-S04")
 	if _, err := parseDriverFeature(withoutLast); err == nil {
 		t.Fatal("missing scenario passed discovery")
 	}

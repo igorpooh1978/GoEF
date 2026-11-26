@@ -9,7 +9,9 @@ import re
 import secrets
 from tempfile import TemporaryDirectory
 
-from driver_run import MODULE, RESULT_PREFIX, SCENARIOS, TEST_ARGS
+from driver_run import (
+    CANCELLATION_SCENARIO, MODULE, RESULT_PREFIX, SCENARIOS, TEST_ARGS, verified_cancellation_facts,
+)
 from runtime import Blocked, LabError, command, inherited, safe_reason
 
 
@@ -178,7 +180,10 @@ def verified_driver_results(output, name, profile):
         if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
             raise LabError("The SQLite driver did not report a valid compile-option digest.")
         native = NATIVE_CODES.get(scenario)
-        if (native is None and "native_code" in facts) or (native is not None and facts.get("native_code") != native):
+        cancellation = {}
+        if scenario == CANCELLATION_SCENARIO:
+            cancellation = verified_cancellation_facts(facts)
+        elif (native is None and "native_code" in facts) or (native is not None and facts.get("native_code") != native):
             raise LabError("The SQLite driver did not report the expected native constraint outcome.")
         results[scenario] = {
             "profile": name,
@@ -190,10 +195,11 @@ def verified_driver_results(output, name, profile):
                 "compile_options_count": count,
                 "compile_options_sha256": digest,
                 **({"native_code": native} if native is not None else {}),
+                **cancellation,
             },
         }
     if set(results) != SCENARIOS:
-        raise LabError("The SQLite driver did not report all three required scenarios.")
+        raise LabError("The SQLite driver did not report all four required scenarios.")
     return [results[scenario] for scenario in sorted(results)]
 
 

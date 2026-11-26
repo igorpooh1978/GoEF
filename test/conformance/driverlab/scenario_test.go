@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/igorpooh1978/GoEF/provider"
 )
 
 type fixture struct {
@@ -25,6 +27,8 @@ type scenario struct {
 	ctx              context.Context
 	writer, observer *sql.Conn
 	writeErr         error
+	readBackend      provider.Backend
+	canceledReader   *spiScenarioReader
 }
 
 func (s *scenario) setup() {
@@ -37,7 +41,7 @@ func (s *scenario) setup() {
 	s.writer = s.lease()
 	s.observer = s.lease()
 	if s.provider != "sqlite" {
-		s.verifyMarker()
+		s.verifyMarker(s.ctx, s.writer.QueryContext)
 	}
 	s.createTable("CREATE TABLE goef_driver_parent ("+
 		"id INTEGER NOT NULL PRIMARY KEY, code VARCHAR(40) NOT NULL, "+
@@ -62,7 +66,7 @@ func (s *scenario) lease() *sql.Conn {
 	return conn
 }
 
-func (s *scenario) verifyMarker() {
+func (s *scenario) verifyMarker(ctx context.Context, queryContext func(context.Context, string, ...any) (*sql.Rows, error)) {
 	s.t.Helper()
 	token := os.Getenv("GOEF_DRIVERLAB_TOKEN")
 	if len(token) != 64 || strings.Trim(token, "0123456789abcdef") != "" {
@@ -74,7 +78,7 @@ func (s *scenario) verifyMarker() {
 	} else if s.provider == "sqlserver" {
 		query = "SELECT token FROM dbo.goef_driver_marker"
 	}
-	rows, err := s.writer.QueryContext(s.ctx, query)
+	rows, err := queryContext(ctx, query)
 	if err != nil {
 		s.t.Fatal("could not read target marker")
 	}

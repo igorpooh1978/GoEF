@@ -4,6 +4,7 @@ go 1.27.4
 
 require (
 	github.com/go-sql-driver/mysql v1.10.0
+	github.com/igorpooh1978/GoEF v0.0.0
 	github.com/jackc/pgx/v5 v5.13.0
 	github.com/microsoft/go-mssqldb v1.11.0
 	modernc.org/sqlite v1.47.0
@@ -30,3 +31,5 @@ require (
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
 )
+
+replace github.com/igorpooh1978/GoEF => ../../..

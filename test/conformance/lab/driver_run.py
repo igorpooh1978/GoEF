@@ -19,7 +19,9 @@ from runtime import Blocked, CommandError, Lab, LabError, command, inherited, sa
 
 
 PROVIDERS = ("postgres", "sqlite", "sqlserver", "mysql")
-SCENARIOS = {f"LAB-DRIVER-001-S{i:02d}" for i in range(1, 4)}
+SCENARIOS = {f"LAB-DRIVER-001-S{i:02d}" for i in range(1, 5)}
+CANCELLATION_SCENARIO = "LAB-DRIVER-001-S04"
+CANCELLATION_FACTS = {"cancel_cause": "context.Canceled", "pool_in_use_after": "0"}
 MODULE = Path(__file__).resolve().parents[1] / "driverlab"
 BINARY = "/tmp/goef-driverlab"
 RESULT_PREFIX = "GOEF_DRIVERLAB_RESULT="
@@ -267,6 +269,12 @@ def build_binary(tempdir, target):
     return binary
 
 
+def verified_cancellation_facts(facts):
+    if "native_code" in facts or any(facts.get(key) != value for key, value in CANCELLATION_FACTS.items()):
+        raise LabError("The scenario did not report the expected cancellation cause and released connection pool.")
+    return {key: facts[key] for key in CANCELLATION_FACTS}
+
+
 def verified_results(output, provider, profile_name=None):
     profile = PROFILES[profile_name or DEFAULT_PROFILES[provider]]
     results = {}
@@ -299,7 +307,10 @@ def verified_results(output, provider, profile_name=None):
                 raise LabError("The scenario did not report the expected SQL Server GENERATE_SERIES availability.")
             if expected_series == "unavailable" and facts.get("generate_series_native_code") != "208":
                 raise LabError("The scenario did not report SQL Server native code 208 for GENERATE_SERIES.")
-        if scenario != "LAB-DRIVER-001-S01":
+        cancellation = {}
+        if scenario == CANCELLATION_SCENARIO:
+            cancellation = verified_cancellation_facts(facts)
+        elif scenario != "LAB-DRIVER-001-S01":
             expected = NATIVE_CODES[provider][0 if scenario == "LAB-DRIVER-001-S02" else 1]
             if facts.get("native_code") != expected:
                 raise LabError("The scenario did not report the expected native constraint code.")
@@ -308,6 +319,7 @@ def verified_results(output, provider, profile_name=None):
             if key in FACT_KEYS and isinstance(value, str) and len(value) <= 256
             and all(c.isprintable() for c in value)
         }
+        facts.update(cancellation)
         results[scenario] = {"provider": provider, "scenario": scenario, "status": "PASS", "facts": facts}
     if set(results) != SCENARIOS:
         raise LabError("The driver test did not report every required scenario.")

@@ -1,5 +1,5 @@
 @LAB-DRIVER-001
-Feature: Observe transaction outcomes and constraint errors through native Go drivers
+Feature: Observe transaction outcomes, constraints and reader cancellation with Go drivers
 
   @LAB-DRIVER-001-S01
   Scenario Outline: An independent connection sees the committed row and the rollback preserves it
@@ -38,6 +38,20 @@ Feature: Observe transaction outcomes and constraint errors through native Go dr
     When the writer inserts another child referencing a missing parent
     Then the driver reports the native foreign key code
     And the observer reads only the original parent and child
+
+    Examples:
+      | provider  |
+      | postgres  |
+      | sqlite    |
+      | sqlserver |
+      | mysql     |
+
+  @LAB-DRIVER-001-S04
+  Scenario Outline: Cancel a provider SPI reader after the first row
+    Given a single-connection provider SPI fixture on <provider>
+    When the reader reads the first row and the caller cancels
+    Then the reader reports caller cancellation and releases its connection
+    And a fresh reader reads both rows and releases its connection
 
     Examples:
       | provider  |
