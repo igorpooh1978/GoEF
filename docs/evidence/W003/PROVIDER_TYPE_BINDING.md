@@ -26,3 +26,28 @@ The final Windows run of `go test -mod=readonly -count=1 -shuffle=on -cover ./mo
 ## Engine verification
 
 S02 uses the generated type declarations in disposable tables on the local four-engine lab and compares the catalog and parameterized write/read results with the Go fixture. The round trip covers the tested input domain. Custom codecs, broader data types, schema generation and indexability retain their own acceptance checks. Exact decimal remains separately specified in S01.
+
+The initial SQL Server 2022 fixture failed to read its catalog under the pinned case-sensitive collation. The fixture uses the catalog's uppercase names for that dialect. It also widens signed Go `int8` to `int16` when binding a parameter through go-mssqldb v1.11.0. That driver encodes a direct `int8` as unsigned `tinyint`. Using the `smallint` parameter preserves the negative boundary without changing the mapped storage type. [Parameter encoding](https://github.com/microsoft/go-mssqldb/blob/v1.11.0/mssql.go) · [TDS declaration names](https://github.com/microsoft/go-mssqldb/blob/v1.11.0/types.go)
+
+The PostgreSQL 18.7 `varchar` declaration checks its type modifier against `MaxAttrSize`, which is `10 * 1024 * 1024`. [Declaration check](https://github.com/postgres/postgres/blob/REL_18_7/src/backend/utils/adt/varchar.c#L28-L62) · [Size definition](https://github.com/postgres/postgres/blob/REL_18_7/src/include/access/htup_details.h#L734-L742)
+
+## Integrated verification
+
+Revision `7796de91e1ddb573a589078916d831eb05605312` combines the provider binding, the database fixture and `Where` → `Select` → `Count`. The Windows/amd64 workstation used Go 1.27.4 on 2026-11-26. Independent reviewers matched the implementation and fixture trees to the reviewed lanes and checked the scope and traceability.
+
+- `go test -mod=readonly -shuffle=on -count=1 -coverprofile=<profile> ./goeferr ./model ./linq/objects` exited 0. The tested packages covered 319 of 324 statements. Coverage was 12 of 12 for `goeferr`, 292 of 296 for `model` and 15 of 16 for `linq/objects`.
+- The Windows/386 `go test -mod=readonly -count=1 -shuffle=on -cover -v ./linq/objects` run with `GOARCH=386` and `CGO_ENABLED=0` exited 0 with 16 of 16 statements covered. It exercised actual `Count` overflow and source cleanup. [Count evidence](../W008/OBJECTS_COUNT.md)
+- All five complete programs in the Code First and LINQ Objects guides ran on the workstation with `go run -mod=readonly` and produced their documented output.
+
+The initial `pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -ModelTypes -AcceptSqlServerEula -AcceptLegacySqlServerEula` passed the bootstrap validator, 61 Python lab tests, Go build, vet and module checks. It exited 1 at the SQL Server fixtures before the catalog correction. The final executable revision `3ffc24a80a6208455065c0afdec141ed4049ceb0` changed only the SQL Server branch of the Go fixture and its redacted catalog error. The model and Objects trees match the earlier reviewed revision.
+
+The workstation reran the complete engine matrix on `3ffc24a80a6208455065c0afdec141ed4049ceb0` using `driver_run.build_binary` once per target, `driver_run.run_provider(..., model_types=True)` on every pinned profile and `sqlite_compat.main(["--model-types"])` for the two linked SQLite runtimes and file cases. The rerun exited 0. There were 12 distinct S02 profile results, 84 distinct driver scenario results and four bidirectional SQLite file results. The current SQLite profile ran in both suites, producing 13 S02 rows and 91 driver rows in total. The catalog matched the bound types and all three synthetic rows preserved their signed boundaries, booleans, nullable text and bytes. [Local command and fixture](../../../test/conformance/driverlab/README.md) · [Go test](../../../test/conformance/driverlab/model_types_test.go)
+
+| Provider | Verified S02 engine profiles | Go driver |
+| --- | --- | --- |
+| PostgreSQL | 16.16, 17.12, 18.7, 19.0 | pgx v5.13.0 |
+| SQLite | 3.51.3, 3.54.1 | modernc.org/sqlite v1.47.0, v1.63.0 respectively |
+| SQL Server Developer | 14.0.3570.2 at 140, 15.0.4510.2 at 150, 16.0.4325.4 at 140 and 160 | go-mssqldb v1.11.0 |
+| MySQL | 8.0.46, 8.4.13.1 | go-sql-driver/mysql v1.10.0 |
+
+On `3ffc24a80a6208455065c0afdec141ed4049ceb0`, the exact driver lab passed `go vet -mod=readonly ./...` on Windows. Race tests used network-isolated Go 1.27.4 Linux/amd64 containers on the same workstation. The root command `go test -mod=readonly -race -count=1 -shuffle=on ./...` passed all four packages. The previous cached vendor snapshot lacked the newly imported model package. The driver lab rerun used a fresh temporary snapshot from `go mod vendor -o <temp directory>` with the existing module pins and passed `go test -mod=vendor -race -count=1 -shuffle=on ./...` with exit 0.

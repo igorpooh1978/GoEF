@@ -119,9 +119,9 @@ A single pointer to a supported Go type is nullable. Plain `[]byte` remains a no
 
 Length is a text facet. PostgreSQL and MySQL use character counts. SQL Server counts UTF-16 units under a supplementary-character collation. SQLite retains length as metadata and emits `TEXT`. SQL Server collation and PostgreSQL client and server encodings determine the supported text domain. MySQL bounded declarations also share a row-size limit. Supply valid text representable in the selected dialect and enforce the intended length before passing values to a driver. Value encoding, identifier quoting, index validation, DDL and schema generation belong to later stages.
 
+When passing signed Go `int8` to go-mssqldb v1.11.0, widen it to `int16` so the driver sends a signed SQL Server `smallint` parameter. Direct `int8` parameters use the driver's unsigned `tinyint` wire representation. [Driver parameter encoding](https://github.com/microsoft/go-mssqldb/blob/v1.11.0/mssql.go#L1118-L1126) · [SQL Server integer types](https://learn.microsoft.com/en-us/sql/t-sql/data-types/int-bigint-smallint-and-tinyint-transact-sql?view=sql-server-ver16)
+
 [Compiled example and binding tests](../../model/type_binding_test.go) · [Source and engine evidence](../evidence/W003/PROVIDER_TYPE_BINDING.md)
-
-
 
 Feature IDs: MODEL-MAP-001, MODEL-NULL-001, MODEL-TYPE-001, MODEL-VALID-001.
 
