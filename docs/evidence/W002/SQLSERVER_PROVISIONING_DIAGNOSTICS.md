@@ -8,7 +8,7 @@ The focused negative control failed on all four timeout injections before the st
 
 At the same revision, the workstation ran the stock SQL Server 2022 Developer profile at compatibility level 160 against build `16.0.4325.4` in local Docker.
 
-```powershell
+```sh
 python -B test/conformance/lab/driver_run.py sqlserver --profile sqlserver-2022 --accept-sqlserver-eula
 ```
 

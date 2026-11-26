@@ -31,10 +31,12 @@ This run covers S03 and S04. A subsequent run covers explicit receipt reconcilia
 
 The authorized workstation matrix passed at source commit `32a79ef3a39a6ea6c33f32389264d1b9e472f8e2` with Go 1.27.4 on Windows/amd64 and disposable Linux/amd64 server containers. All 24 distinct commit-outcome results passed. The four SQL Server profiles were 2017 at level 140, 2019 at level 150, and 2022 at levels 140 and 160. The other eight profiles covered PostgreSQL 16–19, MySQL 8.0.46 and 8.4.13.1, and SQLite 3.51.3 and 3.54.1. [Exact engine and driver profiles](LEGACY_COMPATIBILITY.md)
 
-```powershell
-pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -ModelTypes -OwnedTx -SavepointTx -SaveChanges -TxOptions -DecimalBinding -CommitOutcome -AcceptSqlServerEula -AcceptLegacySqlServerEula
+To select the same checks with the current Python runner, run the following command from the repository root.
+
+```sh
+python -B scripts/ci/goef_w002.py --compatibility --model-types --owned-tx --savepoint-tx --save-changes --tx-options --decimal-binding --commit-outcome --accept-sqlserver-eula --accept-legacy-sqlserver-eula
 ```
 
-The command exited 0 with 228 distinct scenario and profile results and four SQLite file compatibility checks. SQLite 3.54.1 ran twice, producing 247 reported scenario rows. The bootstrap validator covered 84 specifications, seven validator tests and 79 lab tests passed, and the local suite verified the driver module and ran build, vet and shuffled Go tests. The root and driver lab race commands `go test -mod=readonly -race -shuffle=on -count=1 ./...` exited 0 on Go 1.27.4 Linux/amd64 in an isolated container with cgo. Real-engine cases ran separately from race detection.
+The historical matrix run exited 0 with 228 distinct scenario and profile results and four SQLite file compatibility checks. SQLite 3.54.1 ran twice, producing 247 reported scenario rows. The bootstrap validator covered 84 specifications, seven validator tests and 79 lab tests passed, and the local suite verified the driver module and ran build, vet and shuffled Go tests. The root and driver lab race commands `go test -mod=readonly -race -shuffle=on -count=1 ./...` exited 0 on Go 1.27.4 Linux/amd64 in an isolated container with cgo. Real-engine cases ran separately from race detection.
 
 Independent review verified that the fixture observes both durable outcomes and rules out an automatic replay and reuse of the affected connection. The focused `go test -mod=readonly -count=1 -run '^TestCommitFailureReportsUnknownAndDiscards$' ./transaction` exits 0 with the additional public message check. A temporary negative control flattened the synthetic private error into the public message without exposing its identity in the error chain. The same test exited 1 on the redaction assertion. The temporary change was restored. [Redaction test](../../../transaction/transaction_test.go)

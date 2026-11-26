@@ -1,18 +1,24 @@
 # W002 Go driver characterization
 
-Use one local PowerShell command from the repository root:
+Run the local Python CI entry point from the repository root.
 
-```powershell
-pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -AcceptSqlServerEula -AcceptLegacySqlServerEula
+```sh
+python -B scripts/ci/goef_w002.py --compatibility --accept-sqlserver-eula --accept-legacy-sqlserver-eula
 ```
 
-The workstation needs Go 1.27.4, Python 3.11 or later with the repository validator's approved dependencies, PowerShell 7, and a local Linux/amd64 Docker daemon. Go verifies the locked test-only modules through the public Go checksum database. Docker retrieves pinned server images if the workstation cache does not contain them. GitHub Actions and remote runners are outside this pipeline.
+The workstation needs Go 1.27.4, Python 3.11 or later with the repository validator's approved dependencies, and a local Linux/amd64 Docker daemon. Go verifies the locked test-only modules through the public Go checksum database. Docker retrieves pinned server images if the workstation cache does not contain them. GitHub Actions and remote runners are outside this pipeline.
 
-The standard run checks the four reference profiles. `-Compatibility` adds PostgreSQL 16.16, 17.12 and 19.0, MySQL 8.0.46, SQL Server 2017 and 2019, SQL Server 2022 at level 140, and the two SQLite builds. Pass `-AcceptSqlServerEula` only for an authorized local SQL Server 2022 Developer run at levels 140 and 160. Pass `-AcceptLegacySqlServerEula` only for an authorized local SQL Server 2017 and 2019 Developer run. A missing consent flag blocks the affected cells and fails the selected matrix. [Microsoft container setup](https://learn.microsoft.com/en-us/sql/linux/containers/deploy?view=sql-server-2017)
+The standard run checks the four reference profiles. `--compatibility` adds PostgreSQL 16.16, 17.12 and 19.0, MySQL 8.0.46, SQL Server 2017 and 2019, SQL Server 2022 at level 140, and the two SQLite builds. Pass `--accept-sqlserver-eula` only for an authorized local SQL Server 2022 Developer run at levels 140 and 160. Pass `--accept-legacy-sqlserver-eula` only for an authorized local SQL Server 2017 and 2019 Developer run. A missing consent flag blocks the affected cells and fails the selected matrix. [Microsoft container setup](https://learn.microsoft.com/en-us/sql/linux/containers/deploy?view=sql-server-2017)
+
+Use `--providers` to select engines explicitly. For example, run the default PostgreSQL, SQLite and MySQL profiles with:
+
+```sh
+python -B scripts/ci/goef_w002.py --providers postgres sqlite mysql
+```
 
 To run one profile without the other CI checks:
 
-```powershell
+```sh
 python -B test/conformance/lab/driver_run.py postgres --profile postgres-16
 python -B test/conformance/lab/driver_run.py postgres --profile postgres-17
 python -B test/conformance/lab/driver_run.py postgres --profile postgres-19
@@ -25,7 +31,7 @@ python -B test/conformance/lab/sqlite_compat.py
 
 The focused native-driver scenarios run separately from the seven-case portable matrix.
 
-```powershell
+```sh
 python -B test/conformance/lab/postgres_next.py --profile postgres-16 --profile postgres-17 --profile postgres-18 --profile postgres-19
 python -B test/conformance/lab/mysql_deadlock.py
 ```
@@ -34,27 +40,27 @@ The PostgreSQL check observes cancellation while the driver is inside its second
 
 When SQL Server provisioning fails, the JSON report's `stage` identifies `docker-startup`, `engine-readiness`, `engine-identity` or `fixture-setup`. The existing status and failure phase remain available. The reason is selected from fixed diagnostics with a cleanup indicator where applicable.
 
-The runner builds temporary Go test binaries. The server binary runs inside the owned database container. The container has no published ports, bridge network, daemon socket mount or host data mount. Provisioner credentials create the fixture identities and a random protected marker. Database writes occur only after runtime identity and marker validation. SQLite uses the embedded driver against a private on-disk database. Cleanup and the four-engine status are part of acceptance.
+The runner builds temporary Go test binaries. The server binary runs inside the owned database container. The container has no published ports, bridge network, daemon socket mount or host data mount. Provisioner credentials create the fixture identities and a random protected marker. Database writes occur only after runtime identity and marker validation. SQLite uses the embedded driver against a private on-disk database. Acceptance requires cleanup and a passing result for every selected engine.
 
 The executable [Gherkin feature](features/driver.feature) uses tagged scenario outlines, bound Given/When/Then steps and a provider examples table. Each profile must emit seven validated scenario results. The first three verify commit and rollback, native uniqueness and foreign-key codes, and unchanged rows through an independent observer connection. The fourth exercises cancellation after the first row through the GoEF provider execution interface using a test adapter. It verifies the cancellation cause, closes and releases the stream lease, and completes another query with a fresh context on a one-connection pool. The fifth observes contention twice and distinguishes a caller deadline from a native lock timeout with a live caller context. It checks the original rows again after rollback and connection cleanup. The sixth verifies that a query with an already-ended context stops before the adapter calls `database/sql` and that the same lease completes a live query. The seventh cancels an acquisition after the pool has queued it and verifies that a later query reads both rows without waiting again.
 
 A scenario passes only after its cleanup. Unbound steps, duplicate or missing examples, wrong engine versions and missing reports fail the gate.
 
-Add `-ModelTypes` to the local PowerShell command to run the scalar type binding round trip on every selected profile. The Go fixture builds the table from `model.BindTypes`, inspects the native column metadata and checks parameterized values and nulls. Both Python launchers accept `--model-types` when selecting profiles directly. [Type binding scenario](../../../specs/features/model/model-type-001.feature) · [Issue #3](https://github.com/igorpooh1978/GoEF/issues/3)
+Add `--model-types` to the local CI command to run the scalar type binding round trip on every selected profile. The Go fixture builds the table from `model.BindTypes`, inspects the native column metadata and checks parameterized values and nulls. Both Python launchers accept `--model-types` when selecting profiles directly. [Type binding scenario](../../../specs/features/model/model-type-001.feature) · [Issue #3](https://github.com/igorpooh1978/GoEF/issues/3)
 
-Add `-OwnedTx` to the local PowerShell command to exercise the public owned transaction API on every selected profile. With one connection slot, the fixture traces the physical session, waits for a competing acquisition, reuses the session after both commit and rollback, and verifies committed rows on a separate physical connection. Both Python launchers accept `--owned-tx`. [Transaction scenario](../../../specs/features/transactions/tx-own-001.feature) · [Issue #2](https://github.com/igorpooh1978/GoEF/issues/2)
+Add `--owned-tx` to the local CI command to exercise the public owned transaction API on every selected profile. With one connection slot, the fixture traces the physical session, waits for a competing acquisition, reuses the session after both commit and rollback, and verifies committed rows on a separate physical connection. Both Python launchers accept `--owned-tx`. [Transaction scenario](../../../specs/features/transactions/tx-own-001.feature) · [Issue #2](https://github.com/igorpooh1978/GoEF/issues/2)
 
-Add `-SavepointTx` to exercise managed savepoints and external ownership on each selected profile. The two scenario results confirm nested rollback and release, and detached participants leaving the native transaction and connection with their caller. Both Python launchers accept `--savepoint-tx`. [Savepoint scenarios](../../../specs/features/transactions/tx-savepoint-001.feature) · [Issue #2](https://github.com/igorpooh1978/GoEF/issues/2)
+Add `--savepoint-tx` to exercise managed savepoints and external ownership on each selected profile. The two scenario results confirm nested rollback and release, and detached participants leaving the native transaction and connection with their caller. Both Python launchers accept `--savepoint-tx`. [Savepoint scenarios](../../../specs/features/transactions/tx-savepoint-001.feature) · [Issue #2](https://github.com/igorpooh1978/GoEF/issues/2)
 
-Add `-SaveChanges` to exercise automatic rollback of a failed owned graph and a failed caller-owned batch, provisional acceptance after commit, and refusal of an unsupported recovery configuration. The SQL Server fixture checks both `XACT_ABORT` settings. Both Python launchers accept `--save-changes`. [SaveChanges evidence](../../../docs/evidence/W005/SAVE_CHANGES.md)
+Add `--save-changes` to exercise automatic rollback of a failed owned graph and a failed caller-owned batch, provisional acceptance after commit, and refusal of an unsupported recovery configuration. The SQL Server fixture checks both `XACT_ABORT` settings. Both Python launchers accept `--save-changes`. [SaveChanges evidence](../../../docs/evidence/W005/SAVE_CHANGES.md)
 
-Add `-TxOptions` to exercise explicit isolation, native read-only enforcement where supported, and pool behavior after completion. Both Python launchers accept `--tx-options`. [Isolation evidence](../../../docs/evidence/W005/ISOLATION_OPTIONS.md)
+Add `--tx-options` to exercise explicit isolation, native read-only enforcement where supported, and pool behavior after completion. Both Python launchers accept `--tx-options`. [Isolation evidence](../../../docs/evidence/W005/ISOLATION_OPTIONS.md)
 
-Add `-DecimalBinding` to exercise catalog precision, lossless fixed-scale text and a fresh-session decimal round trip. Both Python launchers accept `--decimal-binding`. [Decimal catalog and round-trip evidence](../../../docs/evidence/W003/DECIMAL_SQL_BINDING.md)
+Add `--decimal-binding` to exercise catalog precision, lossless fixed-scale text and a fresh-session decimal round trip. Both Python launchers accept `--decimal-binding`. [Decimal catalog and round-trip evidence](../../../docs/evidence/W003/DECIMAL_SQL_BINDING.md)
 
-Add `-CommitOutcome` to exercise a real commit whose success is withheld and a rollback before native commit. Both results require a typed unknown outcome, a discarded connection, no replay, and an independent read of the persisted state. The verifier cases distinguish a proved commit, a proved rollback, and an outcome that remains unknown. Both Python launchers accept `--commit-outcome`. [Commit outcome fault evidence](../../../docs/evidence/W002/COMMIT_OUTCOME_FAULT.md)
+Add `--commit-outcome` to exercise a real commit whose success is withheld and a rollback before native commit. Both results require a typed unknown outcome, a discarded connection, no replay, and an independent read of the persisted state. The verifier cases distinguish a proved commit, a proved rollback, and an outcome that remains unknown. Both Python launchers accept `--commit-outcome`. [Commit outcome fault evidence](../../../docs/evidence/W002/COMMIT_OUTCOME_FAULT.md)
 
-Add `-ProductionAdapters` to exercise the four concrete adapters. Both Python launchers accept `--production-adapters` and count covered and total statements for the selected adapter and the shared transport. [Adapter contract](../../../specs/features/providers/provider-exec-001.feature)
+Add `--production-adapters` to exercise the four concrete adapters. Both Python launchers accept `--production-adapters` and count covered and total statements for the selected adapter and the shared transport. [Adapter contract](../../../specs/features/providers/provider-exec-001.feature)
 
 Run `python -B test/conformance/lab/mysql_in_flight_read.py` for both pinned MySQL blocked-read cancellation checks. Run `python -B test/conformance/lab/sqlite_wal_recovery.py` for recovery of a durable WAL commit across the two pinned SQLite runtimes. [MySQL cancellation evidence](../../../docs/evidence/W002/MYSQL_IN_FLIGHT_READ.md) · [SQLite WAL recovery evidence](../../../docs/evidence/W002/SQLITE_WAL_RECOVERY.md)
 

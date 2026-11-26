@@ -6,7 +6,7 @@ Two real InnoDB transactions each change an independent sentinel and hold a dist
 
 Before issuing an explicit rollback on the victim handle, the test reads that transaction's original sentinel from the same connection. It also checks that the survivor still sees its uncommitted change, commits the survivor and verifies all four final rows. A fresh transaction on the original victim session commits a new write that the opposite connection can read. This establishes the engine's rollback and the session's reuse in the fixture. Automatic transaction replay retains a separate acceptance case.
 
-```powershell
+```sh
 python -B test/conformance/lab/mysql_deadlock.py
 ```
 

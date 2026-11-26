@@ -23,8 +23,14 @@ pgx stdlib preloads the first row inside its `QueryContext` implementation. This
 
 From the repository root, run the scratch launcher in the directory containing the two overlay inputs.
 
-```powershell
-python -B "$env:GOEF_POSTGRES_INFLIGHT_PROBE_DIR/run_postgres_inflight.py"
+```python
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+launcher = Path(os.environ["GOEF_POSTGRES_INFLIGHT_PROBE_DIR"]) / "run_postgres_inflight.py"
+subprocess.run([sys.executable, "-B", str(launcher)], check=True)
 ```
 
 The launcher mapped `postgres_inflight_probe_test.go` into the test package with Go's overlay flag. It compiled the existing locked module with `GOOS=linux`, `GOARCH=amd64` and `CGO_ENABLED=0` using `go test -c -mod=readonly -overlay=<overlay.json> -ldflags="-s -w" -o <binary> .` inside `test/conformance/driverlab`. The local runner executed that binary with `-test.run=^TestPostgresInFlightReadProbe$ -test.v -test.count=1 -test.timeout=45s`. The launcher exited 0 after requiring all three expected markers and successful cleanup. Both inputs were scratch files kept outside the checkout.

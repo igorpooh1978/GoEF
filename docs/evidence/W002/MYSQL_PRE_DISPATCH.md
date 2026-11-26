@@ -22,14 +22,20 @@ This pilot for [W002 #13](https://github.com/igorpooh1978/GoEF/issues/13) exerci
 4. Call `lease.Query` with the same `provider.Command{SQL: "SELECT 1", Columns: []provider.Column{{Kind: provider.KindInteger}}}` and nil bindings in each operation. Call `cancel()` before the first operation and use `context.WithDeadline(ctx, time.Now().Add(-time.Second))` before the second. Require nil rows and `errors.Is` matching `context.Canceled` and `context.DeadlineExceeded` respectively. Check the adapter counter and session counter after each call while the lease remains occupied.
 5. Run the identical command with the live context. Read the integer `1` and then clean `io.EOF`. Close the rows and require a single increment in both counters. Read `CONNECTION_ID()` again after sampling the counters and require the same identity. Release with `provider.Reuse` under the live context and require zero occupied pool slots.
 
-Build each overlay from `test/conformance/driverlab` on Go 1.27.4 and run the resulting binary inside the provisioned container. Each overlay JSON maps the absolute path of the tracked test file to the corresponding temporary replacement. Supply the lab's generated profile, password and marker through the existing container environment mechanism. Set `GOEF_PREDISPATCH_EXPECT_GATE=1` to require adapter deltas of zero, zero and one. Set it to `0` for the baseline characterization, which expects one call to `database/sql` per operation.
+Run the following Python snippet from the repository root with Go 1.27.4. Set `GOEF_OVERLAY_FILE` and `GOEF_BINARY_FILE` to the absolute overlay input and binary output paths. Run the resulting binary inside the provisioned container. Each overlay JSON maps the absolute path of the tracked test file to the corresponding temporary replacement. Supply the lab's generated profile, password and marker through the existing container environment mechanism. Set `GOEF_PREDISPATCH_EXPECT_GATE=1` to require adapter deltas of zero, zero and one. Set it to `0` for the baseline characterization, which expects one call to `database/sql` per operation.
 
-```powershell
-$env:GOOS = 'linux'
-$env:GOARCH = 'amd64'
-$env:CGO_ENABLED = '0'
-$env:GOWORK = 'off'
-go test -c -mod=readonly -overlay $overlayFile -o $binaryFile .
+```python
+import os
+import subprocess
+
+env = dict(os.environ, GOOS="linux", GOARCH="amd64", CGO_ENABLED="0", GOWORK="off")
+subprocess.run(
+    ["go", "test", "-c", "-mod=readonly", "-overlay", env["GOEF_OVERLAY_FILE"],
+     "-o", env["GOEF_BINARY_FILE"], "."],
+    cwd="test/conformance/driverlab",
+    env=env,
+    check=True,
+)
 ```
 
 ```text

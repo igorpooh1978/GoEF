@@ -10,14 +10,16 @@ A control overlay on SQLite 3.54.1 removed only the context check. The focused t
 
 ## Local run on 2026-11-26
 
-The Windows/amd64 workstation used Go 1.27.4 and its local Docker Desktop Linux/amd64 daemon. The driver tests and reports were generated from `990737d1b93b814fa56d2de7c12cbe09d78199fd`. The first command exited 1 because the SQL Server 2022 level 160 fixture timed out during provisioning. The other profile and SQLite file results passed. The SQL Server 2022 replay at the same revision exited 0 and returned all six passing scenarios.
+The Windows/amd64 workstation used Go 1.27.4 and its local Docker Desktop Linux/amd64 daemon. The driver tests and reports were generated from `990737d1b93b814fa56d2de7c12cbe09d78199fd`. The historical matrix run exited 1 because the SQL Server 2022 level 160 fixture timed out during provisioning. The other profile and SQLite file results passed. The SQL Server 2022 replay at the same revision exited 0 and returned all six passing scenarios.
 
-```powershell
-pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -AcceptSqlServerEula -AcceptLegacySqlServerEula
+Use these commands to select the full matrix and the focused SQL Server 2022 replay with the current Python tools.
+
+```sh
+python -B scripts/ci/goef_w002.py --compatibility --accept-sqlserver-eula --accept-legacy-sqlserver-eula
 python -B test/conformance/lab/driver_run.py sqlserver --profile sqlserver-2022 --accept-sqlserver-eula
 ```
 
-Across the two runs, 12 profiles passed 72 distinct driver cases and four SQLite file cases. The 78 passing driver rows include six repeats on SQLite 3.54.1. Every profile reported the two exact causes, `0,0,1` calls and zero occupied connections. The checked-in PowerShell gate accepted the four real baseline reports with the SQL Server replay. It rejected an altered baseline report with dispatch counts `1,0,1`. No lab-owned containers remained.
+Across the two runs, 12 profiles passed 72 distinct driver cases and four SQLite file cases. The 78 passing driver rows include six repeats on SQLite 3.54.1. Every profile reported the two exact causes, `0,0,1` calls and zero occupied connections. The historical CI gate accepted the four real baseline reports with the SQL Server replay. It rejected an altered baseline report with dispatch counts `1,0,1`. No lab-owned containers remained.
 
 The repository validator, seven bootstrap tests, 44 Python lab tests and Go build, vet, test and module checks passed. The SQLite minimum test and vet also passed with `-modfile=sqlite351.mod -tags=goef_sqlite_351`. Both Go suites passed `-race -count=1 -shuffle=on` locally in Linux/amd64 with networking disabled. The driver module used its locked vendor snapshot for the race check.
 

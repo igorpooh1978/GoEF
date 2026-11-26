@@ -23,8 +23,10 @@ The missing S05 binding first failed `go test -mod=readonly -count=1 -run '^Test
 
 The full matrix exited 0 on `7d74a1185370d11718e8e316df18d712cf46154e` from a detached checkout on the Windows/amd64 workstation. Server cases used the workstation's Docker Desktop Linux/amd64 daemon and existing [engine and driver pins](../../parity/ENGINE_COMPATIBILITY.md).
 
-```powershell
-pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -AcceptSqlServerEula -AcceptLegacySqlServerEula
+To select the full matrix with the current Python runner, run the following command from the repository root.
+
+```sh
+python -B scripts/ci/goef_w002.py --compatibility --accept-sqlserver-eula --accept-legacy-sqlserver-eula
 ```
 
 | Engine | Profiles that observed both waits and correctly identified the deadline and native timeout |

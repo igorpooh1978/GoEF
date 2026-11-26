@@ -14,7 +14,7 @@ The pinned driver closes the connection when the query context expires before th
 
 ## Workstation procedure
 
-```powershell
+```sh
 python -B test/conformance/lab/mysql_in_flight_read.py
 ```
 

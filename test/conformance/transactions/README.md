@@ -4,30 +4,30 @@ W000 defines the test protocol and initial scenario IDs. The first owned transac
 
 Run the owned transaction fixture on the four default profiles from the repository root.
 
-```powershell
-pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -OwnedTx -AcceptSqlServerEula
+```sh
+python -B scripts/ci/goef_w002.py --owned-tx --accept-sqlserver-eula
 ```
 
-Add `-Compatibility -AcceptLegacySqlServerEula` to include the other pinned profiles when both SQL Server Developer releases are authorized for the run. The corresponding Python selector is `--owned-tx`. [Local driver lab](../driverlab/README.md)
+Add `--compatibility --accept-legacy-sqlserver-eula` to include the other pinned profiles when both SQL Server Developer releases are authorized for the run. The focused Python launcher also accepts `--owned-tx`. [Local driver lab](../driverlab/README.md)
 
 The manual `TestSavepointAndExternalTransaction` fixture checks earlier writes, younger point invalidation, owner visibility after participant detach, and rollback observed independently. Run it on the four default profiles with the following command.
 
-```powershell
-pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -SavepointTx -AcceptSqlServerEula
+```sh
+python -B scripts/ci/goef_w002.py --savepoint-tx --accept-sqlserver-eula
 ```
 
-The corresponding Python selector is `--savepoint-tx`. The compatibility flags select the same additional profiles as the owned-transaction run. These scenarios exercise explicit DML and savepoint primitives. [Savepoint scenarios](../../../specs/features/transactions/tx-savepoint-001.feature) · [External ownership scenarios](../../../specs/features/transactions/tx-own-001.feature) · [Local driver lab](../driverlab/README.md)
+The focused Python launcher also accepts `--savepoint-tx`. The compatibility flags select the same additional profiles as the owned-transaction run. These scenarios exercise explicit DML and savepoint primitives. [Savepoint scenarios](../../../specs/features/transactions/tx-savepoint-001.feature) · [External ownership scenarios](../../../specs/features/transactions/tx-own-001.feature) · [Local driver lab](../driverlab/README.md)
 
-Run the ordered `SaveChanges` fixture on the four default profiles with the following command. Add the compatibility flags above to include the other pinned profiles. The corresponding Python selector is `--save-changes`. The fixture checks real partial-write failure, earlier writes, staged values and opt-out before writes. Automatic graph discovery, MARS, distributed transactions and real doomed-transaction recovery retain separate cases. [SaveChanges evidence](../../../docs/evidence/W005/SAVE_CHANGES.md)
+Run the ordered `SaveChanges` fixture on the four default profiles with the following command. Add the compatibility flags above to include the other pinned profiles. The focused Python launcher also accepts `--save-changes`. The fixture checks real partial-write failure, earlier writes, staged values and opt-out before writes. Automatic graph discovery, MARS, distributed transactions and real doomed-transaction recovery retain separate cases. [SaveChanges evidence](../../../docs/evidence/W005/SAVE_CHANGES.md)
 
-```powershell
-pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -SaveChanges -AcceptSqlServerEula
+```sh
+python -B scripts/ci/goef_w002.py --save-changes --accept-sqlserver-eula
 ```
 
-Run the owned commit acknowledgement fixture against the default four profiles. The Python selector is `--commit-outcome`. The compatibility flags above extend the same checks to the other pinned profiles. [Commit outcome fault evidence](../../../docs/evidence/W002/COMMIT_OUTCOME_FAULT.md)
+Run the owned commit acknowledgement fixture against the default four profiles. The focused Python launcher also accepts `--commit-outcome`. The compatibility flags above extend the same checks to the other pinned profiles. [Commit outcome fault evidence](../../../docs/evidence/W002/COMMIT_OUTCOME_FAULT.md)
 
-```powershell
-pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -CommitOutcome -AcceptSqlServerEula
+```sh
+python -B scripts/ci/goef_w002.py --commit-outcome --accept-sqlserver-eula
 ```
 
 | Experiment | Coordination and assertions |

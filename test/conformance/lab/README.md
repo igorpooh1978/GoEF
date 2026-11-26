@@ -4,11 +4,11 @@ This first executable slice provisions disposable engines and checks their ident
 
 Run from the repository root with Python 3.11 or newer. Server cells use a local Docker Linux/amd64 daemon and pinned image digests. SQLite uses a trusted SQLite 3.54.1 command-line executable, selected explicitly. Obtain it from [SQLite downloads](https://www.sqlite.org/download.html) and verify the vendor-published archive checksum before extracting. The runner checks the version and source ID at runtime.
 
-```powershell
+```sh
 python -B test/conformance/lab/run.py postgres mysql
-python -B test/conformance/lab/run.py sqlite --sqlite-binary <path-to-sqlite3>
+python -B test/conformance/lab/run.py sqlite --sqlite-binary "path/to/sqlite3"
 python -B test/conformance/lab/run.py sqlserver --accept-sqlserver-eula
-python -B test/conformance/lab/run.py all --sqlite-binary <path-to-sqlite3> --accept-sqlserver-eula
+python -B test/conformance/lab/run.py all --sqlite-binary "path/to/sqlite3" --accept-sqlserver-eula
 ```
 
 Supply `--accept-sqlserver-eula` only after accepting the [Microsoft SQL Server terms for the Developer edition run](https://learn.microsoft.com/en-us/sql/linux/sql-server-linux-configure-environment-variables). The runner requires an explicit flag for each requested SQL Server run.
@@ -17,7 +17,7 @@ The server containers have no published ports, external network or host data mou
 
 Local runner regression tests:
 
-```powershell
+```sh
 python -B -m unittest discover -s test/conformance/lab -p test_runtime.py
 ```
 

@@ -42,11 +42,7 @@ The Go test module's parser and unit suite passed `go test -mod=vendor -race -co
 
 ## Reproduce
 
-The [local CI command](../../../test/conformance/driverlab/README.md) ran on 2026-11-25 from the Windows workstation with the flags below and exited 0. It passed the repository validator, 7 bootstrap tests, 27 lab tests, the Go build, vet, test and tidy checks, the test module checksum and driver pin checks, and 18 scenario rows across the six real profiles.
-
-```powershell
-pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -AcceptSqlServerEula -Compatibility
-```
+The historical local CI run on 2026-11-25 used the six-profile compatibility selection and SQL Server 2022 consent on the Windows workstation. It exited 0. It passed the repository validator, 7 bootstrap tests, 27 lab tests, the Go build, vet, test and tidy checks, the test module checksum and driver pin checks, and 18 scenario rows across the six real profiles. [Recorded command](https://github.com/igorpooh1978/GoEF/blob/c26e115e2f74029a66428a456e4bb36bfd974c92/docs/evidence/W002/DRIVER_GHERKIN.md#reproduce) · [Current Python runner](../../../test/conformance/driverlab/README.md)
 
 A prior run reported a SQL Server timeout during fixture setup. The runner now strips debug sections from the temporary test binaries and reports copying and permission setup as separate phases. The successful run reached and passed all three SQL Server scenarios.
 

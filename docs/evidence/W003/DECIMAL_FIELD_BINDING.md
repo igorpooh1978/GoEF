@@ -14,7 +14,7 @@ The mapped and physical version 1 snapshots keep a `decimal` member with the con
 - Before adding the field-marker checks to the Python runners, `python -B -m unittest test_driver_run.DecimalBindingEvidenceTests` in `test/conformance/lab` exited 1. A result without field evidence was accepted by the driver runner and the compatibility report lacked the field results.
 - Run the same Go and Python commands after implementation. The unit model probe exercises all four dialects without a connection. The runnable example uses Go 1.27.4.
 - Run `python -B test/conformance/lab/driver_run.py <provider> --profile <profile> --decimal-binding` on a selected isolated server profile and `python -B test/conformance/lab/sqlite_compat.py --decimal-binding` for both linked SQLite runtimes. The result must contain a verified `decimal_field_binding` marker for S05. The SQL Server lab requires its matching Developer consent switches.
-- Run `pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -DecimalBinding -AcceptSqlServerEula -AcceptLegacySqlServerEula` after approval to verify the full profile matrix. The fixture owns the temporary database and uses separate writer and observer leases. It verifies SQL NULL, signed values, the exact precision boundary and scale, and native catalog nullability.
+- Run `python -B scripts/ci/goef_w002.py --compatibility --decimal-binding --accept-sqlserver-eula --accept-legacy-sqlserver-eula` after approval to verify the full profile matrix. The fixture owns the temporary database and uses separate writer and observer leases. It verifies SQL NULL, signed values, the exact precision boundary and scale, and native catalog nullability.
 
 ## Source-commit verification
 

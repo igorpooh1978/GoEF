@@ -18,8 +18,14 @@ This pilot observed entry into native row iteration on a single open result. It 
 
 From the repository root, run the launcher with its adjacent Go scratch input.
 
-```powershell
-python -B "$env:GOEF_POSTGRES_NEXT_PROBE_DIR/run_postgres_next.py"
+```python
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+launcher = Path(os.environ["GOEF_POSTGRES_NEXT_PROBE_DIR"]) / "run_postgres_next.py"
+subprocess.run([sys.executable, "-B", str(launcher)], check=True)
 ```
 
 The launcher used Go's overlay flag to add the scratch test to the existing locked module. It compiled `GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go test -c -mod=readonly -overlay=<overlay.json> -ldflags="-s -w" -o <binary> .` from `test/conformance/driverlab`. The owned local PostgreSQL container executed `-test.run=^TestPostgresNativeNextProbe$ -test.v -test.count=1 -test.timeout=45s`. The launcher exited 0 after checking both expected results and cleanup. The two source files stayed outside the checkout.
@@ -33,7 +39,7 @@ The launcher used Go's overlay flag to add the scratch test to the existing lock
 
 The pilot is now available as `TestPostgresNativeNext` with the dedicated [local launcher](../../../test/conformance/lab/postgres_next.py). The launcher requires explicit pinned profile names, builds one Go test binary, runs only the focused test in owned containers and validates both outcome records after each cleanup.
 
-```powershell
+```sh
 python -B test/conformance/lab/postgres_next.py --profile postgres-16 --profile postgres-17 --profile postgres-18 --profile postgres-19
 ```
 

@@ -9,16 +9,16 @@ GoEF is a Go data access library in alpha. It uses Entity Framework Core as a be
 Use Go 1.27.4 or later. Pin the core version from your application's Go module.
 
 ```sh
-go mod edit '-require=github.com/igorpooh1978/GoEF@v0.1.0-alpha.1'
+go mod edit "-require=github.com/igorpooh1978/GoEF@v0.1.0-alpha.1"
 ```
 
 Pin the adapter for your database.
 
 ```sh
-go mod edit '-require=github.com/igorpooh1978/GoEF/providers/postgres@v0.1.0-alpha.1'
-go mod edit '-require=github.com/igorpooh1978/GoEF/providers/sqlite@v0.1.0-alpha.1'
-go mod edit '-require=github.com/igorpooh1978/GoEF/providers/sqlserver@v0.1.0-alpha.1'
-go mod edit '-require=github.com/igorpooh1978/GoEF/providers/mysql@v0.1.0-alpha.1'
+go mod edit "-require=github.com/igorpooh1978/GoEF/providers/postgres@v0.1.0-alpha.1"
+go mod edit "-require=github.com/igorpooh1978/GoEF/providers/sqlite@v0.1.0-alpha.1"
+go mod edit "-require=github.com/igorpooh1978/GoEF/providers/sqlserver@v0.1.0-alpha.1"
+go mod edit "-require=github.com/igorpooh1978/GoEF/providers/mysql@v0.1.0-alpha.1"
 ```
 
 After adding the imports to your code, run `go mod tidy` to download the pinned modules and update `go.sum`.
@@ -39,7 +39,7 @@ In a new directory outside the GoEF checkout and any Go workspace, initialize a 
 
 ```sh
 go mod init example.com/goef-demo
-go mod edit '-require=github.com/igorpooh1978/GoEF@v0.1.0-alpha.1' '-require=github.com/igorpooh1978/GoEF/providers/sqlite@v0.1.0-alpha.1'
+go mod edit "-require=github.com/igorpooh1978/GoEF@v0.1.0-alpha.1" "-require=github.com/igorpooh1978/GoEF/providers/sqlite@v0.1.0-alpha.1"
 ```
 
 Save this program as `main.go`. It runs a parameterized SQLite query against a temporary file and closes the result stream, connection lease, and pool before removing the file.
@@ -130,12 +130,10 @@ Choose one database. In a new directory outside the GoEF checkout and any Go wor
 
 ```sh
 go mod init example.com/goef-demo
-go mod edit '-require=github.com/igorpooh1978/GoEF@v0.1.0-alpha.1'
+go mod edit "-require=github.com/igorpooh1978/GoEF@v0.1.0-alpha.1"
 ```
 
-For the PostgreSQL and MySQL setup below, PowerShell users can set the connection string with `$env:GOEF_DSN = '...'`.
-
-Save the [shared program](examples/testdata/alpha-quickstart/main.go) as `main.go`. It binds the integer `41`, gives the query and row read a five-second timeout, and closes the rows and connection lease before the adapter closes its pool.
+Save the [shared program](examples/testdata/alpha-quickstart/main.go) as `main.go` and the [Python launcher](examples/testdata/alpha-quickstart/run.py) as `run.py`. Use Python 3.11 or later. The Go program binds the integer `41`, gives the query and row read a five-second timeout, and closes the rows and connection lease before the adapter closes its pool.
 
 ```go
 package main
@@ -189,11 +187,10 @@ func readValue(backend provider.Backend, command provider.Command) (err error) {
 
 ### PostgreSQL
 
-Use a running PostgreSQL instance and an existing database. The sample connection string uses a disposable local instance. Set `GOEF_DSN` to the connection string for your instance.
+Use a running PostgreSQL instance and an existing database. A connection string for a disposable local instance looks like `postgres://demo:password@127.0.0.1:5432/demo?sslmode=disable`.
 
 ```sh
-go mod edit '-require=github.com/igorpooh1978/GoEF/providers/postgres@v0.1.0-alpha.1'
-export GOEF_DSN='postgres://demo:password@127.0.0.1:5432/demo?sslmode=disable'
+go mod edit "-require=github.com/igorpooh1978/GoEF/providers/postgres@v0.1.0-alpha.1"
 ```
 
 Save the [PostgreSQL example](examples/testdata/alpha-quickstart/postgres/adapter.go) as `adapter.go`.
@@ -225,15 +222,10 @@ func run(dsn string) (err error) {
 
 ### SQL Server Express LocalDB
 
-On Windows, use an installed `MSSQLLocalDB` instance. Run these commands in PowerShell to start it and get its current named pipe. The example connects using your Windows account. [Microsoft LocalDB documentation](https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/sql-server-express-localdb)
+On Windows, install SQL Server Express LocalDB and use the `MSSQLLocalDB` instance. The Python launcher starts it, reads its current named pipe, and the adapter connects using your Windows account. [Microsoft LocalDB documentation](https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/sql-server-express-localdb)
 
-```powershell
-go mod edit '-require=github.com/igorpooh1978/GoEF/providers/sqlserver@v0.1.0-alpha.1'
-sqllocaldb start MSSQLLocalDB
-$pipeMatch = sqllocaldb info MSSQLLocalDB | Select-String '\\\\\.\\pipe\\LOCALDB#[0-9A-F]+\\tsql\\query'
-if (!$pipeMatch) { throw 'LocalDB did not report a named pipe.' }
-$pipe = $pipeMatch.Matches[0].Value
-$env:GOEF_DSN = "server=$pipe;protocol=np;database=master;authenticator=winsspi"
+```sh
+go mod edit "-require=github.com/igorpooh1978/GoEF/providers/sqlserver@v0.1.0-alpha.1"
 ```
 
 Save the [LocalDB example](examples/testdata/alpha-quickstart/sqlserver/adapter.go) as `adapter.go`. It imports the SQL Server driver's named-pipe support.
@@ -266,11 +258,10 @@ func run(dsn string) (err error) {
 
 ### MySQL
 
-Use a running MySQL instance and an existing database. The sample connection string uses a disposable local instance. Set `GOEF_DSN` to the connection string for your instance.
+Use a running MySQL instance and an existing database. A connection string for a disposable local instance looks like `demo:password@tcp(127.0.0.1:3306)/demo`.
 
 ```sh
-go mod edit '-require=github.com/igorpooh1978/GoEF/providers/mysql@v0.1.0-alpha.1'
-export GOEF_DSN='demo:password@tcp(127.0.0.1:3306)/demo'
+go mod edit "-require=github.com/igorpooh1978/GoEF/providers/mysql@v0.1.0-alpha.1"
 ```
 
 Save the [MySQL example](examples/testdata/alpha-quickstart/mysql/adapter.go) as `adapter.go`.
@@ -302,11 +293,16 @@ func run(dsn string) (err error) {
 
 ### Run your example
 
-Once `main.go` and the `adapter.go` for your database are in place, run these commands from your application module.
+Once `main.go`, `adapter.go`, and `run.py` are in place, run `go mod tidy` from your application module. For PostgreSQL or MySQL, the launcher uses `GOEF_DSN` when set and otherwise prompts for the connection string.
 
 ```sh
-go mod tidy
-go run -mod=readonly .
+python -B run.py
+```
+
+For SQL Server Express LocalDB, let the launcher obtain the connection string.
+
+```sh
+python -B run.py --localdb
 ```
 
 Expected output

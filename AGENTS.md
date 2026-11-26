@@ -2,6 +2,8 @@
 
 Read the [master plan](docs/roadmap/MASTER_PLAN.md), especially sections 14 through 21, and the [checkpoint](docs/roadmap/CHECKPOINT.md) before work. Use English for repository artifacts, issues, PRs, commits, code comments, diagnostics, and evidence. Every change must link to an actual GitHub issue or a documented blocked issue draft under the [issue workflow](docs/development/ISSUE_WORKFLOW.md).
 
+Use Python for repository scripts and command orchestration. Invoke native tools directly or from Python subprocesses.
+
 ## Before editing
 
 1. Confirm issue scope, baseline, mode, worktree, affected contracts, and acceptance criteria. Keep unrelated changes intact. Apply [repository skills](docs/development/SKILLS.md) and relevant Go guidance. Use independently owned worktrees and parallel agents when available. The integrator owns shared schemas, SPI, module files, and root rules.

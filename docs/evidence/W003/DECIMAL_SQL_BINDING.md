@@ -48,4 +48,4 @@ The integrated source candidate passed `MODEL-TYPE-001-S01` on all 12 pinned pro
 
 The fixture uses precision 38 with scale 9 and scale 0, writes bound strings and reads exact positive, negative and boundary values from an independent physical connection. It verifies native DDL facets where available and SQLite text storage with `typeof()`. Higher declaration maxima and scale up to 1000 are covered by Go unit tests. [Fixture source](../../../test/conformance/driverlab/decimal_binding_test.go)
 
-Run the same selection on the workstation with `pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -ModelTypes -OwnedTx -SavepointTx -SaveChanges -TxOptions -DecimalBinding -AcceptSqlServerEula -AcceptLegacySqlServerEula`.
+Run the same selection on the workstation with `python -B scripts/ci/goef_w002.py --compatibility --model-types --owned-tx --savepoint-tx --save-changes --tx-options --decimal-binding --accept-sqlserver-eula --accept-legacy-sqlserver-eula`.

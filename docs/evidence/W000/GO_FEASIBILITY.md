@@ -6,16 +6,20 @@ On November 25, 2026, an independent fixture compiled a chained generic query fr
 
 ## Reproduce
 
-Start in the repository root. These PowerShell assignments apply to the current shell. The following test invokes the compiler separately for each negative fixture, checks its exit status and matches a diagnostic specific to that case. On a POSIX shell use `export GOTOOLCHAIN=local GOWORK=off GOPROXY=off` after changing directory.
+Run the following Python snippet from the repository root. The Go test invokes the compiler separately for each negative fixture, checks its exit status and matches a diagnostic specific to that case.
 
-```powershell
-Set-Location test/bootstrap/go-feasibility
-$env:GOTOOLCHAIN = 'local'
-$env:GOWORK = 'off'
-$env:GOPROXY = 'off'
-go version
-go test -count=1 -shuffle=on -v ./...
-go vet ./...
+```python
+import os
+import subprocess
+
+env = dict(os.environ, GOTOOLCHAIN="local", GOWORK="off", GOPROXY="off")
+directory = "test/bootstrap/go-feasibility"
+for arguments in (
+    ["version"],
+    ["test", "-count=1", "-shuffle=on", "-v", "./..."],
+    ["vet", "./..."],
+):
+    subprocess.run(["go", *arguments], cwd=directory, env=env, check=True)
 ```
 
 | Command in the fixture directory | Exit | Observed result |
@@ -28,7 +32,7 @@ go vet ./...
 | `go mod verify` | 0 | All modules verified. |
 | `govulncheck ./...` | 0 | Local govulncheck v1.9.0 reported no vulnerabilities for the fixture. |
 | `gofmt -l .` | 0 | No files listed. The syntax-negative interface declaration lives in a text fixture which the test sends directly to the Go compiler. |
-| `go test -race -shuffle=on ./...` | 2 | **Blocked.** Host has `CGO_ENABLED=0`. Retried with `$env:CGO_ENABLED='1'` and the same command, exit 1 because the configured C compiler `gcc` was absent from PATH. Use a runner with cgo and a supported compiler for race evidence. |
+| `go test -race -shuffle=on ./...` | 2 | **Blocked.** Host has `CGO_ENABLED=0`. Retried with `CGO_ENABLED=1` and the same command, exit 1 because the configured C compiler `gcc` was absent from PATH. Use a runner with cgo and a supported compiler for race evidence. |
 
 ## Individual compile-fail controls
 

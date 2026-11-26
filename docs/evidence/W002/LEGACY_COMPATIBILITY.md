@@ -35,34 +35,26 @@ On the SQLite lane `274a96d42d27f7e485130931a32e674d48f017a5`, `python -B test/c
 
 The cases establish compatibility for these schemas and controlled process handoffs. Production migrations, files with features outside the shared schema, crash recovery and older SQLite runtimes require separate evidence. [SQLite file format](https://www.sqlite.org/fileformat.html) · [WAL behavior](https://www.sqlite.org/wal.html)
 
-The follow-up `d99a262e5d6eebde2aea28e08a341c65e3761ed1` reran all six SQLite driver rows and four file rows after binding the steps and examples. The tests reject changed assertions, missing or duplicate journal examples, the wrong version or engine role, and invalid worker markers. The PowerShell gate independently rejects using the originating runtime for the middle step.
+The follow-up `d99a262e5d6eebde2aea28e08a341c65e3761ed1` reran all six SQLite driver rows and four file rows after binding the steps and examples. The tests reject changed assertions, missing or duplicate journal examples, the wrong version or engine role, and invalid worker markers. The historical CI gate independently rejected using the originating runtime for the middle step.
 
 ## Checked source
 
-The driver module tree is `1b5f50d53c1ad81af7d974e53598b316e52d65d9`, the lab tree is `782042056947a5b779aeaacfb9591812e9a89b57`, and the PowerShell script blob is `df10e824da0d6a0bb105c6bc4f72b6cb3e51d702`. The primary Go test module also passed `go test -mod=vendor -race -count=1 -shuffle=on ./...` on Go 1.27.4 Linux/amd64 in an isolated local container using the prior verified module graph. This was a unit and parser run. SQLite file and server outcomes were measured separately.
+The driver module tree is `1b5f50d53c1ad81af7d974e53598b316e52d65d9`, the lab tree is `782042056947a5b779aeaacfb9591812e9a89b57`, and the historical CI script blob is `df10e824da0d6a0bb105c6bc4f72b6cb3e51d702`. The primary Go test module also passed `go test -mod=vendor -race -count=1 -shuffle=on ./...` on Go 1.27.4 Linux/amd64 in an isolated local container using the prior verified module graph. This was a unit and parser run. SQLite file and server outcomes were measured separately.
 
 ## Integrated local run
 
-On 2026-11-25 the command below passed the repository validator, seven bootstrap tests, 32 Python lab tests, Go build, vet, test and module checks, all executable driver cells, and the four SQLite file cells. The report contains 27 successful driver rows covering 24 distinct profile and scenario pairs. The file suite repeats the three current SQLite rows before exchanging files. The two SQL Server legacy cells reported `BLOCKED` pending explicit authorization for those Developer editions. Neither legacy server was started, and the full matrix exited 1.
-
-```powershell
-pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -AcceptSqlServerEula
-```
+On 2026-11-25 the local CI run passed the repository validator, seven bootstrap tests, 32 Python lab tests, Go build, vet, test and module checks, all executable driver cells, and the four SQLite file cells. The report contains 27 successful driver rows covering 24 distinct profile and scenario pairs. The file suite repeats the three current SQLite rows before exchanging files. The two SQL Server legacy cells reported `BLOCKED` pending explicit authorization for those Developer editions. Neither legacy server was started, and the full matrix exited 1. See the [recorded command](https://github.com/igorpooh1978/GoEF/blob/c26e115e2f74029a66428a456e4bb36bfd974c92/docs/evidence/W002/LEGACY_COMPATIBILITY.md#integrated-local-run).
 
 ### Complete run on 2026-11-26
 
-The authorized run below tested `77f432f03695bdb247289ba25743d3e274a4c81d` on the Windows workstation with Go 1.27.4 and the local Docker Desktop 29.4.0 Linux/amd64 daemon. It exited 0. All ten engine profiles passed 30 distinct driver cases and the four SQLite file cases passed. The driver report contains 33 passing rows because the SQLite file suite also reruns the three current SQLite driver cases. The repository validator, seven bootstrap tests, 32 Python lab tests and Go build, vet, test and module verification passed. No lab-owned containers remained after the run.
-
-```powershell
-pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -AcceptSqlServerEula -AcceptLegacySqlServerEula
-```
+The authorized run tested `77f432f03695bdb247289ba25743d3e274a4c81d` on the Windows workstation with Go 1.27.4 and the local Docker Desktop 29.4.0 Linux/amd64 daemon. It exited 0. All ten engine profiles passed 30 distinct driver cases and the four SQLite file cases passed. The driver report contains 33 passing rows because the SQLite file suite also reruns the three current SQLite driver cases. The repository validator, seven bootstrap tests, 32 Python lab tests and Go build, vet, test and module verification passed. No lab-owned containers remained after the run.
 
 | SQL Server Developer profile | Observed build | Database compatibility level | Commit and rollback | Unique code | Foreign-key code |
 | --- | --- | --- | --- | --- | --- |
 | 2017 | 14.0.3570.2, CU31 | 140 | PASS | 2627 | 547 |
 | 2019 | 15.0.4510.2, CU32 | 150 | PASS | 2627 | 547 |
 
-Both cells used go-mssqldb v1.11.0 and observed TCP, `READ COMMITTED`, `XACT_ABORT ON` and `Latin1_General_100_BIN2`. The driver module tree, lab tree and PowerShell blob listed above are identical to those used for this run. Application adapter conformance and SQL Server 2022 with compatibility level 140 retain separate gates.
+Both cells used go-mssqldb v1.11.0 and observed TCP, `READ COMMITTED`, `XACT_ABORT ON` and `Latin1_General_100_BIN2`. The driver module tree, lab tree and historical CI script blob listed above are identical to those used for this run. Application adapter conformance and SQL Server 2022 with compatibility level 140 retain separate gates.
 
 ## PostgreSQL 19 and SQL Server 2022 at level 140
 
@@ -78,15 +70,11 @@ The first integrated run on `f5257ab9677a316db66bbe9711db0a87f310cb79` passed th
 
 ### Complete expanded run on 2026-11-26
 
-On `17bb049c5e7eb1e5f53da312c6bf1cc10904e244`, the focused SQL Server 2017 run passed all three scenarios. The complete run below then exited 0 on the Windows workstation with Go 1.27.4 and local Docker Desktop 29.4.0 Linux/amd64. There were 36 distinct driver cases across 12 profiles and four SQLite file cases. All passed. The report contains 39 driver rows because the SQLite file suite reruns the three current SQLite driver cases.
-
-```powershell
-pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -AcceptSqlServerEula -AcceptLegacySqlServerEula
-```
+On `17bb049c5e7eb1e5f53da312c6bf1cc10904e244`, the focused SQL Server 2017 run passed all three scenarios. The complete run then exited 0 on the Windows workstation with Go 1.27.4 and local Docker Desktop 29.4.0 Linux/amd64. There were 36 distinct driver cases across 12 profiles and four SQLite file cases. All passed. The report contains 39 driver rows because the SQLite file suite reruns the three current SQLite driver cases.
 
 The repository validator, seven bootstrap tests, 34 Python lab tests and Go build, vet, test and module checks passed. The primary driver's unit tests also passed separately with `go test -mod=vendor -race -count=1 -shuffle=on ./...` on the same Go test tree in a local Linux/amd64 container. No lab-owned containers remained after the complete run.
 
-The exact driver module tree is `34d63265c8440e604d56bc1976a8dca5455e2fe3`, the lab tree is `bd6de92664eb31d5b42cca8881632674414864f1`, and the PowerShell blob is `de4baac6e9b206bb3fb5ca95aab0a985fd56f341`. The published evidence uses the same executable artifacts.
+The exact driver module tree is `34d63265c8440e604d56bc1976a8dca5455e2fe3`, the lab tree is `bd6de92664eb31d5b42cca8881632674414864f1`, and the historical CI script blob is `de4baac6e9b206bb3fb5ca95aab0a985fd56f341`. The published evidence uses the same executable artifacts.
 
 ## SQLite minimum runtime
 
@@ -102,11 +90,7 @@ On 2026-11-26 UTC, a standalone Context7 4.7.3 documentation query used protocol
 
 The focused file run used `python -B test/conformance/lab/sqlite_compat.py`. The arithmetic-only fixture could produce only integers. With the new datatype assertion, that fixture failed at the first file mutation with exit 1. After the fixture deliberately generated a noncoercible value, the command exited 0 on implementation revision `50ebfcc468a451254be97e3016a56f151f0e79ef` with six passing driver rows and four passing file cases.
 
-The following command then exited 0 on integrated revision `07038da670a3e26871d0312d792f92d68ab72ede` on 2026-11-26. The Windows/amd64 workstation used Go 1.27.4, Python 3.14.4 and PowerShell 7.6.9. Server cases used the workstation's Docker Desktop 29.4.0 Linux/amd64 daemon.
-
-```powershell
-pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -AcceptSqlServerEula -AcceptLegacySqlServerEula
-```
+The integrated local CI run then exited 0 on integrated revision `07038da670a3e26871d0312d792f92d68ab72ede` on 2026-11-26. The Windows/amd64 workstation used Go 1.27.4 and Python 3.14.4. Server cases used the workstation's Docker Desktop 29.4.0 Linux/amd64 daemon.
 
 | File sequence | DELETE journal | WAL journal |
 | --- | --- | --- |
@@ -115,11 +99,29 @@ pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -AcceptSqlServerEu
 
 The report identified `sqlite-3.51` as the minimum, observed the same source IDs and compile options listed above, and recorded 36 distinct driver cases across 12 profiles and four file cases. The 39 reported driver rows include the three repeated current SQLite cases. The repository validator, seven bootstrap tests, 35 Python lab tests and Go build, vet, test and module checks passed. The primary driver's unit tests also passed with `go test -mod=vendor -race -count=1 -shuffle=on ./...` in a local Linux/amd64 container. The lab removed its containers after the run.
 
-The exact driver module tree is `951054e5683db030a5e20e31cc399cff79ad0fce`, lab tree `0806db6023667fca2090f55495d971ad8b3b1a85` and PowerShell blob `38b02e2f725808f251cffeab274d68b1db9a0125`. The evidence commit preserves these executable artifacts.
+The exact driver module tree is `951054e5683db030a5e20e31cc399cff79ad0fce`, lab tree `0806db6023667fca2090f55495d971ad8b3b1a85` and historical CI script blob `38b02e2f725808f251cffeab274d68b1db9a0125`. The evidence commit preserves these executable artifacts.
+
+## Repeat the compatibility matrix
+
+Use the current Python runner from the repository root. Both consent flags require authorization for the selected SQL Server Developer editions. The [historical command records](https://github.com/igorpooh1978/GoEF/blob/c26e115e2f74029a66428a456e4bb36bfd974c92/docs/evidence/W002/LEGACY_COMPATIBILITY.md#integrated-local-run) preserve the original invocations and tool versions.
+
+```sh
+python -B scripts/ci/goef_w002.py --compatibility --accept-sqlserver-eula --accept-legacy-sqlserver-eula
+```
+
+### Python runner verification
+
+On 2026-11-26, the Python runner (Git blob `7336776be215668c13f8e7090e5f522027fc3774`) exited 0 on Windows/amd64 with Python 3.14.4, Go 1.27.4, and Docker 29.4.0 on Linux/amd64.
+
+```sh
+python -B scripts/ci/goef_w002.py --providers postgres sqlite mysql --compatibility --production-adapters --model-types --owned-tx --savepoint-tx --save-changes --tx-options --decimal-binding --commit-outcome
+```
+
+The run covered PostgreSQL 16.16, 17.12, 18.7 and 19.0, SQLite 3.51.3 and 3.54.1, and MySQL 8.0.46 and 8.4.13.1. It passed 102 Python unit tests, Go module checks, and the selected live scenarios, including SQLite file compatibility and interrupted rebuild. A separate SQL Server Developer selection without consent reported all four SQL Server profiles as blocked before provisioning. The Windows LocalDB quickstart and its typed-value, uniqueness and cancellation probes passed separately with the published adapter.
 
 ## Issue #31 acceptance
 
-The detached source revision `dc13ff64370f7e7348f0f7958dbf996819177a90` was verified on 2026-11-26 with Go 1.27.4, Python 3.14.4 and PowerShell 7.6.9 on Windows/amd64. The server scenarios used the local Docker 29.4.0 Linux/amd64 daemon.
+The detached source revision `dc13ff64370f7e7348f0f7958dbf996819177a90` was verified on 2026-11-26 with Go 1.27.4 and Python 3.14.4 on Windows/amd64. The server scenarios used the local Docker 29.4.0 Linux/amd64 daemon.
 
 | Evidence | Profiles | Results |
 | --- | --- | --- |
@@ -129,7 +131,7 @@ The detached source revision `dc13ff64370f7e7348f0f7958dbf996819177a90` was veri
 | `python -B test/conformance/lab/sqlite_wal_recovery.py` | `sqlite-3.51` → `sqlite-3.54` and the reverse | Exit 0. Both peer runtimes recovered and checkpointed the committed WAL after the originating process exited. The originating runtime then reopened the checkpointed file in each direction. [Recovery evidence](SQLITE_WAL_RECOVERY.md) |
 | [Published authorized matrix run](../W003/DECIMAL_SQL_BINDING.md#real-engine-catalog-and-value-checks) | `sqlserver-2017`, `sqlserver-2019`, `sqlserver-2022-140`, `sqlserver-2022` | All 28 SQL Server driver scenario rows passed at `acd3c5a6250b80dcd716630291174c4dfb93dcce`. |
 
-`git diff --name-status acd3c5a dc13ff6` lists only two Markdown files. Both revisions have the same driver module tree (`74c7f0445a8a6d0a01b627438a9e36d884f9c513`), lab tree (`2a6c7254c6837aa241b7527a097b194e71b7af58`) and local PowerShell runner blob (`7214dda39ac437513827123f15bde41031d1ea04`). The prior run therefore exercised the same executable source and pins. The current review used the recorded SQL Server build, compatibility-level and feature-gate evidence. A fresh SQL Server invocation requires separate local consent.
+`git diff --name-status acd3c5a dc13ff6` lists only two Markdown files. Both revisions have the same driver module tree (`74c7f0445a8a6d0a01b627438a9e36d884f9c513`), lab tree (`2a6c7254c6837aa241b7527a097b194e71b7af58`) and historical local CI script blob (`7214dda39ac437513827123f15bde41031d1ea04`). The prior run therefore exercised the same executable source and pins. The current review used the recorded SQL Server build, compatibility-level and feature-gate evidence. A fresh SQL Server invocation requires separate local consent.
 
 `python -B test/bootstrap/verify.py` exited 0 and validated 76 Gherkin scenarios. `python -B -m unittest discover -s test/conformance/lab -p 'test*.py'` exited 0 with 78 tests.
 

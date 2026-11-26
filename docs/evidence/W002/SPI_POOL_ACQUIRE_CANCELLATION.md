@@ -12,8 +12,10 @@ The new outline first failed discovery because it had no step binding. In a focu
 
 The full matrix ran at executable revision `3733fa7309484b9645b984536a3ec49989201fbd` on the Windows/amd64 workstation with Go 1.27.4 and the local Docker Desktop Linux/amd64 daemon. It exited 0.
 
-```powershell
-pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -AcceptSqlServerEula -AcceptLegacySqlServerEula
+To select the full matrix with the current Python runner, run the following command from the repository root.
+
+```sh
+python -B scripts/ci/goef_w002.py --compatibility --accept-sqlserver-eula --accept-legacy-sqlserver-eula
 ```
 
 The 12 profiles passed 84 distinct driver cases. The log contains 91 passing driver rows because the file suite also runs the seven driver cases on SQLite 3.54.1. All four SQLite file cases passed. Every profile reported `context.Canceled`, exactly one queued acquisition and zero occupied connections after the control query. The repository validator, seven bootstrap tests, 47 Python lab tests and Go build, vet, test and module checks passed. Tests and vet also passed with the SQLite minimum lockfile and build tag.

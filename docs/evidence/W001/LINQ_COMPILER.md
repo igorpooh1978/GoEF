@@ -21,20 +21,24 @@ Each command below ran from the fixture module and exited 1 as expected. The [re
 
 ## Reproduce
 
-Start in the repository root using PowerShell.
+Run the following Python snippet from the repository root.
 
-```powershell
-Set-Location test/architecture/linq-compile
-$env:GOWORK = 'off'
-$env:GOPROXY = 'off'
-$env:GOTOOLCHAIN = 'local'
-go version
-gofmt -l .
-go list -m all
-go build ./...
-go vet ./...
-go test -count=1 -shuffle=1795629201175056800 -cover ./...
-go test -race -count=1 -shuffle=on ./...
+```python
+import os
+import subprocess
+
+env = dict(os.environ, GOWORK="off", GOPROXY="off", GOTOOLCHAIN="local")
+directory = "test/architecture/linq-compile"
+for command in (
+    ["go", "version"],
+    ["gofmt", "-l", "."],
+    ["go", "list", "-m", "all"],
+    ["go", "build", "./..."],
+    ["go", "vet", "./..."],
+    ["go", "test", "-count=1", "-shuffle=1795629201175056800", "-cover", "./..."],
+    ["go", "test", "-race", "-count=1", "-shuffle=on", "./..."],
+):
+    subprocess.run(command, cwd=directory, env=env, check=True)
 ```
 
 | Observed command | Exit | Result |
@@ -44,7 +48,7 @@ go test -race -count=1 -shuffle=on ./...
 | `go list -m all` | 0 | Only `example.invalid/goef/linq-compile`. |
 | `go build ./...`, `go vet ./...` | 0 each | Package builds and vet passes. |
 | `go test -count=1 -shuffle=on -cover -v ./...` | 0 | Three tests, 15 named subtests, 95.5% fixture statement coverage. The fixed-seed command above reproduced the result. |
-| `go test -race -count=1 -shuffle=on ./...` | 2 | The integrated Windows recheck stopped before tests with the host's `CGO_ENABLED=0`. A second run with `$env:CGO_ENABLED = '1'` exited 1 because the configured `gcc` was absent from PATH. Race evidence needs a compatible runner. |
+| `go test -race -count=1 -shuffle=on ./...` | 2 | The integrated Windows recheck stopped before tests with the host's `CGO_ENABLED=0`. A second run with `CGO_ENABLED=1` exited 1 because the configured `gcc` was absent from PATH. Race evidence needs a compatible runner. |
 
 ## Scope of the proposal
 

@@ -11,7 +11,7 @@ These examples run against the published GoEF and adapter modules at `v0.1.0-alp
 | SQL Server Express LocalDB | [Windows named-pipe query](../README.md#sql-server-express-localdb) | [LocalDB adapter code](testdata/alpha-quickstart/sqlserver/adapter.go) |
 | MySQL | [Parameterized query](../README.md#mysql) | [MySQL adapter code](testdata/alpha-quickstart/mysql/adapter.go) |
 
-PostgreSQL, LocalDB, and MySQL use the same [main.go](testdata/alpha-quickstart/main.go). Pair it with the adapter code for your database. Each query returns `42`.
+PostgreSQL, LocalDB, and MySQL share [main.go](testdata/alpha-quickstart/main.go) and a [Python launcher](testdata/alpha-quickstart/run.py). Use both files with the adapter code for your database. Each query returns `42`.
 
 ## GoLINQ and generated bindings
 

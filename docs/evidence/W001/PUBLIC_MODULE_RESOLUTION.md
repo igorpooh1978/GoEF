@@ -16,31 +16,43 @@ A fresh temporary consumer module outside the GoEF checkout used Go 1.27.4 on Wi
 
 ## Consumer check
 
-From the empty consumer directory, these commands initialized the module and resolved the SHA. Each exited 0.
+The original module initialization and SHA resolution commands each exited 0. Run this Python snippet from an empty consumer directory to repeat them.
 
-```powershell
-$env:GOWORK = 'off'
-$env:GOTOOLCHAIN = 'local'
-$env:GOPROXY = 'https://proxy.golang.org'
-$env:GOSUMDB = 'sum.golang.org'
-$env:GOPRIVATE = ''
-$env:GONOPROXY = 'none'
-$env:GONOSUMDB = 'none'
-$env:GOMODCACHE = Join-Path (Get-Location) 'modcache'
-go mod init example.com/goef-issue24-consumer
-go mod download -json github.com/igorpooh1978/GoEF@7a08d90b215d11904109b109c1381ba19c881f35
-go get github.com/igorpooh1978/GoEF@7a08d90b215d11904109b109c1381ba19c881f35
+```python
+import os
+import subprocess
+from tempfile import TemporaryDirectory
+
+module = "github.com/igorpooh1978/GoEF@7a08d90b215d11904109b109c1381ba19c881f35"
+env = dict(
+    os.environ,
+    GOWORK="off",
+    GOTOOLCHAIN="local",
+    GOPROXY="https://proxy.golang.org",
+    GOSUMDB="sum.golang.org",
+    GOPRIVATE="",
+    GONOPROXY="none",
+    GONOSUMDB="none",
+)
+with TemporaryDirectory(prefix="goef-consumer-modcache-") as cache:
+    env["GOMODCACHE"] = cache
+    for arguments in (
+        ["mod", "init", "example.com/goef-issue24-consumer"],
+        ["mod", "download", "-json", module],
+        ["get", module],
+    ):
+        subprocess.run(["go", *arguments], env=env, check=True)
 ```
 
 The consumer imported `github.com/igorpooh1978/GoEF/linq/objects` and called `objects.First(objects.Where(slices.Values(values), isEven))` from an ordinary Go source file. `TestFirstEven` checked that `[3, 8, 10]` returns `(8, true)` and `[3, 7]` returns `(0, false)`.
 
-With those files present, `go mod tidy`, `go mod verify`, `go build -mod=readonly ./...`, `go vet -mod=readonly ./...` and `go test -mod=readonly -count=1 -v ./...` all exited 0. `go list -m -json github.com/igorpooh1978/GoEF` confirmed the expected version, Go 1.27.4 and an unset replacement.
+In the original run, with those files present, `go mod tidy`, `go mod verify`, `go build -mod=readonly ./...`, `go vet -mod=readonly ./...` and `go test -mod=readonly -count=1 -v ./...` all exited 0. `go list -m -json github.com/igorpooh1978/GoEF` confirmed the expected version, Go 1.27.4 and an unset replacement.
 
 ## Repeatable public consumer check
 
 Run [the public module verifier](../../../test/architecture/public-module/verify.py) from the repository root with Python 3.11 or newer and Go 1.27.4. It uses a fresh consumer directory and module cache, the public Go proxy and checksum database, and normal module mode with workspaces disabled. It checks the downloaded module path, origin SHA, both checksums, and the selected dependency with its replacement field unset. It runs tidy, module verification, a read-only build and vet, then executes a [small consumer program](../../../test/architecture/public-module/consumer.go.txt) that filters a local sequence and lists a pending migration.
 
-```powershell
+```sh
 python -B test/architecture/public-module/verify.py fdd22eef3d8ddc07aadef1a152cb20392b090c3f
 python -B test/architecture/public-module/verify.py fdd22eef3d8ddc07aadef1a152cb20392b090c3f --version v0.0.0-20261126152102-fdd22eef3d8d
 ```
@@ -59,7 +71,7 @@ The control used the same version with the earlier expected SHA `7a08d90b215d119
 
 The maintainer approved commit `9fcd036a3927b40e26381202c7f1b5aa4fb3d858` for the first public preview. GitHub published [GoEF v0.1.0-alpha.1](https://github.com/igorpooh1978/GoEF/releases/tag/v0.1.0-alpha.1) on 2026-11-26. The local annotated tag, the remote Git tag, and the GitHub tag API agreed on tag object `7fcd49f96a3aadb8b609b8c04d2acf16f27f5454` and the approved commit.
 
-```powershell
+```sh
 python -B test/architecture/public-module/verify.py 9fcd036a3927b40e26381202c7f1b5aa4fb3d858 --version v0.1.0-alpha.1 --generated-bindings
 ```
 

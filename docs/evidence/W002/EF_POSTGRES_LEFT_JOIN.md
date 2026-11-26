@@ -28,10 +28,17 @@ The verifier compared both arrays to each other and to the declared expected row
 
 The local evidence bundle `postgres-ef-pilot.zip` contains the scratch clients, verifier, seed, locked package list, build script and redacted reports. It was handed off outside Git. Its SHA-256 is `031598582d62a0b661e4cb548b3181af986d300cc2acd3faf9c933b27cbfe9af`. The EF source, pgx source and package-lock SHA-256 values are respectively `b8f144c99288b89949a64d3510d5129929df73a62bb300683e0f2396b7249cb2`, `2a82a90c98a4d35d20e328951e0bb151d347d9b166efe3df88ed100c5fb16977` and `146762d06d9f9de8058f13f3ba83c6c80e624dd746608ac37e7c78eb091c7f3e`.
 
-From the extracted bundle directory, set `$repo` to a local GoEF checkout containing the tested revision. With the recorded SDKs, cached package inputs and local image present, use:
+To rebuild and run the comparison with the recorded SDKs, cached packages, and pinned image, point the [Python pilot runner](../../../scripts/ci/ef_postgres_pilot.py) at the extracted bundle. It checks the inputs against the archived checksums and builds in a temporary directory.
 
-```powershell
-pwsh -NoProfile -File ./build-run.ps1 -Repository $repo
+```sh
+python -B scripts/ci/ef_postgres_pilot.py --bundle "path/to/extracted-bundle"
+```
+
+The Python replay exited 0 on PostgreSQL 18.7 on 2026-11-26. It reproduced both ordered result sets, preserved the seed rows, confirmed the negative comparator exited 1, and removed its container. Missing and modified archive inputs were rejected before either build.
+
+To check the archived results directly, run the verifier commands from the extracted bundle directory.
+
+```sh
 python -B verify.py ef-1.json pgx-1.json 1
 python -B verify.py ef-2.json pgx-2.json 2
 python -B verify.py negative-edited.json pgx-1.json 1

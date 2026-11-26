@@ -29,4 +29,4 @@ The workstation built one test binary per host target with `driver_run.build_bin
 | SQL Server Developer | 14.0.3570.2 at 140, 15.0.4510.2 at 150, 16.0.4325.4 at 140 and 160 | go-mssqldb v1.11.0 |
 | MySQL | 8.0.46 and 8.4.13.1 | go-sql-driver/mysql v1.10.0 |
 
-Run the same selectors from the workstation with `pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -ModelTypes -OwnedTx -SavepointTx -SaveChanges -AcceptSqlServerEula -AcceptLegacySqlServerEula`.
+Run the same selectors from the workstation with `python -B scripts/ci/goef_w002.py --compatibility --model-types --owned-tx --savepoint-tx --save-changes --accept-sqlserver-eula --accept-legacy-sqlserver-eula`.

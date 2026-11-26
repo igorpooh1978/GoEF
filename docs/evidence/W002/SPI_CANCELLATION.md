@@ -12,12 +12,14 @@ The adapter checks the query context before exposing buffered data and also chec
 
 ## Local run on 2026-11-26
 
-The scenario lane first observed a failure from the missing S04 binding. A separate negative control used SQLite 3.54.1 and a temporary adapter that returned `io.EOF` on cancellation. S04 failed with exit 1 and emitted no passing scenario record. Python and PowerShell checks also reject an omitted S04, invalid context cause, nonzero pool use or an unexpected native code.
+The scenario lane first observed a failure from the missing S04 binding. A separate negative control used SQLite 3.54.1 and a temporary adapter that returned `io.EOF` on cancellation. S04 failed with exit 1 and emitted no passing scenario record. Both levels of historical report validation also rejected an omitted S04, invalid context cause, nonzero pool use or an unexpected native code.
 
 The complete local command exited 0 on `8ca2d289acf004a67a09e624c027adbe04e318ab`. The Windows/amd64 workstation used Go 1.27.4 and its local Docker Desktop Linux/amd64 daemon for server fixtures.
 
-```powershell
-pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -AcceptSqlServerEula -AcceptLegacySqlServerEula
+To select the full matrix with the current Python runner, run the following command from the repository root.
+
+```sh
+python -B scripts/ci/goef_w002.py --compatibility --accept-sqlserver-eula --accept-legacy-sqlserver-eula
 ```
 
 | Engine | Verified profiles for S04 | Result |
@@ -29,7 +31,7 @@ pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -Compatibility -AcceptSqlServerEu
 
 All 12 profiles reported `context.Canceled` and zero occupied connections. The full run passed 48 distinct driver cases and the four SQLite file cases. The 52 driver rows include the four repeated current SQLite cases. The repository validator, seven bootstrap tests, 38 Python lab tests and Go build, vet, test and module checks passed. A separate local Go test and vet passed with the SQLite minimum module file and build tag. The primary driver's unit tests also passed with `go test -mod=vendor -race -count=1 -shuffle=on ./...` in an isolated local Linux/amd64 container. No lab-owned containers remained after the matrix.
 
-The exact driver module tree is `7f90e1bd88e73a7f0352c08024de2a80415006de`, lab tree `6e325cd4580e4a86686a87f8c474a66f50cf92a9`, PowerShell blob `8f77cdf96f0ee6b68ca75d0e16e6321ef3111479` and provider SPI tree `c335b07d4a32061204c22af28efdafb8d4ffb49d`. The evidence commit preserves these executable artifacts.
+The exact driver module tree is `7f90e1bd88e73a7f0352c08024de2a80415006de`, lab tree `6e325cd4580e4a86686a87f8c474a66f50cf92a9`, historical CI script blob `8f77cdf96f0ee6b68ca75d0e16e6321ef3111479` and provider SPI tree `c335b07d4a32061204c22af28efdafb8d4ffb49d`. The evidence commit preserves these executable artifacts.
 
 ## Lock-wait follow-up
 

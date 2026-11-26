@@ -4,9 +4,9 @@ The W001 design lane for [issue #12](https://github.com/igorpooh1978/GoEF/issues
 
 ## Reproduce the isolated checks
 
-Run this PowerShell command from the repository root. It extracts the Python block below and executes it using the local interpreter. The Go source files are synthetic type shapes. The empty query methods establish assignability only. The adapter also checks that an ordinary interface call preserves a plan field across module boundaries.
+Run this command from the repository root. It extracts the Python block below and executes it using the local interpreter. The Go source files are synthetic type shapes. The empty query methods establish assignability only. The adapter also checks that an ordinary interface call preserves a plan field across module boundaries.
 
-```powershell
+```sh
 python -c "from pathlib import Path; s=Path('docs/evidence/W001/ARCHITECTURE.md').read_text(encoding='utf-8'); exec(s.split(chr(96)*3+'python'+chr(10),1)[1].split(chr(10)+chr(96)*3,1)[0])"
 ```
 
