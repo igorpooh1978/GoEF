@@ -37,6 +37,9 @@
         },
         "microsoftLearn": {
           "$ref": "#/$defs/server"
+        },
+        "firecrawl": {
+          "$ref": "#/$defs/server"
         }
       }
     },
@@ -194,7 +197,8 @@
         "server": {
           "enum": [
             "context7",
-            "microsoftLearn"
+            "microsoftLearn",
+            "firecrawl"
           ]
         },
         "engineVersion": {

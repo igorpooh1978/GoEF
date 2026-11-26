@@ -1,8 +1,8 @@
 # W000 provider documentation MCP evidence
 
-Tracking [W000 #1](https://github.com/igorpooh1978/GoEF/issues/1). Probes took place on 2026-11-25 UTC against baseline `2a886c78e622f583fa2980ea0a61a7e328a40e28`. The documentation transport and topic lookups passed for all four providers. Exact release provenance passed for two. PostgreSQL and MySQL exact MCP provenance remain blocked. GoEF engine behavior, permissions and client operation with enabled project configuration remain untested.
+Tracking [W000 #1](https://github.com/igorpooh1978/GoEF/issues/1). Probes took place on 2026-11-25 UTC against baseline `2a886c78e622f583fa2980ea0a61a7e328a40e28`. In the original run, documentation transport and topic lookups passed for all four providers. Exact release provenance passed for SQLite and SQL Server. GoEF engine behavior, permissions and enabled project client operation were outside that run.
 
-The post-publication [PostgreSQL recheck](MCP_POSTGRES_RECHECK.md) found exact 18.7 tagged documentation in a read-only GitHub MCP fetch. The dedicated route still lacks exact coverage. The [MySQL recheck](MCP_MYSQL_RECHECK.md) corroborated 8.4.13.1 directly with Oracle and from the exact release's version file through GitHub MCP. The accessible documentation MCP route still serves only the 8.4 family.
+The 2026-11-26 [exact-release follow-up](MCP_EXACT_RELEASES.md) passed for the PostgreSQL and MySQL documentation scopes through a standalone Firecrawl MCP probe limited to public vendor pages. The previous [PostgreSQL](MCP_POSTGRES_RECHECK.md) and [MySQL](MCP_MYSQL_RECHECK.md) rechecks record the Context7 fallback and corroborating tagged source checks.
 
 ## Method and observed transport
 
@@ -45,7 +45,7 @@ At 17:25–17:27 UTC, broad Context7 resolution led to a catalog entry advertisi
 
 The official MCP Registry's public listing API was queried with `version=latest` and searches for `postgresql`, `mysql` and `context7`. It returned 3 PostgreSQL entries, 26 MySQL entries and 3 Context7-related entries, each with no next cursor. This bounded search did not identify another vendor-backed exact-version documentation route for PostgreSQL 18.7 or MySQL 8.4.13.1. Engine query and inspection entries were excluded from documentation readiness. The Context7 listings included a fork and a third-party wrapper. [Registry API reference](https://github.com/modelcontextprotocol/registry/blob/main/docs/reference/api/official-registry-api.md)
 
-Keep exact-version blockers on [#10](https://github.com/igorpooh1978/GoEF/issues/10) and [#11](https://github.com/igorpooh1978/GoEF/issues/11). [#8](https://github.com/igorpooh1978/GoEF/issues/8) and [#6](https://github.com/igorpooh1978/GoEF/issues/6) track remaining adoption, driver/engine pin and conformance work for SQLite and SQL Server. Project configuration remains pending for both documentation endpoints. The [matrix](../../parity/PROVIDER_MATRIX.md) records the four runtime cells separately.
+The [2026-11-26 follow-up](MCP_EXACT_RELEASES.md) supplies the exact-version evidence for [#10](https://github.com/igorpooh1978/GoEF/issues/10) and [#11](https://github.com/igorpooh1978/GoEF/issues/11). [#8](https://github.com/igorpooh1978/GoEF/issues/8) and [#6](https://github.com/igorpooh1978/GoEF/issues/6) track remaining adoption, driver/engine pin and conformance work for SQLite and SQL Server. Project configuration remains pending for both documentation endpoints. The [matrix](../../parity/PROVIDER_MATRIX.md) records the four runtime cells separately.
 
 ## Optional inspection candidates
 

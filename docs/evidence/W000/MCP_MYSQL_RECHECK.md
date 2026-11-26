@@ -2,6 +2,8 @@
 
 Tracking [#11](https://github.com/igorpooh1978/GoEF/issues/11) under [W000 #1](https://github.com/igorpooh1978/GoEF/issues/1). The 2026-11-25 UTC recheck used baseline `c789602e46c7063e6c0f1ddbfec68bc22c2dbb75` in `BOOTSTRAP_ONLY` mode. The candidate is Oracle MySQL 8.4.13.1 LTS with InnoDB and `github.com/go-sql-driver/mysql` v1.10.0. The MySQL 8.4 implicit-commit lookup passed. The exact Oracle release documentation lookup is `BLOCKED`. [Initial probe](MCP_REPORT.md#mysql) · [MCP policy](../../development/MCP_POLICY.md)
 
+The [2026-11-26 exact-release follow-up](MCP_EXACT_RELEASES.md) passed through a different standalone documentation MCP route. The observations below record the 2026-11-25 probes.
+
 ## Documentation MCP transport and calls
 
 At 17:56:05 UTC, a Python 3.14.4 standard-library one-shot client posted JSON-RPC `initialize` with protocol `2025-06-18`, empty client capabilities and `Accept: application/json, text/event-stream` to `https://mcp.context7.com/mcp`. The endpoint returned HTTP 200 SSE and identified itself as Context7 4.7.3 with protocol `2025-06-18`. It issued no session header. `notifications/initialized` returned HTTP 202. `tools/list` returned HTTP 200 SSE with `resolve-library-id` and `query-docs`, both annotated read-only and idempotent. The client included `MCP-Protocol-Version: 2025-06-18` on post-initialize requests, matched SSE responses by JSON-RPC ID, and exited 0. [Context7 publisher documentation](https://context7.com/docs/resources/all-clients) · [Streamable HTTP specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports)

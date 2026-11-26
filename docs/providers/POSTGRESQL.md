@@ -17,6 +17,6 @@ Tracking [#10](https://github.com/igorpooh1978/GoEF/issues/10). W000 research ce
 
 Record the actual server version, driver version, runner, image digest, schema/search path, collation, time zone and connection mode. Verify concurrent DDL failure/recovery, generated values, and transaction behavior on the same physical connection. Run the shared transaction isolation and retry scenarios `TX-ISOLATION-001-S01` and `TX-RETRY-001-S01`.
 
-Context7 corroborated the concurrent index transaction boundary for PostgreSQL 18. The explicit 18.7 selector fell back to major version 18 and returned 18.6 markers. A read-only GitHub MCP file lookup confirmed the release date and the transaction boundary in the official PostgreSQL 18.7 tag. The documentation-only MCP route remains blocked under [#10](https://github.com/igorpooh1978/GoEF/issues/10). [Recheck evidence](../evidence/W000/MCP_POSTGRES_RECHECK.md)
+A standalone Firecrawl MCP check returned the exact 18.7 release note and the applicable PostgreSQL 18 sections on concurrent index builds, isolation and SQLSTATE. Tagged vendor source independently corroborates the release and concurrent index restriction. [Exact-release evidence](../evidence/W000/MCP_EXACT_RELEASES.md) · [Tagged source check](../evidence/W000/MCP_POSTGRES_RECHECK.md)
 
 The W002 local driver suite covers PostgreSQL 16.16, 17.12, 18.7 and 19.0 with pgx v5.13.0. It verifies commit and rollback and the uniqueness and foreign-key cases. [Local run evidence](../evidence/W002/LEGACY_COMPATIBILITY.md#postgresql-19-and-sql-server-2022-at-level-140)

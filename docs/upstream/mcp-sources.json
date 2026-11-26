@@ -56,25 +56,51 @@
         "https://learn.microsoft.com/en-us/training/support/mcp-faq"
       ],
       "auditScope": "First-party endpoint, developer reference, release notes and live tool schema; allowlisted docs search and fetch. Hosted implementation remains outside this probe."
+    },
+    "firecrawl": {
+      "publisher": "Firecrawl",
+      "endpoint": "https://mcp.firecrawl.dev/v2/mcp",
+      "purpose": "documentation",
+      "transport": "streamable_http",
+      "advertisedServerVersion": "3.41.0",
+      "negotiatedProtocolVersion": "2025-06-18",
+      "discovery": "DISCOVERED",
+      "audit": "AUDITED",
+      "configuration": "NOT_CONFIGURED",
+      "handshake": "HANDSHAKE_PASS",
+      "discoveredTools": [
+        "firecrawl_scrape",
+        "firecrawl_search",
+        "firecrawl_parse"
+      ],
+      "allowedTools": [
+        "firecrawl_scrape"
+      ],
+      "auditSources": [
+        "https://docs.firecrawl.dev/mcp-server",
+        "https://github.com/firecrawl/firecrawl-mcp-server",
+        "https://github.com/firecrawl/firecrawl-mcp-server/releases",
+        "https://github.com/firecrawl/firecrawl-mcp-server/security"
+      ],
+      "auditScope": "Standalone anonymous HTTPS probe restricted to the seven public vendor URLs in the exact-release evidence report. Only the live read-only page fetch was called. Hosted internals and client adoption were outside the probe."
     }
   },
   "providers": {
     "postgres": {
       "issue": "https://github.com/igorpooh1978/GoEF/issues/10",
-      "server": "context7",
+      "server": "firecrawl",
       "engineVersion": "18.7",
       "driver": {
         "module": "github.com/jackc/pgx/v5",
         "version": "v5.13.0"
       },
-      "lastVerified": "2026-11-25",
+      "lastVerified": "2026-11-26",
       "lookup": "DOC_LOOKUP_PASS",
-      "tool": "query-docs",
-      "selector": "/websites/postgresql/18",
-      "versionMatch": "BLOCKED",
-      "topicEvidence": "The PostgreSQL 18 CREATE INDEX manual section returned and agreed with the direct section on concurrent builds and transaction blocks.",
-      "versionEvidence": "Context7 explicitly fell back from 18.7 to major 18. Its release index and Appendix A identify 18.6. A separate read-only GitHub MCP fetch retrieved the official release notes and CREATE INDEX source at REL_18_7 commit f5c41f6681c910b3f69951bf6fb97c6d74605d25.",
-      "blocker": "The dedicated Context7 documentation route has no exact PostgreSQL 18.7 corpus. Tagged source retrieval does not refresh that route.",
+      "tool": "firecrawl_scrape",
+      "selector": "https://www.postgresql.org/docs/18/release-18-7.html",
+      "versionMatch": "VERSION_MATCH_PASS",
+      "topicEvidence": "The PostgreSQL 18 manual corroborated the concurrent index transaction boundary, the isolation choices and SQLSTATE 40001 and 40P01.",
+      "versionEvidence": "Firecrawl returned the official PostgreSQL release note for 18.7 dated 2026-11-12. Its source and final URLs matched the requested exact release page. The direct vendor page and official tagged documentation corroborated the release identity.",
       "fallback": {
         "topic": "https://www.postgresql.org/docs/18/sql-createindex.html#SQL-CREATEINDEX-CONCURRENTLY",
         "release": "https://www.postgresql.org/docs/release/18.7/",
@@ -133,20 +159,19 @@
     },
     "mysql": {
       "issue": "https://github.com/igorpooh1978/GoEF/issues/11",
-      "server": "context7",
+      "server": "firecrawl",
       "engineVersion": "8.4.13.1",
       "driver": {
         "module": "github.com/go-sql-driver/mysql",
         "version": "v1.10.0"
       },
-      "lastVerified": "2026-11-25",
+      "lastVerified": "2026-11-26",
       "lookup": "DOC_LOOKUP_PASS",
-      "tool": "query-docs",
-      "selector": "/websites/dev_mysql_doc_refman_en/8.4",
-      "versionMatch": "BLOCKED",
-      "topicEvidence": "The Oracle MySQL 8.4 implicit commit section matched the direct manual on DDL boundaries.",
-      "versionEvidence": "Context7 advertises 8.4 and 8.0. Its exact, URL-qualified request returned the 8.4 manual rather than the 8.4.13.1 release note. Oracle's direct release note identifies the 2026-11-24 update. The alternate keyless hosted endpoints returned HTTP 403 before tool discovery. A separate read-only GitHub MCP request retrieved MYSQL_VERSION at the vendor tag's immutable commit and confirmed 8.4.13.1 LTS. That file does not contain the Oracle release note.",
-      "blocker": "The exact MySQL 8.4.13.1 release was not returned through an accessible documentation MCP route.",
+      "tool": "firecrawl_scrape",
+      "selector": "https://dev.mysql.com/doc/relnotes/mysql/8.4/en/news-8-4-13-1.html",
+      "versionMatch": "VERSION_MATCH_PASS",
+      "topicEvidence": "The Oracle MySQL 8.4 manual corroborated the implicit DDL commit boundary and the default InnoDB isolation.",
+      "versionEvidence": "Firecrawl returned the official Oracle release note for 8.4.13.1 dated 2026-11-24. Its source and final URLs matched the requested exact release page. The direct vendor page and official tagged version file corroborated the release identity.",
       "fallback": {
         "topic": "https://dev.mysql.com/doc/refman/8.4/en/implicit-commit.html",
         "release": "https://dev.mysql.com/doc/relnotes/mysql/8.4/en/news-8-4-13-1.html",
