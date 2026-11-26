@@ -3,6 +3,7 @@ package driverlab
 import (
 	"context"
 	"database/sql"
+	"database/sql/driver"
 	"errors"
 	"os"
 	"strings"
@@ -14,6 +15,7 @@ import (
 
 type fixture struct {
 	db                         *sql.DB
+	connector                  driver.Connector
 	bind                       func(int) string
 	code                       func(error) string
 	uniqueCode, foreignKeyCode string

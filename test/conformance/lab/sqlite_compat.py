@@ -12,7 +12,8 @@ from tempfile import TemporaryDirectory
 from driver_run import (
     ACQUIRE_CANCELLATION_SCENARIO, CANCELLATION_SCENARIO, LOCK_TIMEOUT_SCENARIO, MODULE,
     PRE_DISPATCH_SCENARIO, RESULT_PREFIX, SCENARIOS, driver_test_options,
-    verified_acquire_cancellation_facts, verified_cancellation_facts, verified_decimal_binding_result,
+    verified_acquire_cancellation_facts, verified_cancellation_facts, verified_commit_outcome_results,
+    verified_decimal_binding_result,
     verified_lock_timeout_facts, verified_model_type_result, verified_owned_tx_result, verified_pre_dispatch_facts,
     verified_save_changes_results, verified_savepoint_tx_results, verified_tx_options_result,
 )
@@ -214,10 +215,11 @@ def verified_driver_results(output, name, profile):
 
 
 def run_driver(tempdir, binary, name, profile, *, model_types, owned_tx, savepoint_tx,
-               save_changes=False, tx_options=False, decimal_binding=False):
+               save_changes=False, tx_options=False, decimal_binding=False, commit_outcome=False):
     test_args, env = driver_test_options(
         model_types=model_types, owned_tx=owned_tx, savepoint_tx=savepoint_tx,
         save_changes=save_changes, tx_options=tx_options, decimal_binding=decimal_binding,
+        commit_outcome=commit_outcome,
     )
     env.update(GOEF_DRIVERLAB_PROVIDER="sqlite", GOEF_DRIVERLAB_PROFILE=name)
     output = command(
@@ -236,6 +238,8 @@ def run_driver(tempdir, binary, name, profile, *, model_types, owned_tx, savepoi
         extras["tx_options"] = [verified_tx_options_result(output, "sqlite", name, profile.engine_version)]
     if decimal_binding:
         extras["decimal_binding"] = [verified_decimal_binding_result(output, "sqlite", name, profile.engine_version)]
+    if commit_outcome:
+        extras["commit_outcome"] = verified_commit_outcome_results(output, "sqlite", name, profile.engine_version)
     return verified_driver_results(output, name, profile), extras
 
 
@@ -260,7 +264,7 @@ def run_exchange_stage(directory, binary, profile, journal, stage, token):
 
 
 def run_lab(tempdir, report, *, model_types=False, owned_tx=False, savepoint_tx=False,
-            save_changes=False, tx_options=False, decimal_binding=False):
+            save_changes=False, tx_options=False, decimal_binding=False, commit_outcome=False):
     report["phase"] = "SQLite file feature discovery"
     examples = parse_file_feature(FILE_FEATURE.read_text(encoding="utf-8"))
     binaries = {}
@@ -272,6 +276,7 @@ def run_lab(tempdir, report, *, model_types=False, owned_tx=False, savepoint_tx=
             tempdir, binaries[name], name, profile,
             model_types=model_types, owned_tx=owned_tx, savepoint_tx=savepoint_tx,
             save_changes=save_changes, tx_options=tx_options, decimal_binding=decimal_binding,
+            commit_outcome=commit_outcome,
         )
         report["profiles"][name] = {
             "engine_version": profile.engine_version,
@@ -315,6 +320,7 @@ def main(argv=None):
     parser.add_argument("--save-changes", action="store_true", help="also run SaveChanges transaction scenarios")
     parser.add_argument("--tx-options", action="store_true", help="also verify transaction isolation options")
     parser.add_argument("--decimal-binding", action="store_true", help="also verify exact decimal storage round trips")
+    parser.add_argument("--commit-outcome", action="store_true", help="also verify synthetic commit outcome faults")
     args = parser.parse_args(argv)
     report = {
         "status": "FAIL", "go_version": GO_VERSION, "minimum_profile": MINIMUM_PROFILE, "profiles": {},
@@ -324,7 +330,7 @@ def main(argv=None):
         with TemporaryDirectory(prefix="goef-sqlite-compat-") as directory:
             run_lab(Path(directory), report, model_types=args.model_types, owned_tx=args.owned_tx,
                     savepoint_tx=args.savepoint_tx, save_changes=args.save_changes, tx_options=args.tx_options,
-                    decimal_binding=args.decimal_binding)
+                    decimal_binding=args.decimal_binding, commit_outcome=args.commit_outcome)
             report["phase"] = "cleanup"
     except Blocked as error:
         report.update(status="BLOCKED", reason=safe_reason(error))

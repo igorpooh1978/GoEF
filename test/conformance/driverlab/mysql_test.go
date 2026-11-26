@@ -113,6 +113,7 @@ func openMySQL(t *testing.T) fixture {
 
 	return fixture{
 		db:             db,
+		connector:      connector,
 		bind:           func(int) string { return "?" },
 		code:           mysqlDriverCode,
 		uniqueCode:     "1062/23000",

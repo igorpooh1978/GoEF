@@ -131,6 +131,7 @@ func openSQLServer(t *testing.T) fixture {
 
 	testFixture := fixture{
 		db:             db,
+		connector:      connector,
 		bind:           func(n int) string { return "@p" + strconv.Itoa(n) },
 		code:           sqlServerNativeCode,
 		uniqueCode:     "2627",

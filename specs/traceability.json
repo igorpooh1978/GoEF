@@ -1038,6 +1038,7 @@
       "scenarioId": "TX-OUTCOME-001-S01",
       "spec": "specs/features/transactions/tx-outcome-001.feature",
       "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/13",
         "https://github.com/igorpooh1978/GoEF/issues/2"
       ],
       "docs": [
@@ -1053,6 +1054,7 @@
       "scenarioId": "TX-OUTCOME-001-S02",
       "spec": "specs/features/transactions/tx-outcome-001.feature",
       "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/13",
         "https://github.com/igorpooh1978/GoEF/issues/2"
       ],
       "docs": [
@@ -1061,6 +1063,38 @@
       ],
       "test": null,
       "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-OUTCOME-001",
+      "scenarioId": "TX-OUTCOME-001-S03",
+      "spec": "specs/features/transactions/tx-outcome-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/13",
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": "test/conformance/driverlab/commit_outcome_test.go#TestCommitOutcome",
+      "evidence": "docs/evidence/W002/COMMIT_OUTCOME_FAULT.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-OUTCOME-001",
+      "scenarioId": "TX-OUTCOME-001-S04",
+      "spec": "specs/features/transactions/tx-outcome-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/13",
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": "test/conformance/driverlab/commit_outcome_test.go#TestCommitOutcome",
+      "evidence": "docs/evidence/W002/COMMIT_OUTCOME_FAULT.md",
       "status": "SPECIFIED"
     },
     {

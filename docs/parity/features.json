@@ -1910,7 +1910,8 @@
       },
       "wave": "W009",
       "issues": [
-        2
+        2,
+        13
       ],
       "dependencies": [
         "TX-OWN-001",
@@ -1952,11 +1953,17 @@
       },
       "scenarios": [
         "TX-OUTCOME-001-S01",
-        "TX-OUTCOME-001-S02"
+        "TX-OUTCOME-001-S02",
+        "TX-OUTCOME-001-S03",
+        "TX-OUTCOME-001-S04"
       ],
-      "tests": [],
-      "status": "SPECIFIED",
-      "deviations": [],
+      "tests": [
+        "test/conformance/driverlab/commit_outcome_test.go#TestCommitOutcome"
+      ],
+      "status": "PARTIAL",
+      "deviations": [
+        "A test-only driver completion fault covers the owned transaction outcome and staged values. Automatic tracker reconciliation retains separate acceptance."
+      ],
       "adr": null,
       "docs": [
         "docs/user/TRANSACTIONS.md",

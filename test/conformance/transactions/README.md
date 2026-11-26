@@ -24,6 +24,12 @@ Run the ordered `SaveChanges` fixture on the four default profiles with the foll
 pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -SaveChanges -AcceptSqlServerEula
 ```
 
+Run the owned commit acknowledgement fixture against the default four profiles. The Python selector is `--commit-outcome`. The compatibility flags above extend the same checks to the other pinned profiles. [Commit outcome fault evidence](../../../docs/evidence/W002/COMMIT_OUTCOME_FAULT.md)
+
+```powershell
+pwsh -NoProfile -File scripts/ci/goef-w002.ps1 -CommitOutcome -AcceptSqlServerEula
+```
+
 | Experiment | Coordination and assertions |
 | --- | --- |
 | Ownership and atomic save | Open two independent sessions. Confirm a committed insert survives and a rolled-back insert disappears. Force the second command of a graph save to fail after key generation. Verify actual parent/child counts, original versions, temporary keys and tracker states. Repeat inside an external transaction and observe its owner's subsequent commit/rollback. |

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"database/sql"
+	"database/sql/driver"
 	"encoding/hex"
 	"errors"
 	"net/url"
@@ -24,13 +25,15 @@ func openSQLite(t *testing.T) fixture {
 	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
 	defer cancel()
 
-	db := openSQLitePool(t, filepath.Join(t.TempDir(), "driverlab.db"), "rwc")
+	path := filepath.Join(t.TempDir(), "driverlab.db")
+	db := openSQLitePool(t, path, "rwc")
 	setSQLiteJournalMode(t, ctx, db, "wal")
 	checkSQLiteConnections(t, ctx, db, "wal")
 	options := sqliteCompileOptions(t, ctx, db)
 	optionsDigest := sha256.Sum256([]byte(strings.Join(options, "\n")))
 	return fixture{
 		db:             db,
+		connector:      sqliteFixtureConnector{drv: db.Driver(), dsn: sqliteFixtureDSN(path, "rw")},
 		bind:           func(i int) string { return "?" + strconv.Itoa(i) },
 		code:           sqliteNativeCode,
 		uniqueCode:     "2067", // SQLITE_CONSTRAINT_UNIQUE
@@ -47,9 +50,23 @@ func openSQLite(t *testing.T) fixture {
 	}
 }
 
-func openSQLitePool(t *testing.T, filename, mode string) *sql.DB {
-	t.Helper()
+// Both pinned SQLite drivers implement Driver.Open. The older runtime does
+// not expose a driver.Connector constructor.
+type sqliteFixtureConnector struct {
+	drv driver.Driver
+	dsn string
+}
 
+func (c sqliteFixtureConnector) Driver() driver.Driver { return c.drv }
+
+func (c sqliteFixtureConnector) Connect(ctx context.Context) (driver.Conn, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	return c.drv.Open(c.dsn)
+}
+
+func sqliteFixtureDSN(filename, mode string) string {
 	path := filepath.ToSlash(filename)
 	if !strings.HasPrefix(path, "/") {
 		path = "/" + path // SQLite file URIs spell Windows drive paths as /C:/...
@@ -59,7 +76,13 @@ func openSQLitePool(t *testing.T, filename, mode string) *sql.DB {
 		"mode":    {mode},
 	}
 	dsn := url.URL{Scheme: "file", Path: path, RawQuery: settings.Encode()}
-	db, err := sql.Open("sqlite", dsn.String())
+	return dsn.String()
+}
+
+func openSQLitePool(t *testing.T, filename, mode string) *sql.DB {
+	t.Helper()
+
+	db, err := sql.Open("sqlite", sqliteFixtureDSN(filename, mode))
 	if err != nil {
 		t.Fatal("open isolated SQLite pool failed")
 	}

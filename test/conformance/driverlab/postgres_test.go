@@ -2,6 +2,7 @@ package driverlab
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"os"
 	"strconv"
@@ -64,7 +65,8 @@ func openPostgres(t *testing.T) fixture {
 		"statement_timeout":             "15s",
 	}
 
-	db := stdlib.OpenDB(*config)
+	connector := stdlib.GetConnector(*config)
+	db := sql.OpenDB(connector)
 	db.SetMaxOpenConns(2)
 	db.SetMaxIdleConns(2)
 	t.Cleanup(func() {
@@ -93,7 +95,8 @@ func openPostgres(t *testing.T) fixture {
 	}
 
 	return fixture{
-		db: db,
+		db:        db,
+		connector: connector,
 		bind: func(position int) string {
 			return "$" + strconv.Itoa(position)
 		},

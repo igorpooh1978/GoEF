@@ -9,7 +9,8 @@ param(
     [switch] $SavepointTx,
     [switch] $SaveChanges,
     [switch] $TxOptions,
-    [switch] $DecimalBinding
+    [switch] $DecimalBinding,
+    [switch] $CommitOutcome
 )
 
 Set-StrictMode -Version 3.0
@@ -222,7 +223,8 @@ function Invoke-DriverMatrix {
         [switch] $SavepointTx,
         [switch] $SaveChanges,
         [switch] $TxOptions,
-        [switch] $DecimalBinding
+        [switch] $DecimalBinding,
+        [switch] $CommitOutcome
     )
 
     $driverArguments = @('-B', 'test/conformance/lab/driver_run.py') + $Selection
@@ -232,6 +234,7 @@ function Invoke-DriverMatrix {
     if ($SaveChanges) { $driverArguments += '--save-changes' }
     if ($TxOptions) { $driverArguments += '--tx-options' }
     if ($DecimalBinding) { $driverArguments += '--decimal-binding' }
+    if ($CommitOutcome) { $driverArguments += '--commit-outcome' }
     Write-Host "RUN $(Split-Path -Leaf $Python) $($driverArguments -join ' ')"
     $driverOutput = @(& $Python @driverArguments)
     Confirm-DriverResults -Lines $driverOutput -ExitCode $LASTEXITCODE -ExpectedProfiles $ExpectedProfiles -ExpectedFacts $ExpectedFacts
@@ -245,7 +248,8 @@ function Invoke-SqliteCompatibility {
         [switch] $SavepointTx,
         [switch] $SaveChanges,
         [switch] $TxOptions,
-        [switch] $DecimalBinding
+        [switch] $DecimalBinding,
+        [switch] $CommitOutcome
     )
 
     $script = 'test/conformance/lab/sqlite_compat.py'
@@ -256,6 +260,7 @@ function Invoke-SqliteCompatibility {
     if ($SaveChanges) { $sqliteArguments += '--save-changes' }
     if ($TxOptions) { $sqliteArguments += '--tx-options' }
     if ($DecimalBinding) { $sqliteArguments += '--decimal-binding' }
+    if ($CommitOutcome) { $sqliteArguments += '--commit-outcome' }
     Write-Host "RUN $(Split-Path -Leaf $Python) $($sqliteArguments -join ' ')"
     $lines = @(& $Python @sqliteArguments)
     $exitCode = $LASTEXITCODE
@@ -473,7 +478,7 @@ try {
     $baselineFacts = @{ sqlserver = @{ version = '16.0.4325.4'; compatibility_level = '160'; generate_series = 'available' } }
     $matrixFailures = [System.Collections.Generic.List[string]]::new()
     try {
-        Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles $baselineProfiles -ExpectedFacts $baselineFacts -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx -SavepointTx:$SavepointTx -SaveChanges:$SaveChanges -TxOptions:$TxOptions -DecimalBinding:$DecimalBinding
+        Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles $baselineProfiles -ExpectedFacts $baselineFacts -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx -SavepointTx:$SavepointTx -SaveChanges:$SaveChanges -TxOptions:$TxOptions -DecimalBinding:$DecimalBinding -CommitOutcome:$CommitOutcome
         Write-Host 'PASS W002 local checks and all four driver suites'
     }
     catch {
@@ -520,7 +525,7 @@ try {
             }
             try {
                 $expectedFacts = @{ $provider = $entry.Value.Facts }
-                Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles @{ $provider = $profileName } -ExpectedFacts $expectedFacts -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx -SavepointTx:$SavepointTx -SaveChanges:$SaveChanges -TxOptions:$TxOptions -DecimalBinding:$DecimalBinding
+                Invoke-DriverMatrix -Python $python -Selection $selection -ExpectedProfiles @{ $provider = $profileName } -ExpectedFacts $expectedFacts -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx -SavepointTx:$SavepointTx -SaveChanges:$SaveChanges -TxOptions:$TxOptions -DecimalBinding:$DecimalBinding -CommitOutcome:$CommitOutcome
                 Write-Host "PASS W002 $profileName compatibility suite"
             }
             catch {
@@ -528,7 +533,7 @@ try {
             }
         }
         try {
-            Invoke-SqliteCompatibility -Python $python -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx -SavepointTx:$SavepointTx -SaveChanges:$SaveChanges -TxOptions:$TxOptions -DecimalBinding:$DecimalBinding
+            Invoke-SqliteCompatibility -Python $python -ModelTypes:$ModelTypes -OwnedTx:$OwnedTx -SavepointTx:$SavepointTx -SaveChanges:$SaveChanges -TxOptions:$TxOptions -DecimalBinding:$DecimalBinding -CommitOutcome:$CommitOutcome
         }
         catch {
             $matrixFailures.Add($_.Exception.Message)
@@ -551,6 +556,9 @@ try {
     }
     if ($DecimalBinding) {
         Write-Host 'PASS exact decimal binding checks on all selected profiles'
+    }
+    if ($CommitOutcome) {
+        Write-Host 'PASS commit outcome fault checks on all selected profiles'
     }
     if ($Compatibility) {
         # SQLite file compatibility reruns the baseline profile and adds one linked runtime.

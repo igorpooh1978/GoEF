@@ -52,6 +52,8 @@ Add `-TxOptions` to exercise explicit isolation, native read-only enforcement wh
 
 Add `-DecimalBinding` to exercise catalog precision, lossless fixed-scale text and a fresh-session decimal round trip. Both Python launchers accept `--decimal-binding`. [Decimal catalog and round-trip evidence](../../../docs/evidence/W003/DECIMAL_SQL_BINDING.md)
 
+Add `-CommitOutcome` to exercise a real commit whose success is withheld and a rollback before native commit. Both results require a typed unknown outcome, a discarded connection, no replay, and an independent read of the persisted state. Both Python launchers accept `--commit-outcome`. [Commit outcome fault evidence](../../../docs/evidence/W002/COMMIT_OUTCOME_FAULT.md)
+
 Run `python -B test/conformance/lab/mysql_in_flight_read.py` for both pinned MySQL blocked-read cancellation checks. Run `python -B test/conformance/lab/sqlite_wal_recovery.py` for recovery of a durable WAL commit across the two pinned SQLite runtimes. [MySQL cancellation evidence](../../../docs/evidence/W002/MYSQL_IN_FLIGHT_READ.md) · [SQLite WAL recovery evidence](../../../docs/evidence/W002/SQLITE_WAL_RECOVERY.md)
 
 The SQL Server 2022 profiles also check that `GENERATE_SERIES` returns the expected values at compatibility level 160 and is unavailable at 140 under the fixture's database settings.

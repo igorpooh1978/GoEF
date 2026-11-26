@@ -400,6 +400,46 @@ class DecimalBindingEvidenceTests(unittest.TestCase):
         self.assertEqual(result, 1)
         self.assertEqual(report["phase"], f"Gherkin {expected[1]['profile']}")
 
+
+class CommitOutcomeEvidenceTests(unittest.TestCase):
+    def test_requested_commit_outcome_requires_both_exact_results(self):
+        expected = [
+            {
+                "provider": "sqlite", "profile": "sqlite-3.54", "engine_version": "3.54.1",
+                "scenario": scenario, "status": "PASS",
+            }
+            for scenario in ("TX-OUTCOME-001-S03", "TX-OUTCOME-001-S04")
+        ]
+        prefix = "GOEF_COMMIT_OUTCOME_RESULT="
+        markers = [prefix + json.dumps(row) for row in expected]
+        outputs = [
+            "\n".join(markers),
+            markers[0],
+            "\n".join([markers[0], markers[0]]),
+            "\n".join([markers[0], prefix + json.dumps({**expected[1], "engine_version": "3.51.3"})]),
+            "",
+        ]
+        stdout = io.StringIO()
+        with (
+            patch.object(driver_run, "build_binary", return_value="driverlab-binary"),
+            patch.object(driver_run, "command", side_effect=outputs) as command,
+            patch.object(driver_run, "verified_results", return_value=[]),
+            redirect_stdout(stdout),
+        ):
+            for code in (0, 1, 1, 1):
+                self.assertEqual(driver_run.main(["sqlite", "--commit-outcome"]), code)
+            self.assertEqual(driver_run.main(["sqlite"]), 0)
+
+        passed, *failed, unrequested = [json.loads(line) for line in stdout.getvalue().splitlines()]
+        self.assertEqual(passed["commit_outcome"], expected)
+        self.assertTrue(all((row["status"], row["phase"]) == ("FAIL", "evidence") for row in failed))
+        self.assertEqual(unrequested["status"], "PASS")
+        self.assertNotIn("commit_outcome", unrequested)
+        for call in command.call_args_list[:-1]:
+            self.assertEqual(call.args[0][1], "-test.run=^(TestDriverGherkin|TestCommitOutcome)$")
+            self.assertEqual(call.kwargs["env"]["GOEF_COMMIT_OUTCOME"], "1")
+
+
 class DriverEvidenceTests(unittest.TestCase):
     def result_lines(self, provider="sqlite", native_codes=("2067", "787"), **profile_facts):
         if not profile_facts:
