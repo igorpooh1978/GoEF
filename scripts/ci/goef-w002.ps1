@@ -406,15 +406,15 @@ function Invoke-SqliteCompatibility {
     $seenRebuildChecks = [System.Collections.Generic.HashSet[string]]::new()
     foreach ($check in $rebuildChecks) {
         if ($check -isnot [System.Collections.IDictionary] -or
-            $check['scenario'] -cne 'LAB-SQLITE-REBUILD-001-S01' -or
+            $check['scenario'] -isnot [string] -or $check['scenario'] -cne 'LAB-SQLITE-REBUILD-001-S01' -or
             $check['profile'] -isnot [string] -or $check['profile'] -cnotin $profiles.Keys -or
             $check['journal_mode'] -isnot [string] -or $check['journal_mode'] -cnotin $modes -or
             $check['interrupted_exit'] -isnot [long] -or $check['interrupted_exit'] -ne 68 -or
-            $check['status'] -cne 'PASS') {
+            $check['status'] -isnot [string] -or $check['status'] -cne 'PASS') {
             throw 'SQLite compatibility emitted an unexpected or failed interrupted rebuild check.'
         }
         $profileName = $check['profile']
-        if ($check['engine_version'] -cne $profiles[$profileName].engine_version -or
+        if ($check['engine_version'] -isnot [string] -or $check['engine_version'] -cne $profiles[$profileName].engine_version -or
             -not $seenRebuildChecks.Add("$profileName/$($check['journal_mode'])")) {
             throw 'SQLite compatibility emitted a duplicate rebuild check or an incorrect engine version.'
         }
