@@ -11,7 +11,7 @@ class SQLiteFileFeatureTests(unittest.TestCase):
         self.source = lab.FILE_FEATURE.read_text(encoding="utf-8")
 
     def test_both_directions_bind_to_the_example_rows_and_worker_stages(self):
-        older, current = lab.OLDER, lab.CURRENT
+        older, current = lab.MINIMUM_PROFILE, lab.CURRENT
         examples = lab.parse_file_feature(self.source)
         self.assertEqual(
             examples,
@@ -36,6 +36,7 @@ class SQLiteFileFeatureTests(unittest.TestCase):
             ("When SQLite 3.54.1 reads the rows", "When SQLite 3.53.0 reads the rows"),
             ("Then the existing schema, rows, audit records and migration history are preserved", "Then the rows exist"),
             ("Then the existing schema, rows, audit records and migration history are preserved", ""),
+            ("And SQLite 3.54.1 rejects a noncoercible stored generated value with its native datatype constraint code", ""),
             ("And integrity and foreign-key checks succeed", "And nothing else is verified"),
         ):
             with self.subTest(original=original, replacement=replacement):
@@ -48,12 +49,22 @@ class SQLiteFileFeatureTests(unittest.TestCase):
                     build.assert_not_called()
 
     def test_exchange_stage_requires_the_expected_engine_marker(self):
-        profile = lab.PROFILES[lab.OLDER]
+        profile = lab.PROFILES[lab.MINIMUM_PROFILE]
         args = (None, "sqlite", profile, "wal", "create", "unused")
         expected = lab.FILE_RESULT_PREFIX + "3.51.3/wal/create"
         with patch.object(lab, "command", return_value=expected):
-            self.assertEqual(lab.run_exchange_stage(*args), "3.51.3")
+            self.assertEqual(lab.run_exchange_stage(*args), ("3.51.3", None))
         for output in ("", expected + "\n" + expected, expected.replace("3.51.3", "3.54.1")):
+            with self.subTest(output=output), patch.object(lab, "command", return_value=output):
+                with self.assertRaises(lab.LabError):
+                    lab.run_exchange_stage(*args)
+
+    def test_mutate_stage_requires_the_native_datatype_code(self):
+        args = (None, "sqlite", lab.PROFILES[lab.MINIMUM_PROFILE], "delete", "mutate", "unused")
+        marker = lab.FILE_RESULT_PREFIX + "3.51.3/delete/mutate"
+        with patch.object(lab, "command", return_value=marker + "/3091"):
+            self.assertEqual(lab.run_exchange_stage(*args), ("3.51.3", "3091"))
+        for output in (marker, marker + "/19", marker + "/2067"):
             with self.subTest(output=output), patch.object(lab, "command", return_value=output):
                 with self.assertRaises(lab.LabError):
                     lab.run_exchange_stage(*args)

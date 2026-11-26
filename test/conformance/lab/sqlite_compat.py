@@ -22,10 +22,10 @@ class Profile:
     build_flags: tuple[str, ...] = ()
 
 
-OLDER = "sqlite-3.51"
+MINIMUM_PROFILE = "sqlite-3.51"
 CURRENT = "sqlite-3.54"
 PROFILES = {
-    OLDER: Profile(
+    MINIMUM_PROFILE: Profile(
         "3.51.3",
         "2026-03-13 10:38:09 737ae4a34738ffa0c3ff7f9bb18df914dd1cad163f28fd6b6e114a344fe6d618",
         "v1.47.0",
@@ -40,8 +40,8 @@ PROFILES = {
     ),
 }
 DIRECTIONS = (
-    ("LAB-SQLITE-FILE-001-S01", OLDER, CURRENT),
-    ("LAB-SQLITE-FILE-001-S02", CURRENT, OLDER),
+    ("LAB-SQLITE-FILE-001-S01", MINIMUM_PROFILE, CURRENT),
+    ("LAB-SQLITE-FILE-001-S02", CURRENT, MINIMUM_PROFILE),
 )
 FILE_FEATURE = MODULE / "features" / "sqlite_files.feature"
 FILE_JOURNALS = {"delete", "wal"}
@@ -50,6 +50,7 @@ NATIVE_CODES = {
     "LAB-DRIVER-001-S03": "787",
 }
 FILE_RESULT_PREFIX = "GOEF_SQLITE_FILE_RESULT="
+STRICT_GENERATED_NATIVE_CODE = "3091"
 GO_VERSION = "go1.27.4"
 
 
@@ -85,6 +86,7 @@ def parse_file_feature(source):
             ("mutate", peer, (
                 f"When SQLite {peer_version} reads the rows and rolls back a migration after a unique violation",
                 "Then the existing schema, rows, audit records and migration history are preserved",
+                f"And SQLite {peer_version} rejects a noncoercible stored generated value with its native datatype constraint code",
                 f"When SQLite {peer_version} commits the compatible additive migration and closes the file",
             )),
             ("reopen", origin, (
@@ -214,9 +216,13 @@ def run_exchange_stage(directory, binary, profile, journal, stage, token):
         },
     )
     markers = [line for line in output.splitlines() if line.startswith(FILE_RESULT_PREFIX)]
-    if markers != [f"{FILE_RESULT_PREFIX}{profile.engine_version}/{journal}/{stage}"]:
-        raise LabError("The SQLite file test did not verify the requested stage and engine.")
-    return profile.engine_version
+    marker = f"{FILE_RESULT_PREFIX}{profile.engine_version}/{journal}/{stage}"
+    native_code = STRICT_GENERATED_NATIVE_CODE if stage == "mutate" else None
+    if native_code is not None:
+        marker += f"/{native_code}"
+    if markers != [marker]:
+        raise LabError("The SQLite file test did not verify the requested stage, engine, and outcome.")
+    return profile.engine_version, native_code
 
 
 def run_lab(tempdir, report):
@@ -247,17 +253,24 @@ def run_lab(tempdir, report):
         with (directory / ".goef-sqlite-exchange").open("x", encoding="ascii") as marker:
             marker.write(token)
         engines = []
+        strict_generated_native_code = None
         for stage, name in example.stages:
             report["phase"] = f"{scenario} {journal} {stage}"
-            engines.append(run_exchange_stage(directory, binaries[name], PROFILES[name], journal, stage, token))
-        report["checks"].append({"scenario": scenario, "journal_mode": journal, "engines": engines, "status": "PASS"})
+            engine, native_code = run_exchange_stage(directory, binaries[name], PROFILES[name], journal, stage, token)
+            engines.append(engine)
+            if native_code is not None:
+                strict_generated_native_code = native_code
+        report["checks"].append({
+            "scenario": scenario, "journal_mode": journal, "engines": engines,
+            "strict_generated_native_code": strict_generated_native_code, "status": "PASS",
+        })
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.parse_args(argv)
     report = {
-        "status": "FAIL", "go_version": GO_VERSION, "profiles": {},
+        "status": "FAIL", "go_version": GO_VERSION, "minimum_profile": MINIMUM_PROFILE, "profiles": {},
         "driver_scenarios": [], "checks": [], "phase": "allocate temporary directory",
     }
     try:

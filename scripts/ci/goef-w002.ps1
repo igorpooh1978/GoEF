@@ -164,6 +164,11 @@ function Invoke-SqliteCompatibility {
         throw "SQLite compatibility reported $($report['status']) and exited with code $exitCode."
     }
 
+    $minimumProfile = 'sqlite-3.51'
+    if ($report['minimum_profile'] -isnot [string] -or $report['minimum_profile'] -cne $minimumProfile) {
+        throw "SQLite compatibility must report minimum profile $minimumProfile."
+    }
+
     $profiles = [ordered] @{
         'sqlite-3.51' = @{
             engine_version = '3.51.3'
@@ -241,6 +246,10 @@ function Invoke-SqliteCompatibility {
             $check['status'] -isnot [string] -or $check['status'] -cne 'PASS') {
             throw 'SQLite compatibility emitted an unexpected or failed file check.'
         }
+        $strictGeneratedCode = $check['strict_generated_native_code']
+        if ($strictGeneratedCode -isnot [string] -or $strictGeneratedCode -cne '3091') {
+            throw "SQLite compatibility for $($check['scenario'])/$($check['journal_mode']) must report strict_generated_native_code=3091."
+        }
         $engines = $check['engines']
         $expectedEngines = $directions[$check['scenario']]
         if ($engines -isnot [array] -or $engines.Count -ne $expectedEngines.Count) {
@@ -255,7 +264,7 @@ function Invoke-SqliteCompatibility {
             throw 'SQLite compatibility emitted a duplicate file direction and journal mode.'
         }
     }
-    Write-Host 'PASS W002 SQLite linked-runtime and file compatibility suite'
+    Write-Host "PASS W002 SQLite linked-runtime and file compatibility suite (minimum SQLite $($profiles[$minimumProfile].engine_version))"
 }
 
 $repoRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))

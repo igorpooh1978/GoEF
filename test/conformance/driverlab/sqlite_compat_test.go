@@ -38,6 +38,7 @@ func TestSQLiteCompatibilityStep(t *testing.T) {
 		t.Fatal("invalid SQLite compatibility stage")
 	}
 
+	var strictGeneratedNativeCode string
 	if t.Run(stage, func(t *testing.T) {
 		path := sqliteFilePath(t, stage == "create")
 		ctx, cancel := context.WithTimeout(t.Context(), 15*time.Second)
@@ -63,7 +64,7 @@ func TestSQLiteCompatibilityStep(t *testing.T) {
 			createSQLiteFileSchema(t, ctx, db)
 			assertSQLiteFileState(t, ctx, db, false)
 		case "mutate":
-			mutateSQLiteFile(t, ctx, db)
+			strictGeneratedNativeCode = mutateSQLiteFile(t, ctx, db)
 		case "reopen":
 			assertSQLiteFileState(t, ctx, db, true)
 			_, err := db.ExecContext(ctx, "DELETE FROM compat_parent WHERE id = ?", 2)
@@ -73,7 +74,11 @@ func TestSQLiteCompatibilityStep(t *testing.T) {
 		}
 	}) {
 		// A result is published only after the pool and all leases close.
-		fmt.Printf("GOEF_SQLITE_FILE_RESULT=%s/%s/%s\n", sqliteVersion, journal, stage)
+		result := strings.Join([]string{sqliteVersion, journal, stage}, "/")
+		if strictGeneratedNativeCode != "" {
+			result += "/" + strictGeneratedNativeCode
+		}
+		fmt.Printf("GOEF_SQLITE_FILE_RESULT=%s\n", result)
 	}
 }
 
@@ -124,7 +129,9 @@ func createSQLiteFileSchema(t *testing.T, ctx context.Context, db *sql.DB) {
 		"PRAGMA application_id = 0x474F4546",
 		`CREATE TABLE compat_parent (
 			id INTEGER PRIMARY KEY, code TEXT NOT NULL UNIQUE, amount INTEGER NOT NULL,
-			twice_amount INTEGER GENERATED ALWAYS AS (amount * 2) STORED, payload BLOB
+			twice_amount INTEGER GENERATED ALWAYS AS (
+				CASE WHEN amount < 0 THEN 'invalid' ELSE amount * 2 END
+			) STORED, payload BLOB
 		) STRICT`,
 		`CREATE TABLE compat_child (
 			id INTEGER PRIMARY KEY, parent_id INTEGER NOT NULL REFERENCES compat_parent(id)
@@ -146,7 +153,7 @@ func createSQLiteFileSchema(t *testing.T, ctx context.Context, db *sql.DB) {
 	}
 }
 
-func mutateSQLiteFile(t *testing.T, ctx context.Context, db *sql.DB) {
+func mutateSQLiteFile(t *testing.T, ctx context.Context, db *sql.DB) string {
 	t.Helper()
 
 	observer, err := db.Conn(ctx)
@@ -173,6 +180,13 @@ func mutateSQLiteFile(t *testing.T, ctx context.Context, db *sql.DB) {
 	}
 	assertSQLiteFileState(t, ctx, observer, false)
 
+	_, err = db.ExecContext(ctx, "INSERT INTO compat_parent (id, code, amount) VALUES (?, ?, ?)", 3, "bad-type", -1)
+	strictGeneratedNativeCode := sqliteNativeCode(err)
+	if strictGeneratedNativeCode != "3091" { // SQLITE_CONSTRAINT_DATATYPE
+		t.Fatal("STRICT stored generated column did not reject the incompatible value")
+	}
+	assertSQLiteFileState(t, ctx, observer, false)
+
 	succeeded := beginSQLiteFileTx(t, ctx, db)
 	defer finishUnfinishedSQLiteFileTx(t, succeeded)
 	changeSQLiteFile(t, ctx, succeeded)
@@ -181,6 +195,7 @@ func mutateSQLiteFile(t *testing.T, ctx context.Context, db *sql.DB) {
 		t.Fatal("could not commit the compatible SQLite migration")
 	}
 	assertSQLiteFileState(t, ctx, observer, true)
+	return strictGeneratedNativeCode
 }
 
 func changeSQLiteFile(t *testing.T, ctx context.Context, tx *sql.Tx) {

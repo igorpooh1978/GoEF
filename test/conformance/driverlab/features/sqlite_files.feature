@@ -8,6 +8,7 @@ Feature: SQLite file compatibility across linked runtimes
     And the file contains related rows, an audit trigger and one migration history entry
     When SQLite 3.54.1 reads the rows and rolls back a migration after a unique violation
     Then the existing schema, rows, audit records and migration history are preserved
+    And SQLite 3.54.1 rejects a noncoercible stored generated value with its native datatype constraint code
     When SQLite 3.54.1 commits the compatible additive migration and closes the file
     Then SQLite 3.51.3 reopens the same file and reads the new schema and committed rows
     And the audit records and migration history include the committed changes only
@@ -24,6 +25,7 @@ Feature: SQLite file compatibility across linked runtimes
     And the file contains related rows, an audit trigger and one migration history entry
     When SQLite 3.51.3 reads the rows and rolls back a migration after a unique violation
     Then the existing schema, rows, audit records and migration history are preserved
+    And SQLite 3.51.3 rejects a noncoercible stored generated value with its native datatype constraint code
     When SQLite 3.51.3 commits the compatible additive migration and closes the file
     Then SQLite 3.54.1 reopens the same file and reads the new schema and committed rows
     And the audit records and migration history include the committed changes only
