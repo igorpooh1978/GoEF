@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add focused local checks for native row cancellation on four PostgreSQL profiles and InnoDB deadlock rollback and recovery on both MySQL profiles. Verify blocked-read cancellation on three additional SQL Server profiles and label SQL Server provisioning failures by stage ([#13](https://github.com/igorpooh1978/GoEF/issues/13), [#26](https://github.com/igorpooh1978/GoEF/issues/26)).
 - Verify cancellation in a full connection pool and recovery on every local driver profile ([#13](https://github.com/igorpooh1978/GoEF/issues/13)).
 - Record blocked-read cancellation while opening queries on PostgreSQL 18.7 and SQL Server 2022, and during native row iteration on PostgreSQL 18.7 ([#13](https://github.com/igorpooh1978/GoEF/issues/13)).
 - Verify already-ended query contexts stop before dispatch and a live query succeeds on the same test lease across the local driver matrix ([#13](https://github.com/igorpooh1978/GoEF/issues/13)).

@@ -23,6 +23,17 @@ python -B test/conformance/lab/driver_run.py sqlserver --profile sqlserver-2022-
 python -B test/conformance/lab/sqlite_compat.py
 ```
 
+The focused native-driver scenarios run separately from the seven-case portable matrix.
+
+```powershell
+python -B test/conformance/lab/postgres_next.py --profile postgres-16 --profile postgres-17 --profile postgres-18 --profile postgres-19
+python -B test/conformance/lab/mysql_deadlock.py
+```
+
+The PostgreSQL check observes cancellation while the driver is inside its second `Rows.Next`. The MySQL check observes an InnoDB deadlock, verifies the victim's earlier write was rolled back and commits a fresh write on the recovered session. Both launchers select pinned local containers and verify the reported outcomes after cleanup.
+
+When SQL Server provisioning fails, the JSON report's `stage` identifies `docker-startup`, `engine-readiness`, `engine-identity` or `fixture-setup`. The existing status and failure phase remain available. The reason is selected from fixed diagnostics with a cleanup indicator where applicable.
+
 The runner builds temporary Go test binaries. The server binary runs inside the owned database container. The container has no published ports, bridge network, daemon socket mount or host data mount. Provisioner credentials create the fixture identities and a random protected marker. Database writes occur only after runtime identity and marker validation. SQLite uses the embedded driver against a private on-disk database. Cleanup and the four-engine status are part of acceptance.
 
 The executable [Gherkin feature](features/driver.feature) uses tagged scenario outlines, bound Given/When/Then steps and a provider examples table. Each profile must emit seven validated scenario results. The first three verify commit and rollback, native uniqueness and foreign-key codes, and unchanged rows through an independent observer connection. The fourth exercises cancellation after the first row through the GoEF provider execution interface using a test adapter. It verifies the cancellation cause, closes and releases the stream lease, and completes another query with a fresh context on a one-connection pool. The fifth observes contention twice and distinguishes a caller deadline from a native lock timeout with a live caller context. It checks the original rows again after rollback and connection cleanup. The sixth verifies that a query with an already-ended context stops before the adapter calls `database/sql` and that the same lease completes a live query. The seventh cancels an acquisition after the pool has queued it and verifies that a later query reads both rows without waiting again.

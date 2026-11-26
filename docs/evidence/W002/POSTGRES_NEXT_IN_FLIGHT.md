@@ -28,3 +28,13 @@ The launcher used Go's overlay flag to add the scratch test to the existing lock
 | --- | --- |
 | `postgres_next_probe_test.go` | `d0fd22ce6f6c07121ca1a2478b7a83bfe36b1da2bfcc58650da9b8f03a556481` |
 | `run_postgres_next.py` | `467164013d7e1c59d4bc72c161091de3893d82d955de54330542824a2d135764` |
+
+## Checked-in test across all four PostgreSQL profiles
+
+The pilot is now available as `TestPostgresNativeNext` with the dedicated [local launcher](../../../test/conformance/lab/postgres_next.py). The launcher requires explicit pinned profile names, builds one Go test binary, runs only the focused test in owned containers and validates both outcome records after each cleanup.
+
+```powershell
+python -B test/conformance/lab/postgres_next.py --profile postgres-16 --profile postgres-17 --profile postgres-18 --profile postgres-19
+```
+
+On local executable revision `05469eb1e2024b1e752cec47bc9f216ed80ddc8a`, the command exited 0. Both cancellation and holder-release controls passed on PostgreSQL 16.16, 17.12, 18.7 and 19.0 with pgx v5.13.0. All eight results confirmed entry into the second native `Rows.Next` while the lock wait was observable. The canceled call returned `context.Canceled`. The test discarded the connection, observed the backend exit before unlock and recovered with the original row. The control returned row 2 followed by clean EOF. No retries were needed and no GoEF lab containers remained after the run. The redacted report SHA-256 is `d7baa8f2138a152c1d8a2bb24884435e516f84146a94c77c34cbe92cfd53fda3`.
