@@ -123,6 +123,25 @@ When passing signed Go `int8` to go-mssqldb v1.11.0, widen it to `int16` so the 
 
 [Compiled example and binding tests](../../model/type_binding_test.go) · [Source and engine evidence](../evidence/W003/PROVIDER_TYPE_BINDING.md)
 
+## Read and write exact decimal text
+
+Use `model.ParseDecimal` with Go 1.27.4 to read values such as prices without rounding. The example prints `9007199254740993.1000` and `20 4` on separate lines.
+
+```go
+amount, err := model.ParseDecimal("0009007199254740993.1000")
+if err != nil {
+	panic(err)
+}
+fmt.Println(amount)
+fmt.Println(amount.Precision(), amount.Scale())
+```
+
+Use ASCII digits, an optional leading sign, and an optional decimal point with digits on both sides. Input is limited to 1003 bytes and precision to 1000 digits. Canonical text removes redundant leading integer zeros and the sign of zero. It keeps all fractional digits, including trailing zeros. `Scale()` counts fractional digits. `Precision()` counts the digits needed at that scale and excludes a zero integer part in fractional values. The Go zero value represents `0` with precision 1 and scale 0.
+
+Go equality compares canonical values at the same scale. For example, `+01.00` compares equal to `1.00`. Use `MarshalText` and `UnmarshalText` to preserve value and scale through a text round trip. Invalid input leaves the receiver unchanged.
+
+Provider binding for SQL decimal columns is a separate capability. `model.BindTypes` reports `goeferr.ErrInvalidModel` for a `model.Decimal` field. [Runnable decimal example and tests](../../model/decimal_test.go) · [Exact decimal evidence](../evidence/W003/DECIMAL_VALUE.md)
+
 Feature IDs: MODEL-MAP-001, MODEL-NULL-001, MODEL-TYPE-001, MODEL-VALID-001.
 
 - [Design or source evidence](../architecture/MODEL_ENGINE.md)
