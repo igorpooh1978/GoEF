@@ -6,6 +6,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"go/build"
 	"io"
 	"os"
 	"path/filepath"
@@ -34,7 +35,7 @@ func run(args []string, diagnostics io.Writer) error {
 		return err
 	}
 	if flags.NArg() != 0 || !goFileName(*source) || !goFileName(*output) {
-		return errors.New("goef-linqgen: specify -source and -output with ordinary .go file names")
+		return errors.New("goef-linqgen: specify -source and -output with portable .go file names")
 	}
 	sourcePath, err := filepath.Abs(*source)
 	if err != nil {
@@ -93,8 +94,21 @@ func run(args []string, diagnostics io.Writer) error {
 
 func goFileName(path string) bool {
 	name := filepath.Base(path)
-	return strings.HasSuffix(name, ".go") && !strings.HasSuffix(name, "_test.go") &&
-		!strings.HasPrefix(name, ".") && !strings.HasPrefix(name, "_")
+	if !strings.HasSuffix(name, ".go") || strings.HasSuffix(name, "_test.go") {
+		return false
+	}
+
+	// A synthetic platform never satisfies a recognized GOOS or GOARCH
+	// suffix. MatchFile applies Go's filename rules to placeholder content.
+	target := build.Context{
+		GOOS:   "goef-linqgen",
+		GOARCH: "goef-linqgen",
+		OpenFile: func(string) (io.ReadCloser, error) {
+			return io.NopCloser(strings.NewReader("package generated\n")), nil
+		},
+	}
+	match, err := target.MatchFile("", name)
+	return err == nil && match
 }
 
 func lf(source []byte) []byte {

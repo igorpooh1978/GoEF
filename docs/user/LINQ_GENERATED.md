@@ -16,7 +16,7 @@ func findCustomer(row Customer, city string) (bool, string) {
 }
 ```
 
-Add a `//goef:query EntryPoint` doc comment to a function in a regular Go source file. Declare its named row struct and any named scalar types in that file. Use a direct comparison `row.Field == argument` and return one direct field as the second result. Use the same Go type on both operands and for the projection field and result. Supported scalars are bool, string and the signed Go integer types, including their named forms. Use a source file that builds on every target platform. The declaration file is self-contained, with no imports or build constraints.
+Add a `//goef:query EntryPoint` doc comment to a function in a regular Go source file. Declare its named row struct and any named scalar types in that file. Use a direct comparison `row.Field == argument` and return one direct field as the second result. Use the same Go type on both operands and for the projection field and result. Supported scalars are bool, string and the signed Go integer types, including their named forms. Use regular source and output filenames without platform suffixes. The declaration file is self-contained, with no imports or build constraints.
 
 From the containing package, generate and then check the output. The GoEF module must be present in the consumer's module graph.
 

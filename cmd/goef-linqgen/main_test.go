@@ -82,10 +82,12 @@ func TestRunRejectsUnsafePaths(t *testing.T) {
 		want string
 	}{
 		{"bad flag", []string{"-unknown"}, "flag provided"},
-		{"bad source name", []string{"-source", "source.txt", "-output", output}, "ordinary .go"},
-		{"ignored file name", []string{"-source", source, "-output", "_ignored.go"}, "ordinary .go"},
-		{"test file name", []string{"-source", source, "-output", "binding_test.go"}, "ordinary .go"},
-		{"unexpected argument", []string{"-source", source, "-output", output, "extra"}, "ordinary .go"},
+		{"bad source name", []string{"-source", "source.txt", "-output", output}, "portable .go"},
+		{"ignored file name", []string{"-source", source, "-output", "_ignored.go"}, "portable .go"},
+		{"test file name", []string{"-source", source, "-output", "binding_test.go"}, "portable .go"},
+		{"unexpected argument", []string{"-source", source, "-output", output, "extra"}, "portable .go"},
+		{"platform source", []string{"-source", filepath.Join(dir, "query_linux_amd64.go"), "-output", output}, "portable .go"},
+		{"platform output", []string{"-source", source, "-output", filepath.Join(dir, "binding_windows.go")}, "portable .go"},
 		{"same file", []string{"-source", source, "-output", source}, "different files"},
 		{"different directory", []string{"-source", source, "-output", filepath.Join(dir, "other", "out.go")}, "same directory"},
 		{"source not found", []string{"-source", filepath.Join(dir, "absent.go"), "-output", output}, "absent.go"},
@@ -167,5 +169,30 @@ func writeFixture(t *testing.T, path string, contents []byte) {
 	t.Helper()
 	if err := os.WriteFile(path, contents, 0o600); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestPortableGoFileNames(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		want bool
+	}{
+		{"query.go", true},
+		{"query_gen.go", true},
+		{"linux.go", true},
+		{"query_linux_sample.go", true},
+		{"query_windows.go", false},
+		{"query_amd64.go", false},
+		{"query_linux_amd64.go", false},
+		{"query_js_wasm.go", false},
+		{"query_test.go", false},
+		{"_query.go", false},
+		{".query.go", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := goFileName(tc.name); got != tc.want {
+				t.Fatalf("portable name %q = %t; want %t", tc.name, got, tc.want)
+			}
+		})
 	}
 }
