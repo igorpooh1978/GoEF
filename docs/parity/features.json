@@ -19,10 +19,10 @@
           "relation": "behavior"
         }
       ],
-      "contract": "Resolve one entity and its field names to explicit table and column names in a deterministic physical model.",
+      "contract": "Resolve explicit Code First registrations to deterministic table and column metadata, then bind the model to physical providers for design-time generation.",
       "goApi": {
-        "status": "PROPOSED",
-        "description": "Immutable model descriptor with explicit table and column mappings."
+        "status": "IMPLEMENTED",
+        "description": "Portable Code First table and property metadata with per-facet precedence and a deterministic snapshot. Provider binding and design-time generation remain proposed."
       },
       "wave": "W003",
       "issues": [
@@ -64,11 +64,19 @@
         }
       },
       "scenarios": [
-        "MODEL-MAP-001-S01"
+        "MODEL-MAP-001-S01",
+        "MODEL-MAP-001-S02",
+        "MODEL-MAP-001-S03"
       ],
-      "tests": [],
-      "status": "SPECIFIED",
-      "deviations": [],
+      "tests": [
+        "model/mapping_test.go#TestMapMODEL_MAP_001S02",
+        "model/mapping_test.go#TestMapMODEL_MAP_001S03"
+      ],
+      "status": "PARTIAL",
+      "deviations": [
+        "GoEF diagnoses disagreements at equal precedence. EF Core configuration sources can replace an equal-priority setting.",
+        "The portable mapper checks exact names. Physical identifier rules and deterministic provider-backed source generation require separate acceptance."
+      ],
       "adr": null,
       "docs": [
         "docs/user/MODELS_CODE_FIRST.md"
@@ -2073,12 +2081,34 @@
           "testPath": "where_test.go",
           "testSymbol": "TestWhere",
           "relation": "analogue"
+        },
+        {
+          "lockId": "dotnet-runtime",
+          "repository": "https://github.com/dotnet/runtime",
+          "tag": "v10.0.0",
+          "sha": "60629d14374c56f1cb51819049ad1fa529307f8d",
+          "path": "src/libraries/System.Linq/src/System/Linq/Select.cs",
+          "symbol": "Enumerable.Select",
+          "testPath": "src/libraries/System.Linq/tests/SelectTests.cs",
+          "testSymbol": "Select_SourceIsAnArray_ExecutionIsDeferred",
+          "relation": "behavior"
+        },
+        {
+          "lockId": "go-linq-stable",
+          "repository": "https://github.com/ahmetb/go-linq",
+          "tag": "v5.0.0",
+          "sha": "6ebc43b7c971a8a4cb9e38742f6cb491d4032cbb",
+          "path": "select.go",
+          "symbol": "Query.Select",
+          "testPath": "select_test.go",
+          "testSymbol": "TestSelect_TypeChanging",
+          "relation": "analogue"
         }
       ],
-      "contract": "Filter values through a lazy in-memory iterator. Consume in source order and stop upstream once the consumer stops.",
+      "contract": "Filter and project values through lazy, typed in-memory iterators. Consume values in source order and stop upstream once the consumer stops.",
       "goApi": {
-        "status": "PROPOSED",
-        "description": "Typed iterator query with local Go predicates."
+        "status": "IMPLEMENTED",
+        "description": "The Where and Select functions compose over iter.Seq with typed Go predicates and selectors."
       },
       "wave": "W008",
       "issues": [
@@ -2123,11 +2153,17 @@
         "LINQ-OBJECTS-001-S01",
         "LINQ-OBJECTS-001-S02",
         "LINQ-OBJECTS-001-S03",
-        "LINQ-OBJECTS-001-S04"
+        "LINQ-OBJECTS-001-S04",
+        "LINQ-OBJECTS-001-S05"
       ],
-      "tests": [],
-      "status": "SPECIFIED",
-      "deviations": [],
+      "tests": [
+        "linq/objects/where_test.go#TestWhereConsumesOnlyNecessaryPrefix",
+        "linq/objects/select_test.go#TestWhereSelectStopsAtFirstProjectionAndReplays"
+      ],
+      "status": "PARTIAL",
+      "deviations": [
+        "The current functions take iter.Seq and non-nil callbacks. Indexed overloads and the other Objects scenarios retain separate acceptance requirements."
+      ],
       "adr": null,
       "docs": [
         "docs/architecture/LINQ_OBJECTS.md",

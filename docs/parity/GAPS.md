@@ -1,8 +1,8 @@
 # Open parity gaps
 
-The [W000 registry](features.json) contains 50 seed records across 18 registry families. 31 records have proposed Gherkin scenarios and 19 are discovered. Zero GoEF behaviors have executable or independent acceptance evidence. By origin there are 40 EF Core records, 3 .NET LINQ reference records and 7 GoEF extensions. The [EF Core research index](../upstream/RESEARCH_INDEX.md) counts 21 survey families, 18 with at least one seed and 3 awaiting a first record. The family survey and seed registry count different units.
+The [feature registry](features.json) contains 50 seed records across 18 registry families. 31 records have Gherkin scenarios and 19 are discovered. Code First mapping and the LINQ Objects pipeline have direct executable Go checks. Their feature records remain partial. By origin there are 40 EF Core records, 3 .NET LINQ reference records and 7 GoEF extensions. The [EF Core research index](../upstream/RESEARCH_INDEX.md) counts 21 survey families, 18 with at least one seed and 3 awaiting a first record. The family survey and seed registry count different units.
 
-| Registry family | Seed records | Specified | Discovered |
+| Registry family | Seed records | With scenarios | Discovered |
 | --- | ---: | ---: | ---: |
 | Context | 2 | 0 | 2 |
 | Diagnostics | 1 | 0 | 1 |

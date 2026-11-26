@@ -1,6 +1,6 @@
 # LINQ to Objects
 
-**Proposed contract · LINQ-OBJECTS-001 · [issue #4](https://github.com/igorpooh1978/GoEF/issues/4).** A caller with a slice of orders can filter by an ordinary Go predicate, project to order IDs and stop after one match. Building that pipeline consumes zero values. Requesting the first match calls the predicate once per inspected item. The consumer's stop signal travels back through every stage.
+`objects.Where` and `objects.Select` compose over `iter.Seq`. A caller can filter orders with a Go predicate, project matches to order IDs and stop after one result. Building the pipeline consumes zero values. Requesting the first result calls the predicate once per inspected item and the selector once for the match. The consumer's stop signal travels back through both operators. The remaining obligations below describe planned behavior. [Examples](../user/LINQ_OBJECTS.md) · [Issue #4](https://github.com/igorpooh1978/GoEF/issues/4)
 
 | Input | Proposed observation |
 | --- | --- |
@@ -9,7 +9,7 @@
 | String | Yield Unicode code points in iteration order. Indexed operators count elements. Byte-offset APIs need distinct names. |
 | Native iterator | Forward early stop. Replayability follows the source. A factory can supply a fresh iterator when replay is required. |
 | Channel | Receive consumes values once. The producer owns closure. Cancellation and early exit require an agreed producer shutdown mechanism. |
-| Empty/nil | Specify nil slice/map as empty and test both. A nil channel can block. Select a typed error or cancellation-aware contract for nil channels and nil iterator functions before freezing the API. |
+| Empty/nil | Specify nil slice/map as empty and test both. A nil channel can block, so a channel adapter needs a cancellation policy. The current `Where` and `Select` take non-nil iterator and callback functions. |
 
 ### Operator obligations
 

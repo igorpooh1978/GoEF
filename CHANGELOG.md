@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Resolve Code First table and property mappings with independent column name and length precedence and deterministic metadata ([#3](https://github.com/igorpooh1978/GoEF/issues/3)).
+- Add lazy, type-changing `Select` and verify that `Where` followed by `Select` preserves order and stops upstream when the consumer stops ([#4](https://github.com/igorpooh1978/GoEF/issues/4)).
 - Adopt the MIT License for GoEF with copyright attributed to Igor Pukhlikov ([#15](https://github.com/igorpooh1978/GoEF/issues/15)).
 - Add validation of resolved model declarations with typed invalid-model errors and a lazy in-memory `Where` over `iter.Seq` ([#3](https://github.com/igorpooh1978/GoEF/issues/3), [#4](https://github.com/igorpooh1978/GoEF/issues/4)).
 - Add focused local checks for native row cancellation on four PostgreSQL profiles and InnoDB deadlock rollback and recovery on both MySQL profiles. Verify blocked-read cancellation on three additional SQL Server profiles and label SQL Server provisioning failures by stage ([#13](https://github.com/igorpooh1978/GoEF/issues/13), [#26](https://github.com/igorpooh1978/GoEF/issues/26)).

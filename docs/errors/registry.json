@@ -28,13 +28,16 @@
       "deprecated": false,
       "replacement": null,
       "issues": [
-        "https://github.com/igorpooh1978/GoEF/issues/2"
+        "https://github.com/igorpooh1978/GoEF/issues/2",
+        "https://github.com/igorpooh1978/GoEF/issues/3"
       ],
       "featureIds": [
-        "ERR-CONTRACT-001"
+        "ERR-CONTRACT-001",
+        "MODEL-MAP-001"
       ],
       "scenarioIds": [
-        "ERR-CONTRACT-001-S01"
+        "ERR-CONTRACT-001-S01",
+        "MODEL-MAP-001-S03"
       ],
       "docs": [
         "docs/architecture/ERROR_CONTRACT.md",

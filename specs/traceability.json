@@ -316,8 +316,8 @@
         "docs/architecture/LINQ_OBJECTS.md",
         "docs/user/LINQ_OBJECTS.md"
       ],
-      "test": null,
-      "evidence": null,
+      "test": "linq/objects/where_test.go#TestWhereConsumesOnlyNecessaryPrefix",
+      "evidence": "docs/evidence/W008/OBJECTS_WHERE.md",
       "status": "SPECIFIED"
     },
     {
@@ -363,6 +363,21 @@
       ],
       "test": null,
       "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-OBJECTS-001",
+      "scenarioId": "LINQ-OBJECTS-001-S05",
+      "spec": "specs/features/linq/objects.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/4"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_OBJECTS.md",
+        "docs/user/LINQ_OBJECTS.md"
+      ],
+      "test": "linq/objects/select_test.go#TestWhereSelectStopsAtFirstProjectionAndReplays",
+      "evidence": "docs/evidence/W008/OBJECTS_SELECT.md",
       "status": "SPECIFIED"
     },
     {
@@ -647,6 +662,34 @@
       ],
       "test": null,
       "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MODEL-MAP-001",
+      "scenarioId": "MODEL-MAP-001-S02",
+      "spec": "specs/features/model/model-map-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/3"
+      ],
+      "docs": [
+        "docs/user/MODELS_CODE_FIRST.md"
+      ],
+      "test": "model/mapping_test.go#TestMapMODEL_MAP_001S02",
+      "evidence": "docs/evidence/W003/MODEL_MAPPING.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MODEL-MAP-001",
+      "scenarioId": "MODEL-MAP-001-S03",
+      "spec": "specs/features/model/model-map-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/3"
+      ],
+      "docs": [
+        "docs/user/MODELS_CODE_FIRST.md"
+      ],
+      "test": "model/mapping_test.go#TestMapMODEL_MAP_001S03",
+      "evidence": "docs/evidence/W003/MODEL_MAPPING.md",
       "status": "SPECIFIED"
     },
     {
