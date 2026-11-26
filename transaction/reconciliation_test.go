@@ -221,6 +221,16 @@ func TestReconcileCommitSerializesVerification(t *testing.T) {
 	case <-time.After(2 * time.Second):
 		t.Fatal("verification did not start")
 	}
+	closed := make(chan error, 1)
+	go func() { closed <- tx.Close() }()
+	select {
+	case err := <-closed:
+		if err != nil {
+			t.Fatalf("closed transaction with verification in progress: %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("closing an already released transaction waited for its verifier")
+	}
 	if err := tx.ReconcileCommit(t.Context(), func(context.Context) (transaction.CommitVerification, error) {
 		t.Error("concurrent call received verification ownership")
 		return transaction.RollbackConfirmed, nil

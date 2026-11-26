@@ -25,8 +25,8 @@ const (
 // authoritative primary. For example, a matching operation marker and
 // payload, written atomically with the unit, can confirm a commit. A negative
 // read can confirm rollback only after the prior unit is known to be final.
-// The verifier owns its resources, must honor its context, and must not invoke
-// transaction methods other than State.
+// The verifier owns its resources and must honor its context. The old native
+// transaction and its affected connection have already been released.
 type CommitVerifier func(context.Context) (CommitVerification, error)
 
 // ReconcileCommit checks an owned transaction after Commit reported an unknown
@@ -36,9 +36,8 @@ type CommitVerifier func(context.Context) (CommitVerification, error)
 //
 // A missing or inconclusive verifier, a verification failure, or cancellation
 // leaves StateOutcomeUnknown and returns [goeferr.ErrCommitOutcomeUnknown].
-// The caller can try verification again using a fresh context. Verification runs
-// at most
-// once per call, with no native completion or replay.
+// The caller can try verification again using a fresh context. Verification
+// runs once per call at most, with no native completion or replay.
 func (tx *Tx) ReconcileCommit(ctx context.Context, verify CommitVerifier) error {
 	if ctx == nil {
 		return goeferr.NewInvalidState()

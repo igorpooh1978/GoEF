@@ -211,6 +211,11 @@ func (tx *Tx) Close() error {
 		return nil
 	}
 	owned := tx.owned
+	// Terminal state publishes the immutable cleanup result. A verifier
+	// can run after that publication without delaying resource cleanup.
+	if tx.State() != StateActive {
+		return owned.cleanupErr
+	}
 	owned.mu.Lock()
 	defer owned.mu.Unlock()
 	if tx.State() != StateActive {
