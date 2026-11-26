@@ -289,6 +289,7 @@ class SaveChangesEvidenceTests(unittest.TestCase):
             stdout = io.StringIO()
             with (
                 patch.object(sqlite_compat, "parse_file_feature", return_value=[]),
+                patch.object(sqlite_compat, "run_rebuild_checks"),
                 patch.object(sqlite_compat, "build", return_value=("driverlab-binary", "windows/amd64")),
                 patch.object(sqlite_compat, "command", side_effect=supplied_outputs) as command,
                 patch.object(sqlite_compat, "verified_driver_results", return_value=[{"facts": {}}]),
@@ -392,6 +393,7 @@ class DecimalBindingEvidenceTests(unittest.TestCase):
             stdout = io.StringIO()
             with (
                 patch.object(sqlite_compat, "parse_file_feature", return_value=[]),
+                patch.object(sqlite_compat, "run_rebuild_checks"),
                 patch.object(sqlite_compat, "build", return_value=("driverlab-binary", "windows/amd64")),
                 patch.object(sqlite_compat, "command", side_effect=supplied_outputs) as command,
                 patch.object(sqlite_compat, "verified_driver_results", return_value=[{"facts": {}}]),
