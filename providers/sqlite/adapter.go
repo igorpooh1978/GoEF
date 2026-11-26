@@ -19,7 +19,10 @@ type Backend = sqladapter.Backend
 
 // Open creates an application-owned SQLite pool for a file path or driver URI.
 // The driver opens the database on first acquisition. Configure required
-// connection PRAGMAs through the URI. Close Backend.DB when finished.
+// connection PRAGMAs through the URI. Use a file-backed database, or supply
+// an independent anchor for named shared memory. A private :memory: database
+// loses its state when the adapter discards the physical connection. Close
+// Backend.DB when finished.
 func Open(dsn string) (*Backend, error) {
 	db, err := sql.Open("sqlite", dsn)
 	if err != nil {
@@ -28,7 +31,8 @@ func Open(dsn string) (*Backend, error) {
 	return New(db)
 }
 
-// New binds a caller-owned pool using modernc.org/sqlite.
+// New binds a caller-owned pool using modernc.org/sqlite. The pool must use a
+// file-backed database or keep an independent anchor for named shared memory.
 func New(db *sql.DB) (*Backend, error) {
 	if db == nil {
 		return nil, goeferr.NewInvalidState()

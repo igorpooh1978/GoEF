@@ -1,5 +1,7 @@
 # GoEF SQL execution adapters
 
+The [SQLite example](sqlite/example_test.go) runs on Go 1.27.4 against a temporary file. It reads a bound value and handles an incompatible result layout through `errors.Is`.
+
 Issue [#13](https://github.com/igorpooh1978/GoEF/issues/13) implements the frozen [execution SPI](../docs/architecture/PROVIDER_SPI.md) over the pinned database/sql drivers. Each provider is a separate Go module. An application imports the selected provider and owns its pool.
 
 | Provider | Module subdirectory | Driver selection |
