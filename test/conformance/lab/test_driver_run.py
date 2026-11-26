@@ -308,6 +308,98 @@ class SaveChangesEvidenceTests(unittest.TestCase):
         self.assertEqual(report["phase"], f"Gherkin {profiles[1]}")
 
 
+class DecimalBindingEvidenceTests(unittest.TestCase):
+    prefix = "GOEF_DECIMAL_BINDING_RESULT="
+
+    def row(self, profile="sqlite-3.54", engine_version="3.54.1"):
+        return {
+            "provider": "sqlite", "profile": profile, "engine_version": engine_version,
+            "scenario": "MODEL-TYPE-001-S01", "status": "PASS",
+        }
+
+    def evidence(self, row):
+        return self.prefix + json.dumps(row)
+
+    def test_decimal_binding_verifies_one_exact_result(self):
+        row = self.row()
+
+        def verify(output):
+            return driver_run.verified_decimal_binding_result(output, "sqlite", "sqlite-3.54", "3.54.1")
+
+        marker = self.evidence(row)
+        self.assertEqual(verify(marker), row)
+        for output in ("", f"{marker}\n{marker}", self.prefix + "{private-data", self.prefix + "[]"):
+            with self.subTest(output=output), self.assertRaises(driver_run.LabError) as failure:
+                verify(output)
+            self.assertNotIn("private-data", str(failure.exception))
+
+        for field, wrong in (
+            ("provider", "postgres"), ("profile", "sqlite-3.51"), ("engine_version", "3.51.3"),
+            ("scenario", "MODEL-TYPE-001-S02"), ("status", "SKIP"), ("unexpected", "private-data"),
+        ):
+            with self.subTest(field=field), self.assertRaises(driver_run.LabError) as failure:
+                verify(self.evidence({**row, field: wrong}))
+            self.assertNotIn("private-data", str(failure.exception))
+
+    def test_decimal_binding_is_opt_in_and_can_run_with_transaction_options(self):
+        args, env = driver_run.driver_test_options(tx_options=True)
+        self.assertEqual(args[0], "-test.run=^(TestDriverGherkin|TestTransactionOptions)$")
+        self.assertEqual(env, {"GOEF_TX_OPTIONS": "1"})
+
+        args, env = driver_run.driver_test_options(tx_options=True, decimal_binding=True)
+        self.assertEqual(args[0], "-test.run=^(TestDriverGherkin|TestTransactionOptions|TestDecimalBindingRoundTrip)$")
+        self.assertEqual(env, {"GOEF_TX_OPTIONS": "1", "GOEF_DECIMAL_BINDING": "1"})
+
+    def test_driver_matrix_requires_decimal_evidence_when_selected(self):
+        expected = self.row()
+        stdout = io.StringIO()
+        with (
+            patch.object(driver_run, "build_binary", return_value="driverlab-binary"),
+            patch.object(driver_run, "command", side_effect=[self.evidence(expected), "PASS", "PASS"]) as command,
+            patch.object(driver_run, "verified_results", return_value=[]),
+            redirect_stdout(stdout),
+        ):
+            self.assertEqual(driver_run.main(["sqlite", "--decimal-binding"]), 0)
+            self.assertEqual(driver_run.main(["sqlite", "--decimal-binding"]), 1)
+            self.assertEqual(driver_run.main(["sqlite"]), 0)
+
+        for call in command.call_args_list[:2]:
+            self.assertEqual(call.args[0][1], "-test.run=^(TestDriverGherkin|TestDecimalBindingRoundTrip)$")
+            self.assertEqual(call.kwargs["env"]["GOEF_DECIMAL_BINDING"], "1")
+        self.assertNotIn("GOEF_DECIMAL_BINDING", command.call_args_list[2].kwargs["env"])
+        passed, failed, unrequested = [json.loads(line) for line in stdout.getvalue().splitlines()]
+        self.assertEqual(passed["decimal_binding"], expected)
+        self.assertEqual((failed["status"], failed["phase"]), ("FAIL", "evidence"))
+        self.assertNotIn("decimal_binding", unrequested)
+
+    def test_sqlite_compatibility_requires_decimal_evidence_on_both_linked_runtimes(self):
+        expected = [self.row(name, profile.engine_version) for name, profile in sqlite_compat.PROFILES.items()]
+        outputs = [self.evidence(row) for row in expected]
+
+        def run(supplied_outputs):
+            stdout = io.StringIO()
+            with (
+                patch.object(sqlite_compat, "parse_file_feature", return_value=[]),
+                patch.object(sqlite_compat, "build", return_value=("driverlab-binary", "windows/amd64")),
+                patch.object(sqlite_compat, "command", side_effect=supplied_outputs) as command,
+                patch.object(sqlite_compat, "verified_driver_results", return_value=[{"facts": {}}]),
+                redirect_stdout(stdout),
+            ):
+                result = sqlite_compat.main(["--decimal-binding"])
+            return result, json.loads(stdout.getvalue()), command.call_args_list
+
+        result, report, calls = run(outputs)
+        self.assertEqual(result, 0)
+        self.assertEqual(report["decimal_binding"], expected)
+        self.assertEqual(
+            [call.kwargs["env"]["GOEF_DRIVERLAB_PROFILE"] for call in calls],
+            list(sqlite_compat.PROFILES),
+        )
+        self.assertTrue(all(call.kwargs["env"]["GOEF_DECIMAL_BINDING"] == "1" for call in calls))
+        result, report, _ = run([outputs[0], "PASS"])
+        self.assertEqual(result, 1)
+        self.assertEqual(report["phase"], f"Gherkin {expected[1]['profile']}")
+
 class DriverEvidenceTests(unittest.TestCase):
     def result_lines(self, provider="sqlite", native_codes=("2067", "787"), **profile_facts):
         if not profile_facts:
