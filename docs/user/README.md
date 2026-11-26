@@ -1,6 +1,8 @@
 # User guide
 
-These proposed guides describe workflows and the evidence needed before they can be published as runnable instructions. Follow the [example catalog](../../examples/README.md) for planned fixtures.
+To connect and run a first query with the published alpha, choose a database in the [database quickstarts](../README.md#start-with-a-database). The [example catalog](../../examples/README.md) lists the runnable source files and the examples still planned.
+
+## Guides
 
 - [Plan a first Code First workflow](QUICKSTART.md)
 - [Configure a provider and a context](CONFIGURATION.md)

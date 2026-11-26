@@ -1,5 +1,20 @@
 # Example catalog
 
+## Database quickstarts
+
+These examples run against the published GoEF and adapter modules at `v0.1.0-alpha.1` in a separate Go module without `replace`. Each walkthrough includes the installation commands, connection settings, and expected output.
+
+| Database | Walkthrough | Go source |
+| --- | --- | --- |
+| SQLite | [Temporary-file query](../README.md#quick-start-with-sqlite) | [Adapter example](../providers/sqlite/example_test.go) |
+| PostgreSQL | [Parameterized query](../README.md#postgresql) | [PostgreSQL adapter code](testdata/alpha-quickstart/postgres/adapter.go) |
+| SQL Server Express LocalDB | [Windows named-pipe query](../README.md#sql-server-express-localdb) | [LocalDB adapter code](testdata/alpha-quickstart/sqlserver/adapter.go) |
+| MySQL | [Parameterized query](../README.md#mysql) | [MySQL adapter code](testdata/alpha-quickstart/mysql/adapter.go) |
+
+PostgreSQL, LocalDB, and MySQL use the same [main.go](testdata/alpha-quickstart/main.go). Pair it with the adapter code for your database. Each query returns `42`.
+
+## GoLINQ and generated bindings
+
 The [GoLINQ Objects guide](../docs/user/LINQ_OBJECTS.md) links runnable examples for filtering and projection, counting, indexed filtering, quantifiers, paging, and sequence composition. Run them from the repository root with Go 1.27.4.
 
 ```sh
@@ -7,6 +22,8 @@ go test -run '^Example' -count=1 -v ./linq/objects
 ```
 
 The [generated customer binding](linq/generated/query.go) binds two city arguments and projects a scalar field. Run `go generate ./examples/linq/generated` and `go test -run '^Example$' -count=1 -v ./examples/linq/generated`. See the [generated binding guide](../docs/user/LINQ_GENERATED.md).
+
+## Planned examples
 
 The [language feasibility fixture](../test/bootstrap/go-feasibility/) demonstrates Go compiler behavior. The workflows below still need canonical runnable examples.
 

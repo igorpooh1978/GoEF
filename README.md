@@ -2,21 +2,23 @@
 
 GoEF is a Go data access library in alpha. It uses Entity Framework Core as a behavioral reference. The preview includes Code First mapping, transactions, migration history validation, in-memory GoLINQ operators, and separate database adapters.
 
+[SQLite](#quick-start-with-sqlite) · [PostgreSQL](#postgresql) · [SQL Server LocalDB](#sql-server-express-localdb) · [MySQL](#mysql) · [Documentation](docs/README.md) · [Runnable examples](examples/README.md#database-quickstarts)
+
 ## Install the alpha
 
 Use Go 1.27.4 or later. Pin the core version from your application's Go module.
 
 ```sh
-go mod edit -require=github.com/igorpooh1978/GoEF@v0.1.0-alpha.1
+go mod edit '-require=github.com/igorpooh1978/GoEF@v0.1.0-alpha.1'
 ```
 
 Pin the adapter for your database.
 
 ```sh
-go mod edit -require=github.com/igorpooh1978/GoEF/providers/postgres@v0.1.0-alpha.1
-go mod edit -require=github.com/igorpooh1978/GoEF/providers/sqlite@v0.1.0-alpha.1
-go mod edit -require=github.com/igorpooh1978/GoEF/providers/sqlserver@v0.1.0-alpha.1
-go mod edit -require=github.com/igorpooh1978/GoEF/providers/mysql@v0.1.0-alpha.1
+go mod edit '-require=github.com/igorpooh1978/GoEF/providers/postgres@v0.1.0-alpha.1'
+go mod edit '-require=github.com/igorpooh1978/GoEF/providers/sqlite@v0.1.0-alpha.1'
+go mod edit '-require=github.com/igorpooh1978/GoEF/providers/sqlserver@v0.1.0-alpha.1'
+go mod edit '-require=github.com/igorpooh1978/GoEF/providers/mysql@v0.1.0-alpha.1'
 ```
 
 After adding the imports to your code, run `go mod tidy` to download the pinned modules and update `go.sum`.
@@ -37,7 +39,7 @@ In a new directory outside the GoEF checkout and any Go workspace, initialize a 
 
 ```sh
 go mod init example.com/goef-demo
-go mod edit -require=github.com/igorpooh1978/GoEF@v0.1.0-alpha.1 -require=github.com/igorpooh1978/GoEF/providers/sqlite@v0.1.0-alpha.1
+go mod edit '-require=github.com/igorpooh1978/GoEF@v0.1.0-alpha.1' '-require=github.com/igorpooh1978/GoEF/providers/sqlite@v0.1.0-alpha.1'
 ```
 
 Save this program as `main.go`. It runs a parameterized SQLite query against a temporary file and closes the result stream, connection lease, and pool before removing the file.
@@ -128,7 +130,7 @@ Choose one database. In a new directory outside the GoEF checkout and any Go wor
 
 ```sh
 go mod init example.com/goef-demo
-go mod edit -require=github.com/igorpooh1978/GoEF@v0.1.0-alpha.1
+go mod edit '-require=github.com/igorpooh1978/GoEF@v0.1.0-alpha.1'
 ```
 
 For the PostgreSQL and MySQL setup below, PowerShell users can set the connection string with `$env:GOEF_DSN = '...'`.
@@ -190,7 +192,7 @@ func readValue(backend provider.Backend, command provider.Command) (err error) {
 Use a running PostgreSQL instance and an existing database. The sample connection string uses a disposable local instance. Set `GOEF_DSN` to the connection string for your instance.
 
 ```sh
-go mod edit -require=github.com/igorpooh1978/GoEF/providers/postgres@v0.1.0-alpha.1
+go mod edit '-require=github.com/igorpooh1978/GoEF/providers/postgres@v0.1.0-alpha.1'
 export GOEF_DSN='postgres://demo:password@127.0.0.1:5432/demo?sslmode=disable'
 ```
 
@@ -226,7 +228,7 @@ func run(dsn string) (err error) {
 On Windows, use an installed `MSSQLLocalDB` instance. Run these commands in PowerShell to start it and get its current named pipe. The example connects using your Windows account. [Microsoft LocalDB documentation](https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/sql-server-express-localdb)
 
 ```powershell
-go mod edit -require=github.com/igorpooh1978/GoEF/providers/sqlserver@v0.1.0-alpha.1
+go mod edit '-require=github.com/igorpooh1978/GoEF/providers/sqlserver@v0.1.0-alpha.1'
 sqllocaldb start MSSQLLocalDB
 $pipeMatch = sqllocaldb info MSSQLLocalDB | Select-String '\\\\\.\\pipe\\LOCALDB#[0-9A-F]+\\tsql\\query'
 if (!$pipeMatch) { throw 'LocalDB did not report a named pipe.' }
@@ -267,7 +269,7 @@ func run(dsn string) (err error) {
 Use a running MySQL instance and an existing database. The sample connection string uses a disposable local instance. Set `GOEF_DSN` to the connection string for your instance.
 
 ```sh
-go mod edit -require=github.com/igorpooh1978/GoEF/providers/mysql@v0.1.0-alpha.1
+go mod edit '-require=github.com/igorpooh1978/GoEF/providers/mysql@v0.1.0-alpha.1'
 export GOEF_DSN='demo:password@tcp(127.0.0.1:3306)/demo'
 ```
 
