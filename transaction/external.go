@@ -17,8 +17,9 @@ type External struct {
 }
 
 type externalTx struct {
-	mu     sync.Mutex
-	native *sql.Tx
+	mu         sync.Mutex
+	native     *sql.Tx
+	savepoints savepointStack
 }
 
 // NewExternal coordinates participation in a native transaction opened by
@@ -82,6 +83,7 @@ func (e *External) withNative(action func(*sql.Tx) error) error {
 // detach must be called with mu held.
 func (s *externalTx) detach() {
 	s.native = nil
+	s.savepoints.invalidate()
 }
 
 // Participant runs commands in a caller-owned transaction. Copies share

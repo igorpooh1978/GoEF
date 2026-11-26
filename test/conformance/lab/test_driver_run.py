@@ -129,7 +129,7 @@ class SQLServerProvisioningDiagnosticsTests(unittest.TestCase):
         self.assertEqual(container.docker.call_count, 2)
 
 
-class ModelTypeEvidenceTests(unittest.TestCase):
+class OptionalScenarioEvidenceTests(unittest.TestCase):
     def test_requires_one_exact_result_for_requested_profile(self):
         expected = {
             "provider": "sqlite", "profile": "sqlite-3.51", "engine_version": "3.51.3",
@@ -173,13 +173,35 @@ class ModelTypeEvidenceTests(unittest.TestCase):
                 verify(*rows)
 
     def test_optional_cases_can_run_together(self):
-        arguments, environment = driver_run.driver_test_options(model_types=True, owned_tx=True)
+        arguments, environment = driver_run.driver_test_options(model_types=True, owned_tx=True, savepoint_tx=True)
         self.assertEqual(arguments, (
-            "-test.run=^(TestDriverGherkin|TestModelTypeRoundTrip|TestOwnedTransaction)$",
+            "-test.run=^(TestDriverGherkin|TestModelTypeRoundTrip|TestOwnedTransaction|TestSavepointAndExternalTransaction)$",
             *driver_run.TEST_ARGS[1:],
         ))
-        self.assertEqual(environment, {"GOEF_DRIVERLAB_MODEL_TYPES": "1", "GOEF_DRIVERLAB_OWNED_TX": "1"})
+        self.assertEqual(environment, {
+            "GOEF_DRIVERLAB_MODEL_TYPES": "1", "GOEF_DRIVERLAB_OWNED_TX": "1", "GOEF_DRIVERLAB_SAVEPOINT_TX": "1",
+        })
         self.assertEqual(driver_run.driver_test_options(), (driver_run.TEST_ARGS, {}))
+
+    def test_savepoint_and_external_results_are_both_required(self):
+        expected = [{
+            "provider": "sqlite", "profile": "sqlite-3.51", "engine_version": "3.51.3",
+            "scenario": scenario, "status": "PASS",
+        } for scenario in ("TX-OWN-001-S01", "TX-SAVEPOINT-001-S03")]
+
+        def verify(rows):
+            output = "\n".join("GOEF_SAVEPOINT_TX_RESULT=" + json.dumps(row) for row in rows)
+            return driver_run.verified_savepoint_tx_results(output, "sqlite", "sqlite-3.51", "3.51.3")
+
+        self.assertEqual(verify(reversed(expected)), expected)
+        for rows in (
+            expected[:1], [expected[0], expected[0]], [*expected, expected[1]],
+            [expected[0], {**expected[1], "scenario": "TX-SAVEPOINT-001-S01"}],
+            [expected[0], {**expected[1], "profile": "sqlite-3.54"}],
+            [expected[0], {**expected[1], "unexpected": "private-data"}],
+        ):
+            with self.subTest(rows=rows), self.assertRaises(driver_run.LabError):
+                verify(rows)
 
 
 class DriverEvidenceTests(unittest.TestCase):

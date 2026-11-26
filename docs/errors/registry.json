@@ -419,7 +419,8 @@
       ],
       "docs": [
         "docs/architecture/ERROR_CONTRACT.md",
-        "docs/errors/README.md"
+        "docs/errors/README.md",
+        "docs/user/TRANSACTIONS.md"
       ],
       "testIds": [
         "TEST-GOEF-CAP-0001"
@@ -1620,7 +1621,8 @@
       ],
       "docs": [
         "docs/architecture/ERROR_CONTRACT.md",
-        "docs/errors/README.md"
+        "docs/errors/README.md",
+        "docs/user/TRANSACTIONS.md"
       ],
       "testIds": [
         "TEST-GOEF-TX-0002"

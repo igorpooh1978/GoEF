@@ -130,6 +130,8 @@ LOCK_TIMEOUT_CODES = {"postgres": "55P03", "sqlite": "5", "sqlserver": "1222", "
 TEST_ARGS = ("-test.run=^TestDriverGherkin$", "-test.v", "-test.count=1", "-test.timeout=3m")
 MODEL_TYPES_RESULT_PREFIX = "GOEF_MODEL_TYPES_RESULT="
 OWNED_TX_RESULT_PREFIX = "GOEF_OWNED_TX_RESULT="
+SAVEPOINT_TX_RESULT_PREFIX = "GOEF_SAVEPOINT_TX_RESULT="
+SAVEPOINT_TX_SCENARIOS = ("TX-OWN-001-S01", "TX-SAVEPOINT-001-S03")
 FACT_KEYS = {
     "autocommit", "busy_timeout_ms", "character_set_connection", "collation", "collation_connection",
     "compatibility_level", "compile_options_count", "compile_options_sha256", "database", "driver", "edition",
@@ -400,7 +402,7 @@ def verified_results(output, provider, profile_name=None):
     return [results[key] for key in sorted(results)]
 
 
-def driver_test_options(*, model_types=False, owned_tx=False):
+def driver_test_options(*, model_types=False, owned_tx=False, savepoint_tx=False):
     tests = ["TestDriverGherkin"]
     environment = {}
     if model_types:
@@ -409,37 +411,45 @@ def driver_test_options(*, model_types=False, owned_tx=False):
     if owned_tx:
         tests.append("TestOwnedTransaction")
         environment["GOEF_DRIVERLAB_OWNED_TX"] = "1"
+    if savepoint_tx:
+        tests.append("TestSavepointAndExternalTransaction")
+        environment["GOEF_DRIVERLAB_SAVEPOINT_TX"] = "1"
     if not environment:
         return TEST_ARGS, environment
     return (f"-test.run=^({'|'.join(tests)})$", *TEST_ARGS[1:]), environment
 
 
-def _verified_profile_scenario(output, prefix, scenario, provider, profile, engine_version):
+def _verified_profile_scenarios(output, prefix, scenarios, provider, profile, engine_version):
+    scope = ", ".join(scenarios)
     markers = [
         line.removeprefix(prefix)
         for line in output.splitlines() if line.startswith(prefix)
     ]
-    if len(markers) != 1:
-        raise LabError(f"{scenario} must emit exactly one result.")
+    if len(markers) != len(scenarios):
+        raise LabError(f"{scope} must emit one result per scenario.")
     try:
-        observed = json.loads(markers[0])
+        rows = [json.loads(marker) for marker in markers]
     except ValueError:
-        raise LabError(f"{scenario} emitted malformed evidence.") from None
-    expected = {
+        raise LabError(f"{scope} emitted malformed evidence.") from None
+    expected = [{
         "provider": provider, "profile": profile, "engine_version": engine_version,
         "scenario": scenario, "status": "PASS",
-    }
-    if observed != expected:
-        raise LabError(f"{scenario} did not verify the selected profile and outcome.")
+    } for scenario in scenarios]
+    if any(rows.count(row) != 1 for row in expected):
+        raise LabError(f"{scope} did not verify the selected profile and outcome.")
     return expected
 
 
 def verified_model_type_result(output, provider, profile, engine_version):
-    return _verified_profile_scenario(output, MODEL_TYPES_RESULT_PREFIX, "MODEL-TYPE-001-S02", provider, profile, engine_version)
+    return _verified_profile_scenarios(output, MODEL_TYPES_RESULT_PREFIX, ("MODEL-TYPE-001-S02",), provider, profile, engine_version)[0]
 
 
 def verified_owned_tx_result(output, provider, profile, engine_version):
-    return _verified_profile_scenario(output, OWNED_TX_RESULT_PREFIX, "TX-OWN-001-S02", provider, profile, engine_version)
+    return _verified_profile_scenarios(output, OWNED_TX_RESULT_PREFIX, ("TX-OWN-001-S02",), provider, profile, engine_version)[0]
+
+
+def verified_savepoint_tx_results(output, provider, profile, engine_version):
+    return _verified_profile_scenarios(output, SAVEPOINT_TX_RESULT_PREFIX, SAVEPOINT_TX_SCENARIOS, provider, profile, engine_version)
 
 
 def missing_eula(profile, accepted_eulas):
@@ -466,7 +476,7 @@ def sqlserver_provisioning_reason(error):
     return "SQL Server provisioning failed."
 
 
-def run_provider(profile_name, binary, accepted_eulas, *, model_types=False, owned_tx=False):
+def run_provider(profile_name, binary, accepted_eulas, *, model_types=False, owned_tx=False, savepoint_tx=False):
     profile = PROFILES[profile_name]
     provider = profile.provider
     phase = "build"
@@ -485,7 +495,7 @@ def run_provider(profile_name, binary, accepted_eulas, *, model_types=False, own
         with TemporaryDirectory(prefix="goef-driver-cell-") as directory:
             path = Path(directory)
             env = {"GOEF_DRIVERLAB_PROVIDER": provider, "GOEF_DRIVERLAB_PROFILE": profile_name}
-            test_args, extra_env = driver_test_options(model_types=model_types, owned_tx=owned_tx)
+            test_args, extra_env = driver_test_options(model_types=model_types, owned_tx=owned_tx, savepoint_tx=savepoint_tx)
             env.update(extra_env)
             if provider == "sqlite":
                 phase = "driver execution"
@@ -519,6 +529,8 @@ def run_provider(profile_name, binary, accepted_eulas, *, model_types=False, own
             report["model_types"] = verified_model_type_result(output, provider, profile_name, profile.version)
         if owned_tx:
             report["owned_tx"] = verified_owned_tx_result(output, provider, profile_name, profile.version)
+        if savepoint_tx:
+            report["savepoint_tx"] = verified_savepoint_tx_results(output, provider, profile_name, profile.version)
         return report
     except Exception as error:
         blocked = isinstance(error, Blocked)
@@ -539,6 +551,7 @@ def main(argv=None):
     parser.add_argument("--profile", choices=tuple(PROFILES))
     parser.add_argument("--model-types", action="store_true", help="also run the model type round-trip scenario")
     parser.add_argument("--owned-tx", action="store_true", help="also run the owned transaction scenario")
+    parser.add_argument("--savepoint-tx", action="store_true", help="also run savepoint and external transaction scenarios")
     parser.add_argument(SQLSERVER_EULA, action="store_true", help="accept the SQL Server 2022 Developer EULA")
     parser.add_argument(LEGACY_SQLSERVER_EULA, action="store_true", help="accept the selected SQL Server 2017 or 2019 Developer EULA")
     args = parser.parse_args(argv)
@@ -569,7 +582,8 @@ def main(argv=None):
             tasks = [
                 pool.submit(run_provider, name,
                             binaries.get("host" if provider == "sqlite" else "linux"),
-                            accepted_eulas, model_types=args.model_types, owned_tx=args.owned_tx)
+                            accepted_eulas, model_types=args.model_types, owned_tx=args.owned_tx,
+                            savepoint_tx=args.savepoint_tx)
                 for provider, name in selected.items()
             ]
             for task in tasks:

@@ -29,3 +29,20 @@ Feature: Bound the effects of failed saves with savepoints
       | sqlite    |
       | sqlserver |
       | mysql     |
+
+  @TX-SAVEPOINT-001-S03
+  Scenario Outline: Roll back nested explicit savepoints without ending the transaction
+    Given a GoEF-owned <provider> transaction has inserted A
+    When the caller creates nested savepoints around later writes on the same connection
+    Then a point with a younger active point cannot be released
+    When the caller rolls back to the older point
+    Then the younger point is invalid and the older point can be used again
+    When the caller rolls back to the older point again, releases it, and commits
+    Then the released point is invalid and a fresh physical connection sees only A
+
+    Examples:
+      | provider  |
+      | postgres  |
+      | sqlite    |
+      | sqlserver |
+      | mysql     |

@@ -921,8 +921,8 @@
         "docs/architecture/TRANSACTION_ENGINE.md",
         "docs/user/TRANSACTIONS.md"
       ],
-      "test": null,
-      "evidence": null,
+      "test": "test/conformance/driverlab/savepoint_transaction_test.go#TestSavepointAndExternalTransaction",
+      "evidence": "docs/evidence/W005/SAVEPOINTS_AND_EXTERNAL.md",
       "status": "SPECIFIED"
     },
     {
@@ -1028,6 +1028,21 @@
       ],
       "test": null,
       "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-SAVEPOINT-001",
+      "scenarioId": "TX-SAVEPOINT-001-S03",
+      "spec": "specs/features/transactions/tx-savepoint-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/2"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": "test/conformance/driverlab/savepoint_transaction_test.go#TestSavepointAndExternalTransaction",
+      "evidence": "docs/evidence/W005/SAVEPOINTS_AND_EXTERNAL.md",
       "status": "SPECIFIED"
     }
   ]

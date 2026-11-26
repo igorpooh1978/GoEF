@@ -4,11 +4,13 @@ Feature: Honor transaction and connection ownership
   @TX-OWN-001-S01
   Scenario Outline: Only the external owner completes enlisted work
     Given a caller begins a transaction on an isolated <provider> connection
-    And two compatible contexts explicitly enlist on that connection
-    When one context saves a row and both contexts close
-    Then the owner can read the pending row through the transaction
-    And owner rollback leaves no row on a fresh connection
-    And the caller can still use and close its connection
+    And two participants explicitly enlist through one coordinator
+    When they write rows on that connection and roll back to a coordinator savepoint
+    And the participants and coordinator detach
+    Then the owner can read the remaining pending rows through the native transaction
+    And the detached participants and coordinator savepoints reject further operations
+    And owner rollback leaves no rows on a fresh physical connection
+    And the caller can still use and close its original connection
 
     Examples:
       | provider  |
