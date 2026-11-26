@@ -172,6 +172,12 @@ func runLocked(ctx context.Context, conn *sql.Conn, plan Plan) (bool, error) {
 	if applicationID != plan.ApplicationID {
 		return false, goeferr.NewMigrationRecoveryRequired()
 	}
+	if _, err := conn.ExecContext(ctx, createHistory); err != nil {
+		return false, safeError(err)
+	}
+	if err := verifyHistoryTable(ctx, conn); err != nil {
+		return false, err
+	}
 	applied, err := readHistory(ctx, conn, len(plan.Lineage))
 	if err != nil {
 		return false, err
@@ -199,12 +205,11 @@ func runLocked(ctx context.Context, conn *sql.Conn, plan Plan) (bool, error) {
 	if err := verify(ctx, conn, plan.CheckTarget); err != nil {
 		return false, err
 	}
-	if err := checkForeignKeys(ctx, conn); err != nil {
+	if err := recordHistory(ctx, conn, plan.Lineage); err != nil {
 		return false, err
 	}
-	entry := pending[0]
-	if _, err := conn.ExecContext(ctx, insertHistory, len(plan.Lineage), entry.ID, entry.Predecessor, entry.Digest[:]); err != nil {
-		return false, safeError(err)
+	if err := checkForeignKeys(ctx, conn); err != nil {
+		return false, err
 	}
 	return true, nil
 }

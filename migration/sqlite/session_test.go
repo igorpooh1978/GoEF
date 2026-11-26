@@ -28,6 +28,7 @@ type scriptedStep struct {
 	values    [][]driver.Value
 	args      []driver.Value
 	err       error
+	result    driver.Result
 	rowsErr   error
 	closeErr  error
 	onCall    func()
@@ -79,7 +80,10 @@ func (c *scriptedConn) Close() error {
 
 func (c *scriptedConn) ExecContext(ctx context.Context, statement string, args []driver.NamedValue) (driver.Result, error) {
 	step := c.consume(ctx, statement, args, false)
-	return driver.RowsAffected(1), step.err
+	if step.result == nil {
+		step.result = driver.RowsAffected(1)
+	}
+	return step.result, step.err
 }
 
 func (c *scriptedConn) QueryContext(ctx context.Context, statement string, args []driver.NamedValue) (driver.Rows, error) {
@@ -175,6 +179,7 @@ func preflight() []scriptedStep {
 		exec("BEGIN IMMEDIATE"),
 		scalar("PRAGMA main.application_id", int64(42)),
 		exec(createHistory),
+		scalar(inspectHistoryTable, true),
 		query(selectHistory, 4),
 	}
 }
@@ -184,8 +189,10 @@ func operations() []scriptedStep {
 		scalar("CHECK SOURCE", true),
 		exec("RUN REVIEWED STATEMENTS"),
 		scalar("CHECK TARGET", true),
-		query("PRAGMA main.foreign_key_check", 4),
+		scalar(inspectHistoryTable, true),
 		exec(insertHistory, int64(1), artifact.ID, artifact.Predecessor, artifact.Digest[:]),
+		query(selectHistory, 4, []driver.Value{int64(1), artifact.ID, artifact.Predecessor, artifact.Digest[:]}),
+		query("PRAGMA main.foreign_key_check", 4),
 	}
 }
 
@@ -246,7 +253,7 @@ func TestApplyValidatesAlreadyAppliedTarget(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			steps := preflight()
-			steps[6] = query(selectHistory, 4, []driver.Value{int64(1), artifact.ID, artifact.Predecessor, artifact.Digest[:]})
+			steps[7] = query(selectHistory, 4, []driver.Value{int64(1), artifact.ID, artifact.Predecessor, artifact.Digest[:]})
 			steps = append(steps, scalar("CHECK TARGET", tc.matches))
 			if tc.matches {
 				steps = append(steps, query("PRAGMA main.foreign_key_check", 4))
@@ -310,24 +317,31 @@ func TestApplyRollsBackOnVerificationAndExecutionFailures(t *testing.T) {
 		{"target read error", 4, func(s *scriptedStep) { s.err = privateError }, goeferr.ErrUnknownDriver},
 		{"wrong target", 4, func(s *scriptedStep) { s.values[0][0] = int64(43) }, goeferr.ErrMigrationRecoveryRequired},
 		{"create history", 5, func(s *scriptedStep) { s.err = privateError }, goeferr.ErrUnknownDriver},
-		{"history query", 6, func(s *scriptedStep) { s.err = privateError }, goeferr.ErrUnknownDriver},
-		{"history iteration", 6, func(s *scriptedStep) { s.rowsErr = privateError }, goeferr.ErrUnknownDriver},
-		{"history row conversion", 6, func(s *scriptedStep) { s.values = [][]driver.Value{{"bad", "", "", nil}} }, goeferr.ErrUnknownDriver},
-		{"history noncontiguous", 6, func(s *scriptedStep) { s.values = [][]driver.Value{{int64(2), "", "", artifact.Digest[:]}} }, goeferr.ErrMigrationConflict},
-		{"history digest size", 6, func(s *scriptedStep) { s.values = [][]driver.Value{{int64(1), "", "", []byte{1}}} }, goeferr.ErrMigrationConflict},
-		{"history extra entries", 6, func(s *scriptedStep) { s.values = [][]driver.Value{badHistory, badHistory}; s.closeErr = privateError }, goeferr.ErrMigrationConflict},
-		{"history divergent entry", 6, func(s *scriptedStep) { s.values = [][]driver.Value{{int64(1), "different", "", artifact.Digest[:]}} }, goeferr.ErrMigrationConflict},
-		{"source drift", 7, func(s *scriptedStep) { s.values[0][0] = false }, goeferr.ErrMigrationRecoveryRequired},
-		{"source unavailable", 7, func(s *scriptedStep) { s.err = privateError }, goeferr.ErrMigrationRecoveryRequired},
-		{"driver statement error", 8, func(s *scriptedStep) { s.err = privateError }, goeferr.ErrUnknownDriver},
-		{"target postcondition", 9, func(s *scriptedStep) { s.values[0][0] = false }, goeferr.ErrMigrationRecoveryRequired},
-		{"foreign key query", 10, func(s *scriptedStep) { s.err = privateError }, goeferr.ErrUnknownDriver},
-		{"foreign key iteration", 10, func(s *scriptedStep) { s.rowsErr = privateError }, goeferr.ErrUnknownDriver},
-		{"foreign key violation", 10, func(s *scriptedStep) {
+		{"history query", 7, func(s *scriptedStep) { s.err = privateError }, goeferr.ErrUnknownDriver},
+		{"history iteration", 7, func(s *scriptedStep) { s.rowsErr = privateError }, goeferr.ErrUnknownDriver},
+		{"history row conversion", 7, func(s *scriptedStep) { s.values = [][]driver.Value{{"bad", "", "", nil}} }, goeferr.ErrUnknownDriver},
+		{"history noncontiguous", 7, func(s *scriptedStep) { s.values = [][]driver.Value{{int64(2), "", "", artifact.Digest[:]}} }, goeferr.ErrMigrationConflict},
+		{"history digest size", 7, func(s *scriptedStep) { s.values = [][]driver.Value{{int64(1), "", "", []byte{1}}} }, goeferr.ErrMigrationConflict},
+		{"history extra entries", 7, func(s *scriptedStep) { s.values = [][]driver.Value{badHistory, badHistory}; s.closeErr = privateError }, goeferr.ErrMigrationConflict},
+		{"history divergent entry", 7, func(s *scriptedStep) { s.values = [][]driver.Value{{int64(1), "different", "", artifact.Digest[:]}} }, goeferr.ErrMigrationConflict},
+		{"source drift", 8, func(s *scriptedStep) { s.values[0][0] = false }, goeferr.ErrMigrationRecoveryRequired},
+		{"source unavailable", 8, func(s *scriptedStep) { s.err = privateError }, goeferr.ErrMigrationRecoveryRequired},
+		{"driver statement error", 9, func(s *scriptedStep) { s.err = privateError }, goeferr.ErrUnknownDriver},
+		{"target postcondition", 10, func(s *scriptedStep) { s.values[0][0] = false }, goeferr.ErrMigrationRecoveryRequired},
+		{"foreign key query", 14, func(s *scriptedStep) { s.err = privateError }, goeferr.ErrUnknownDriver},
+		{"foreign key iteration", 14, func(s *scriptedStep) { s.rowsErr = privateError }, goeferr.ErrUnknownDriver},
+		{"foreign key violation", 14, func(s *scriptedStep) {
 			s.values = [][]driver.Value{{"child", int64(1), "parent", int64(0)}}
 			s.closeErr = privateError
 		}, goeferr.ErrMigrationRecoveryRequired},
-		{"insert history", 11, func(s *scriptedStep) { s.err = privateError }, goeferr.ErrUnknownDriver},
+		{"insert history", 12, func(s *scriptedStep) { s.err = privateError }, goeferr.ErrUnknownDriver},
+		{"history schema unreadable", 6, func(s *scriptedStep) { s.err = privateError }, goeferr.ErrUnknownDriver},
+		{"history trigger or malformed table", 6, func(s *scriptedStep) { s.values[0][0] = false }, goeferr.ErrMigrationConflict},
+		{"new history trigger", 11, func(s *scriptedStep) { s.values[0][0] = false }, goeferr.ErrMigrationConflict},
+		{"history insert suppressed", 12, func(s *scriptedStep) { s.result = driver.RowsAffected(0) }, goeferr.ErrMigrationRecoveryRequired},
+		{"history row count unavailable", 12, func(s *scriptedStep) { s.result = driver.ResultNoRows }, goeferr.ErrUnknownDriver},
+		{"new history query unavailable", 13, func(s *scriptedStep) { s.err = privateError }, goeferr.ErrUnknownDriver},
+		{"new history missing", 13, func(s *scriptedStep) { s.values = nil }, goeferr.ErrMigrationRecoveryRequired},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {

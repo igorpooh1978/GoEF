@@ -200,6 +200,12 @@ func checkExecutorRebuildRejections(t *testing.T, ctx context.Context, path stri
 	requireExecutorError(t, ctx, db, reject, goeferr.ErrMigrationConflict)
 	reject.Lineage = plan.Lineage
 
+	execExecutorFixture(t, ctx, db, `CREATE TRIGGER ignore_goef_history BEFORE INSERT ON main.__goef_migrations_history
+		BEGIN SELECT RAISE(IGNORE); END`)
+	requireExecutorError(t, ctx, db, reject, goeferr.ErrMigrationConflict)
+	execExecutorFixture(t, ctx, db, "DROP TRIGGER ignore_goef_history")
+	assertExecutorRebuildHistory(t, ctx, db, plan.Lineage[:1])
+
 	execExecutorFixture(t, ctx, db, "CREATE VIEW unexpected_parent_view AS SELECT id FROM parent")
 	requireExecutorError(t, ctx, db, reject, goeferr.ErrMigrationRecoveryRequired)
 	execExecutorFixture(t, ctx, db, "DROP VIEW unexpected_parent_view")
