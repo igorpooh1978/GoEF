@@ -59,3 +59,17 @@ Feature: Observe transaction outcomes, constraints and reader cancellation with 
       | sqlite    |
       | sqlserver |
       | mysql     |
+
+  @LAB-DRIVER-001-S05
+  Scenario Outline: Distinguish a caller deadline from an engine lock timeout
+    Given isolated parent and child tables on <provider> with a separate observer connection
+    When the contender executes both lock waits while the writer holds the write lock
+    Then the observed waits distinguish the caller deadline and native engine timeout
+    And the observer reads exactly the rows that were seeded for the lock waits
+
+    Examples:
+      | provider  |
+      | postgres  |
+      | sqlite    |
+      | sqlserver |
+      | mysql     |

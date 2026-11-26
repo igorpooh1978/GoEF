@@ -14,9 +14,11 @@ class DriverEvidenceTests(unittest.TestCase):
     def result_lines(self, provider="sqlite", native_codes=("2067", "787"), **profile_facts):
         if not profile_facts:
             profile_facts = {"engine_version": "3.54.1"}
+        lock_native = {"postgres": "55P03", "sqlite": "5", "sqlserver": "1222", "mysql": "1205/HY000"}[provider]
         outcomes = (
             {}, {"native_code": native_codes[0]}, {"native_code": native_codes[1]},
             {"cancel_cause": "context.Canceled", "pool_in_use_after": "0"},
+            {"lock_deadline_cause": "context.DeadlineExceeded", "lock_wait_observed": "both", "lock_timeout_native": lock_native},
         )
         return [
             {
@@ -34,16 +36,43 @@ class DriverEvidenceTests(unittest.TestCase):
     def test_complete_evidence_is_required_and_redacted(self):
         rows = self.result_lines()
         result = driver_run.verified_results(self.output(rows), "sqlite")
-        self.assertEqual(len(result), 4)
+        self.assertEqual(len(result), 5)
         self.assertNotIn("ignored_secret", result[0]["facts"])
         self.assertNotIn("target_marker", result[0]["facts"])
         self.assertEqual(result[3]["facts"], {
             "engine_version": "3.54.1", "cancel_cause": "context.Canceled", "pool_in_use_after": "0",
         })
         with self.assertRaises(driver_run.LabError):
-            driver_run.verified_results(self.output(rows[:-1]), "sqlite")
+            driver_run.verified_results(self.output([*rows[:3], rows[4]]), "sqlite")
         with self.assertRaises(driver_run.LabError):
             driver_run.verified_results(self.output([*rows, rows[3]]), "sqlite")
+
+    def test_lock_timeout_is_required_and_redacted(self):
+        rows = self.result_lines("mysql", ("1062/23000", "1452/23000"), server_version="8.4.13.1")
+        result = driver_run.verified_results(self.output(rows), "mysql")
+        self.assertEqual(result[4]["facts"], {
+            "server_version": "8.4.13.1", "lock_deadline_cause": "context.DeadlineExceeded",
+            "lock_wait_observed": "both", "lock_timeout_native": "1205/HY000",
+        })
+        for altered in (rows[:-1], [*rows, rows[4]]):
+            with self.assertRaises(driver_run.LabError):
+                driver_run.verified_results(self.output(altered), "mysql")
+
+    def test_lock_timeout_rejects_missing_or_incorrect_facts(self):
+        for field, wrong in (
+            ("lock_deadline_cause", None), ("lock_deadline_cause", "context.Canceled"),
+            ("lock_wait_observed", None), ("lock_wait_observed", "caller"),
+            ("lock_timeout_native", None), ("lock_timeout_native", "55P03"),
+            ("lock_timeout_native", 5), ("native_code", "5"),
+        ):
+            with self.subTest(field=field, wrong=wrong):
+                rows = self.result_lines()
+                if wrong is None:
+                    rows[4]["facts"].pop(field)
+                else:
+                    rows[4]["facts"][field] = wrong
+                with self.assertRaisesRegex(driver_run.LabError, "lock timeout"):
+                    driver_run.verified_results(self.output(rows), "sqlite")
 
     def test_cancellation_requires_the_cause_and_released_pool(self):
         for field, wrong in (
@@ -109,7 +138,7 @@ class DriverEvidenceTests(unittest.TestCase):
             product_update_level="CU31", compatibility_level="140",
         )
         output = self.output(rows)
-        self.assertEqual(len(driver_run.verified_results(output, "sqlserver", "sqlserver-2017")), 4)
+        self.assertEqual(len(driver_run.verified_results(output, "sqlserver", "sqlserver-2017")), 5)
         with self.assertRaises(driver_run.LabError):
             driver_run.verified_results(output, "sqlserver", "sqlserver-2019")
         for field, value in (("compatibility_level", "150"), ("product_update_level", "CU32")):
@@ -158,13 +187,13 @@ class DriverEvidenceTests(unittest.TestCase):
                     if probe_code:
                         row["facts"]["generate_series_native_code"] = probe_code
                 result = driver_run.verified_results(self.output(rows), "sqlserver", profile)
-                self.assertEqual(len(result), 4)
-                self.assertEqual([row["facts"]["generate_series"] for row in result], [availability] * 4)
+                self.assertEqual(len(result), 5)
+                self.assertEqual([row["facts"]["generate_series"] for row in result], [availability] * 5)
                 other = "sqlserver-2022-140" if profile == "sqlserver-2022" else "sqlserver-2022"
                 with self.assertRaises(driver_run.LabError):
                     driver_run.verified_results(self.output(rows), "sqlserver", other)
                 if probe_code:
-                    self.assertEqual([row["facts"]["generate_series_native_code"] for row in result], [probe_code] * 4)
+                    self.assertEqual([row["facts"]["generate_series_native_code"] for row in result], [probe_code] * 5)
                     rows[1]["facts"]["generate_series_native_code"] = "229"
                     with self.assertRaises(driver_run.LabError):
                         driver_run.verified_results(self.output(rows), "sqlserver", profile)
@@ -179,7 +208,7 @@ class DriverEvidenceTests(unittest.TestCase):
             with self.subTest(profile=profile):
                 rows = self.result_lines("postgres", ("23505", "23503"), engine_version=version)
                 output = self.output(rows)
-                self.assertEqual(len(driver_run.verified_results(output, "postgres", profile)), 4)
+                self.assertEqual(len(driver_run.verified_results(output, "postgres", profile)), 5)
                 with self.assertRaises(driver_run.LabError):
                     driver_run.verified_results(output, "postgres")
 

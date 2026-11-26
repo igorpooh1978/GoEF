@@ -59,7 +59,7 @@ func (s *scenario) lease() *sql.Conn {
 		s.t.Fatal("could not lease a fixture connection")
 	}
 	s.t.Cleanup(func() {
-		if err := conn.Close(); err != nil {
+		if err := conn.Close(); err != nil && !errors.Is(err, sql.ErrConnDone) {
 			s.t.Error("could not release a fixture connection")
 		}
 	})
@@ -187,15 +187,25 @@ func (s *scenario) checkNativeCode(want string) {
 
 func (s *scenario) checkParent() {
 	s.t.Helper()
-	rows, err := s.observer.QueryContext(s.ctx, "SELECT id, code FROM goef_driver_parent")
+	s.checkParents("original")
+}
+
+func (s *scenario) checkParents(codes ...string) {
+	s.t.Helper()
+	rows, err := s.observer.QueryContext(s.ctx, "SELECT id, code FROM goef_driver_parent ORDER BY id")
 	if err != nil {
 		s.t.Fatal("observer could not read parents")
 	}
 	defer rows.Close()
-	var id int
-	var code string
-	if !rows.Next() || rows.Scan(&id, &code) != nil || id != 1 || code != "original" || rows.Next() || rows.Err() != nil {
-		s.t.Fatal("observer did not find exactly the original parent")
+	for i, want := range codes {
+		var id int
+		var code string
+		if !rows.Next() || rows.Scan(&id, &code) != nil || id != i+1 || code != want {
+			s.t.Fatal("observer did not find the expected parent")
+		}
+	}
+	if rows.Next() || rows.Err() != nil {
+		s.t.Fatal("observer did not find exactly the expected parents")
 	}
 }
 

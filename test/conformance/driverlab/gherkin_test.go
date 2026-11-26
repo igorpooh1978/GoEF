@@ -56,6 +56,12 @@ var bindings = map[string][]step{
 		{"Then the reader reports caller cancellation and releases its connection", (*scenario).checkSPICancellation},
 		{"And a fresh reader reads both rows and releases its connection", (*scenario).checkSPIRecovery},
 	},
+	"LAB-DRIVER-001-S05": {
+		setupStep,
+		{"When the contender executes both lock waits while the writer holds the write lock", (*scenario).runDriverLockWait},
+		{"Then the observed waits distinguish the caller deadline and native engine timeout", (*scenario).checkDriverLockWait},
+		{"And the observer reads exactly the rows that were seeded for the lock waits", (*scenario).checkDriverLockRows},
+	},
 }
 
 type example struct {
@@ -133,8 +139,8 @@ func tableCell(line string) string {
 
 func TestDriverFeature(t *testing.T) {
 	examples, err := parseDriverFeature(driverFeature)
-	if err != nil || len(examples) != 16 {
-		t.Fatalf("expected sixteen bound examples, got %d: %v", len(examples), err)
+	if err != nil || len(examples) != 20 {
+		t.Fatalf("expected twenty bound examples, got %d: %v", len(examples), err)
 	}
 	for _, test := range []struct{ name, before, after string }{
 		{"unknown step", "When the writer commits", "When the reader commits"},
@@ -148,6 +154,7 @@ func TestDriverFeature(t *testing.T) {
 		{"duplicate scenario", "@LAB-DRIVER-001-S03", "@LAB-DRIVER-001-S02"},
 		{"unknown scenario", "@LAB-DRIVER-001-S03", "@LAB-DRIVER-001-S99"},
 		{"missing cancellation assertion", "Then the reader reports caller cancellation and releases its connection", ""},
+		{"missing lock wait assertion", "Then the observed waits distinguish the caller deadline and native engine timeout", ""},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			source := strings.Replace(driverFeature, test.before, test.after, 1)
@@ -156,7 +163,7 @@ func TestDriverFeature(t *testing.T) {
 			}
 		})
 	}
-	withoutLast, _, _ := strings.Cut(driverFeature, "@LAB-DRIVER-001-S04")
+	withoutLast, _, _ := strings.Cut(driverFeature, "@LAB-DRIVER-001-S05")
 	if _, err := parseDriverFeature(withoutLast); err == nil {
 		t.Fatal("missing scenario passed discovery")
 	}

@@ -17,6 +17,7 @@ class SQLiteDriverEvidenceTests(unittest.TestCase):
         outcomes = (
             {}, {"native_code": "2067"}, {"native_code": "787"},
             {"cancel_cause": "context.Canceled", "pool_in_use_after": "0"},
+            {"lock_deadline_cause": "context.DeadlineExceeded", "lock_wait_observed": "both", "lock_timeout_native": "5"},
         )
         return [
             {
@@ -34,16 +35,44 @@ class SQLiteDriverEvidenceTests(unittest.TestCase):
             with self.subTest(profile=name):
                 rows = self.result_lines(profile)
                 results = lab.verified_driver_results(self.output(rows), name, profile)
-                self.assertEqual(len(results), 4)
+                self.assertEqual(len(results), 5)
                 self.assertEqual(results[3]["profile"], name)
                 facts = results[3]["facts"]
                 self.assertEqual(facts["cancel_cause"], "context.Canceled")
                 self.assertEqual(facts["pool_in_use_after"], "0")
                 self.assertNotIn("native_code", facts)
                 self.assertNotIn("ignored_secret", facts)
-                for altered in (rows[:-1], [*rows, rows[3]]):
+                for altered in ([*rows[:3], rows[4]], [*rows, rows[3]]):
                     with self.assertRaises(lab.LabError):
                         lab.verified_driver_results(self.output(altered), name, profile)
+
+    def test_lock_timeout_is_required_on_both_linked_runtimes(self):
+        for name, profile in lab.PROFILES.items():
+            with self.subTest(profile=name):
+                rows = self.result_lines(profile)
+                results = lab.verified_driver_results(self.output(rows), name, profile)
+                facts = results[4]["facts"]
+                self.assertEqual(results[4]["profile"], name)
+                self.assertEqual(facts["lock_deadline_cause"], "context.DeadlineExceeded")
+                self.assertEqual(facts["lock_wait_observed"], "both")
+                self.assertEqual(facts["lock_timeout_native"], "5")
+                self.assertNotIn("native_code", facts)
+                self.assertNotIn("ignored_secret", facts)
+                for altered in (rows[:-1], [*rows, rows[4]]):
+                    with self.assertRaises(lab.LabError):
+                        lab.verified_driver_results(self.output(altered), name, profile)
+                for field, wrong in (
+                    ("lock_deadline_cause", None), ("lock_wait_observed", "engine"),
+                    ("lock_timeout_native", "1205/HY000"), ("lock_timeout_native", 5), ("native_code", "5"),
+                ):
+                    with self.subTest(field=field, wrong=wrong):
+                        altered = self.result_lines(profile)
+                        if wrong is None:
+                            altered[4]["facts"].pop(field)
+                        else:
+                            altered[4]["facts"][field] = wrong
+                        with self.assertRaisesRegex(lab.LabError, "lock timeout"):
+                            lab.verified_driver_results(self.output(altered), name, profile)
 
     def test_cancellation_rejects_invalid_facts(self):
         name = lab.MINIMUM_PROFILE

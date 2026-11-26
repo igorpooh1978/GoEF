@@ -19,9 +19,10 @@ from runtime import Blocked, CommandError, Lab, LabError, command, inherited, sa
 
 
 PROVIDERS = ("postgres", "sqlite", "sqlserver", "mysql")
-SCENARIOS = {f"LAB-DRIVER-001-S{i:02d}" for i in range(1, 5)}
+SCENARIOS = {f"LAB-DRIVER-001-S{i:02d}" for i in range(1, 6)}
 CANCELLATION_SCENARIO = "LAB-DRIVER-001-S04"
 CANCELLATION_FACTS = {"cancel_cause": "context.Canceled", "pool_in_use_after": "0"}
+LOCK_TIMEOUT_SCENARIO = "LAB-DRIVER-001-S05"
 MODULE = Path(__file__).resolve().parents[1] / "driverlab"
 BINARY = "/tmp/goef-driverlab"
 RESULT_PREFIX = "GOEF_DRIVERLAB_RESULT="
@@ -107,6 +108,7 @@ NATIVE_CODES = {
     "sqlserver": ("2627", "547"),
     "mysql": ("1062/23000", "1452/23000"),
 }
+LOCK_TIMEOUT_CODES = {"postgres": "55P03", "sqlite": "5", "sqlserver": "1222", "mysql": "1205/HY000"}
 
 TEST_ARGS = ("-test.run=^TestDriverGherkin$", "-test.v", "-test.count=1", "-test.timeout=3m")
 FACT_KEYS = {
@@ -181,21 +183,22 @@ def mysql_container(lab, password, token, profile):
         )
         if identity.strip() != f"{profile.version}\t{mysql.VARIANT}":
             raise LabError("MySQL provisioning target does not match the pin.")
-        # token_hex generates the entire value. The login has fixture database
-        # privileges and can only read this separate provisioner-owned marker.
+        # token_hex generates the entire value. Outside the fixture database,
+        # the login reads only the marker and the table used to observe waits.
         container.exec(
             client, stdin=f"""\
 CREATE DATABASE goef_marker;
 CREATE TABLE goef_marker.target (token VARCHAR(64) NOT NULL) ENGINE=InnoDB;
 INSERT INTO goef_marker.target VALUES ('{token}');
 GRANT SELECT ON goef_marker.target TO 'goef_driver'@'%';
+GRANT SELECT ON performance_schema.data_lock_waits TO 'goef_driver'@'%';
 """, env=settings,
         )
         yield container
 
 
 @contextmanager
-def sqlserver_container(lab, password, token, profile):
+def sqlserver_container(lab, password, token, profile, *, lock_observer_password):
     expected = profile.sqlserver_settings
     if not lab.allow_sqlserver:
         raise Blocked(f"SQL Server requires {expected.eula_flag} for this local run.")
@@ -220,19 +223,27 @@ def sqlserver_container(lab, password, token, profile):
             [*client, "-Q", f"ALTER DATABASE [goef_smoke] SET COMPATIBILITY_LEVEL = {expected.compatibility_level};"],
             env=settings,
         )
-        # Both interpolated values are generated internally from hex and a
-        # fixed password prefix. Secrets are sent in stdin, off the argv.
+        # The login passwords and marker are generated internally. Secrets
+        # are passed on stdin. Only the observer has the diagnostic grant.
+        observer_permission = (
+            "VIEW SERVER PERFORMANCE STATE" if int(profile.version.split(".", 1)[0]) >= 16 else "VIEW SERVER STATE"
+        )
         container.exec(client, stdin=f"""\
 CREATE LOGIN [goef_driver] WITH PASSWORD = N'{password}';
+GO
+CREATE LOGIN [goef_lock_observer] WITH PASSWORD = N'{lock_observer_password}';
+GO
+GRANT {observer_permission} TO [goef_lock_observer];
 GO
 USE [goef_smoke];
 GO
 CREATE SCHEMA [goef_fixture] AUTHORIZATION [dbo];
 GO
 CREATE USER [goef_driver] FOR LOGIN [goef_driver] WITH DEFAULT_SCHEMA = [goef_fixture];
+CREATE USER [goef_lock_observer] FOR LOGIN [goef_lock_observer];
 CREATE TABLE dbo.goef_driver_marker (token VARCHAR(64) NOT NULL);
 INSERT INTO dbo.goef_driver_marker VALUES ('{token}');
-GRANT SELECT ON dbo.goef_driver_marker TO [goef_driver];
+GRANT SELECT ON dbo.goef_driver_marker TO [goef_driver], [goef_lock_observer];
 GRANT CREATE TABLE TO [goef_driver];
 GRANT ALTER, SELECT, INSERT, UPDATE, DELETE, REFERENCES ON SCHEMA::[goef_fixture] TO [goef_driver];
 GO
@@ -275,6 +286,17 @@ def verified_cancellation_facts(facts):
     return {key: facts[key] for key in CANCELLATION_FACTS}
 
 
+def verified_lock_timeout_facts(facts, provider):
+    expected = {
+        "lock_deadline_cause": "context.DeadlineExceeded",
+        "lock_wait_observed": "both",
+        "lock_timeout_native": LOCK_TIMEOUT_CODES[provider],
+    }
+    if "native_code" in facts or any(facts.get(key) != value for key, value in expected.items()):
+        raise LabError("The scenario did not report both observed waits and the expected lock timeout outcomes.")
+    return {key: facts[key] for key in expected}
+
+
 def verified_results(output, provider, profile_name=None):
     profile = PROFILES[profile_name or DEFAULT_PROFILES[provider]]
     results = {}
@@ -307,9 +329,11 @@ def verified_results(output, provider, profile_name=None):
                 raise LabError("The scenario did not report the expected SQL Server GENERATE_SERIES availability.")
             if expected_series == "unavailable" and facts.get("generate_series_native_code") != "208":
                 raise LabError("The scenario did not report SQL Server native code 208 for GENERATE_SERIES.")
-        cancellation = {}
+        outcome = {}
         if scenario == CANCELLATION_SCENARIO:
-            cancellation = verified_cancellation_facts(facts)
+            outcome = verified_cancellation_facts(facts)
+        elif scenario == LOCK_TIMEOUT_SCENARIO:
+            outcome = verified_lock_timeout_facts(facts, provider)
         elif scenario != "LAB-DRIVER-001-S01":
             expected = NATIVE_CODES[provider][0 if scenario == "LAB-DRIVER-001-S02" else 1]
             if facts.get("native_code") != expected:
@@ -319,7 +343,7 @@ def verified_results(output, provider, profile_name=None):
             if key in FACT_KEYS and isinstance(value, str) and len(value) <= 256
             and all(c.isprintable() for c in value)
         }
-        facts.update(cancellation)
+        facts.update(outcome)
         results[scenario] = {"provider": provider, "scenario": scenario, "status": "PASS", "facts": facts}
     if set(results) != SCENARIOS:
         raise LabError("The driver test did not report every required scenario.")
@@ -354,7 +378,12 @@ def run_provider(profile_name, binary, accepted_eulas):
                 token = secrets.token_hex(32)
                 lab = Lab(path, None, provider == "sqlserver")
                 phase = "provisioning"
-                with SERVER_CONTAINERS[provider](lab, password, token, profile) as container:
+                provision_options = {}
+                if provider == "sqlserver":
+                    lock_observer_password = "GoEF9!" + secrets.token_hex(24)
+                    provision_options["lock_observer_password"] = lock_observer_password
+                    env["GOEF_DRIVERLAB_SQLSERVER_OBSERVER_PASSWORD"] = lock_observer_password
+                with SERVER_CONTAINERS[provider](lab, password, token, profile, **provision_options) as container:
                     phase = "copy test binary"
                     container.docker(["cp", str(binary), f"{container.id}:{BINARY}"], timeout=60)
                     phase = "set test binary permissions"
