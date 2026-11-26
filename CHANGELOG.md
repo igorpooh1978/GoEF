@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add ordered `SaveChanges` batches for owned and caller-owned transactions. Failed batches roll back to a savepoint when recovery is confirmed, and generated values are accepted after commit ([#2](https://github.com/igorpooh1978/GoEF/issues/2)).
 - Add managed savepoints and non-owning participation in caller transactions ([#2](https://github.com/igorpooh1978/GoEF/issues/2)).
 - Add owned transactions on one physical connection with explicit begin, commit, rollback, and pool return ([#2](https://github.com/igorpooh1978/GoEF/issues/2)).
 - Bind Go booleans, signed integers, strings and byte slices to physical types for all four database families ([#3](https://github.com/igorpooh1978/GoEF/issues/3)).

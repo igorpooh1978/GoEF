@@ -100,4 +100,63 @@ func StageMarker(ctx context.Context, external *transaction.External, dialect tr
 
 Serialize the owner's direct `*sql.Tx` calls with GoEF operations. The owner calls `external.Close()` before its native `Commit` or `Rollback`. Closing the coordinator waits for its managed operation and invalidates its participants and savepoint handles without native I/O. Calls through a detached scope return `goeferr.ErrInvalidState`. If the owner completes the native transaction directly, a subsequent SQL operation can detect that the native transaction is finished. Cancellation of an enlisted command affects that operation. The owner controls the lifetime of the native transaction.
 
-The public savepoint methods are manual controls for transaction-preserving statements. Tracked `SaveChanges`, provider-specific transaction options, returning rows and automatic retries have their own design and conformance cases. [Ownership scenarios](../../specs/features/transactions/tx-own-001.feature) · [Savepoint scenarios](../../specs/features/transactions/tx-savepoint-001.feature) · [Conformance protocol](../../test/conformance/transactions/README.md)
+## Save a batch of changes
+
+Call `SaveChanges` on an active `Tx`, `External` or `Participant`. The method creates a private savepoint and runs the callback in order on the same physical transaction. `SaveWriter.Exec` executes statements without result rows. `SaveWriter.Scan` reads one result row into local variables, which can supply keys or versions to later statements. Use trusted, parameterized DML. Run the callback synchronously and use its writer for all SQL in the batch. Keep transaction-control statements, operations that implicitly commit, and external side effects outside the callback. The application supplies dependency order.
+
+The following example requires Go 1.27.4 and a disposable SQLite 3.51.3 or 3.54.1 file opened with the corresponding `modernc.org/sqlite` v1.47.0 or v1.63.0 driver. Create `save_markers` with `id INTEGER PRIMARY KEY` and `marker TEXT NOT NULL UNIQUE` on the file before starting. Both writes use SQLite's `?` parameter syntax. [Pinned versions](../parity/ENGINE_COMPATIBILITY.md)
+
+```go
+package example
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+
+	"github.com/igorpooh1978/GoEF/transaction"
+)
+
+// SaveMarkerPair writes two markers and publishes the first key after commit.
+func SaveMarkerPair(ctx context.Context, db *sql.DB, first, second string, firstID *int64) (err error) {
+	tx, err := transaction.Begin(ctx, db)
+	if err != nil {
+		return err
+	}
+	defer func() { err = errors.Join(err, tx.Close()) }()
+
+	options := transaction.SaveOptions{Dialect: transaction.DialectSQLite, Savepoints: true}
+	saved, err := tx.SaveChanges(ctx, options, saveMarkerPair(first, second, firstID))
+	if err != nil {
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	return saved.Accept()
+}
+
+func saveMarkerPair(first, second string, firstID *int64) func(*transaction.SaveWriter) error {
+	return func(w *transaction.SaveWriter) error {
+		var id int64
+		if err := w.Scan(`INSERT INTO save_markers (marker) VALUES (?) RETURNING id`, []any{first}, &id); err != nil {
+			return err
+		}
+		if err := transaction.StageValue(w, firstID, id); err != nil {
+			return err
+		}
+		_, err := w.Exec(`INSERT INTO save_markers (marker) VALUES (?)`, second)
+		return err
+	}
+}
+```
+
+On an empty file, `SaveMarkerPair(ctx, db, "A", "B", &firstID)` commits A and B and puts A's generated key in `firstID`. Calling it next with `"C", "C"` fails on the second insert, leaves the first key unchanged, and stores no C. An independent connection can verify both outcomes.
+
+Use the same callback with `participant.SaveChanges(ctx, options, saveMarkerPair(first, second, &firstID))` in a caller-owned transaction. The caller closes the coordinator and commits its native transaction before accepting a successful save. A successful batch returns a `SavedChanges` receipt. `StageValue` records assignments for that receipt, leaving application fields unchanged until `Accept`. Stage copies of mutable values if the original could change before acceptance. Call `Accept` once, after a confirmed enclosing commit that includes the batch. A managed rewind to an earlier savepoint invalidates receipts for the batches it removes. An owned receipt also checks the enclosing `Tx` state. For external receipts the caller confirms which batches the native commit included and discards receipts after rollback or an unknown outcome.
+
+A callback or writer error rolls back the batch when the engine confirms recovery. Earlier work stays pending, and `SaveChanges` returns no receipt. A canceled operation can attempt recovery with a separate bounded context. The commit decision stays with the owner. If the error matches `goeferr.ErrSavepointFailed`, recovery could not be confirmed. GoEF rolls back its owned transaction in full. In an external transaction, stop managed use and roll back the native transaction as its owner. A caller-owned transaction can be uncommittable or already ended on the server even though GoEF has left native completion to the caller. GoEF performs no automatic replay.
+
+Set `SaveOptions.Savepoints` only for a configuration you have verified can use savepoints for this batch. A false value or an unsupported dialect returns `goeferr.ErrUnsupportedFeature` before calling the callback or dispatching SQL. On SQL Server use a local, committable transaction with Multiple Active Result Sets (MARS) disabled. GoEF checks that the session has `XACT_ABORT OFF` with a read-only query before creating the savepoint. On SQLite use a conflict policy that preserves the enclosing transaction, such as the default `ABORT`. On MySQL use transactional tables such as InnoDB. Some engine failures, including an InnoDB deadlock, can still end the entire transaction. [SQL Server savepoints](https://learn.microsoft.com/en-us/sql/t-sql/language-elements/save-transaction-transact-sql?view=sql-server-ver16) · [SQL Server XACT_ABORT](https://learn.microsoft.com/en-us/sql/t-sql/statements/set-xact-abort-transact-sql?view=sql-server-ver16) · [SQLite conflict resolution](https://www.sqlite.org/lang_conflict.html) · [InnoDB error recovery](https://dev.mysql.com/doc/refman/8.4/en/innodb-error-handling.html)
+
+The callback API supplies transactional batching and explicit acceptance for generated values. Model-driven change detection, automatic graph ordering and optimistic concurrency resolution belong to the change tracker. [Change tracker](../architecture/CHANGE_TRACKER.md) · [Ownership scenarios](../../specs/features/transactions/tx-own-001.feature) · [Savepoint scenarios](../../specs/features/transactions/tx-savepoint-001.feature) · [Conformance protocol](../../test/conformance/transactions/README.md)
