@@ -10,7 +10,9 @@ import (
 	"testing"
 
 	"github.com/igorpooh1978/GoEF/goeferr"
+	"github.com/igorpooh1978/GoEF/provider"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/stdlib"
 )
 
 func TestPoolAndOpenRedaction(t *testing.T) {
@@ -63,3 +65,57 @@ type wrongConnector struct{}
 
 func (wrongConnector) Connect(context.Context) (driver.Conn, error) { return nil, driver.ErrBadConn }
 func (wrongConnector) Driver() driver.Driver                        { return nil }
+
+func TestReleaseDiscardsWrappedNativeConnection(t *testing.T) {
+	connector := &wrappedConnector{}
+	db := sql.OpenDB(connector)
+	defer db.Close()
+
+	backend, err := New(db)
+	if err != nil {
+		t.Fatal(err)
+	}
+	lease, err := backend.Acquire(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = lease.Release(t.Context(), provider.Discard)
+	var detail *goeferr.ErrorDetail
+	if !errors.Is(err, goeferr.ErrUnknownDriver) || !errors.As(err, &detail) ||
+		detail.Phase() != goeferr.PhaseRelease || detail.Provider() != "postgres" ||
+		detail.NativeCode() != "" || err.Error() != goeferr.ErrUnknownDriver.Error() {
+		t.Fatalf("expected redacted typed cleanup failure, got %v", err)
+	}
+	if connector.closed != 1 {
+		t.Fatalf("discard must close the wrapped connection, got %d closes", connector.closed)
+	}
+	lease, err = backend.Acquire(t.Context())
+	if err != nil || connector.opened != 2 {
+		t.Fatalf("pool did not supply a replacement, got %d opens, %v", connector.opened, err)
+	}
+	if err := lease.Release(t.Context(), provider.Reuse); err != nil {
+		t.Fatal(err)
+	}
+}
+
+type wrappedConnector struct {
+	opened, closed int
+}
+
+func (c *wrappedConnector) Driver() driver.Driver { return stdlib.GetDefaultDriver() }
+func (c *wrappedConnector) Connect(context.Context) (driver.Conn, error) {
+	c.opened++
+	return opaqueConn{Conn: &testConn{onClose: func() { c.closed++ }}}, nil
+}
+
+// An ordinary driver.Conn wrapper can hide the concrete *stdlib.Conn type.
+type opaqueConn struct{ driver.Conn }
+
+type testConn struct{ onClose func() }
+
+func (*testConn) Prepare(string) (driver.Stmt, error) { return nil, driver.ErrSkip }
+func (*testConn) Begin() (driver.Tx, error)           { return nil, driver.ErrSkip }
+func (c *testConn) Close() error {
+	c.onClose()
+	return nil
+}

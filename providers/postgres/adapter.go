@@ -30,7 +30,8 @@ func Open(dsn string) (*Backend, error) {
 }
 
 // New binds a caller-owned database/sql pool built with the pgx stdlib driver.
-// Existing driver settings remain in effect.
+// Existing driver settings remain in effect. Use a direct stdlib pool so the
+// adapter can retire the physical connection when a lease is discarded.
 func New(db *sql.DB) (*Backend, error) {
 	if db == nil {
 		return nil, goeferr.NewInvalidState()
