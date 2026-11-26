@@ -58,6 +58,9 @@ NATIVE_CODES = {
 }
 FILE_RESULT_PREFIX = "GOEF_SQLITE_FILE_RESULT="
 STRICT_GENERATED_NATIVE_CODE = "3091"
+REBUILD_SCENARIO = "LAB-SQLITE-REBUILD-001-S01"
+REBUILD_RESULT_PREFIX = "GOEF_SQLITE_REBUILD_RESULT="
+REBUILD_INTERRUPTED_EXIT = 68
 GO_VERSION = "go1.27.4"
 
 
@@ -266,6 +269,49 @@ def run_exchange_stage(directory, binary, profile, journal, stage, token):
     return profile.engine_version, native_code
 
 
+def allocate_file_case(tempdir, case):
+    directory = tempdir / case
+    directory.mkdir(mode=0o700)
+    token = secrets.token_hex(32)
+    with (directory / ".goef-sqlite-exchange").open("x", encoding="ascii") as marker:
+        marker.write(token)
+    return directory, token
+
+
+def run_rebuild_stage(directory, binary, profile, journal, stage, token):
+    expected = f"{REBUILD_RESULT_PREFIX}{profile.engine_version}/{journal}/{stage}"
+    interrupted = stage == "interrupt"
+    output = command(
+        [str(binary), "-test.v", "-test.run", "^TestSQLiteRebuildStep$", "-test.timeout", "30s"],
+        cwd=directory, timeout=35,
+        env={
+            "GOEF_SQLITE_COMPAT_JOURNAL": journal,
+            "GOEF_SQLITE_COMPAT_TOKEN": token,
+            "GOEF_SQLITE_REBUILD_STAGE": stage,
+        },
+        expected_failure=(REBUILD_INTERRUPTED_EXIT, expected) if interrupted else None,
+    )
+    if not interrupted:
+        markers = [line for line in output.splitlines() if line.startswith(REBUILD_RESULT_PREFIX)]
+        if markers != [expected]:
+            raise LabError("The SQLite rebuild did not report the requested stage and pinned engine.")
+
+
+def run_rebuild_checks(tempdir, binaries, report):
+    for name, profile in PROFILES.items():
+        for journal in sorted(FILE_JOURNALS):
+            case = f"{REBUILD_SCENARIO} {name} {journal}"
+            report["phase"] = f"{case} setup"
+            directory, token = allocate_file_case(tempdir, f"{REBUILD_SCENARIO}-{name}-{journal}")
+            for stage in ("seed", "interrupt", "resume", "reopen"):
+                report["phase"] = f"{case} {stage}"
+                run_rebuild_stage(directory, binaries[name], profile, journal, stage, token)
+            report["rebuild_checks"].append({
+                "scenario": REBUILD_SCENARIO, "profile": name, "engine_version": profile.engine_version,
+                "journal_mode": journal, "interrupted_exit": REBUILD_INTERRUPTED_EXIT, "status": "PASS",
+            })
+
+
 def run_lab(tempdir, report, *, model_types=False, owned_tx=False, savepoint_tx=False,
             save_changes=False, tx_options=False, decimal_binding=False, commit_outcome=False):
     report["phase"] = "SQLite file feature discovery"
@@ -296,11 +342,7 @@ def run_lab(tempdir, report, *, model_types=False, owned_tx=False, savepoint_tx=
     for example in examples:
         scenario, journal = example.scenario, example.journal
         report["phase"] = f"{scenario} {journal} setup"
-        directory = tempdir / f"{scenario}-{journal}"
-        directory.mkdir(mode=0o700)
-        token = secrets.token_hex(32)
-        with (directory / ".goef-sqlite-exchange").open("x", encoding="ascii") as marker:
-            marker.write(token)
+        directory, token = allocate_file_case(tempdir, f"{scenario}-{journal}")
         engines = []
         strict_generated_native_code = None
         for stage, name in example.stages:
@@ -313,6 +355,7 @@ def run_lab(tempdir, report, *, model_types=False, owned_tx=False, savepoint_tx=
             "scenario": scenario, "journal_mode": journal, "engines": engines,
             "strict_generated_native_code": strict_generated_native_code, "status": "PASS",
         })
+    run_rebuild_checks(tempdir, binaries, report)
 
 
 def main(argv=None):
@@ -327,7 +370,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     report = {
         "status": "FAIL", "go_version": GO_VERSION, "minimum_profile": MINIMUM_PROFILE, "profiles": {},
-        "driver_scenarios": [], "checks": [], "phase": "allocate temporary directory",
+        "driver_scenarios": [], "checks": [], "rebuild_checks": [], "phase": "allocate temporary directory",
     }
     try:
         with TemporaryDirectory(prefix="goef-sqlite-compat-") as directory:

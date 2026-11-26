@@ -190,3 +190,25 @@ class SQLiteFileFeatureTests(unittest.TestCase):
             with self.subTest(output=output), patch.object(lab, "command", return_value=output):
                 with self.assertRaises(lab.LabError):
                     lab.run_exchange_stage(*args)
+
+
+class SQLiteRebuildEvidenceTests(unittest.TestCase):
+    def test_interruption_requires_the_expected_exit_and_stage_marker(self):
+        profile = lab.PROFILES[lab.MINIMUM_PROFILE]
+        with patch.object(lab, "command", return_value="") as command:
+            lab.run_rebuild_stage(None, "sqlite", profile, "wal", "interrupt", "unused")
+        self.assertEqual(command.call_args.kwargs["expected_failure"], (
+            68, lab.REBUILD_RESULT_PREFIX + "3.51.3/wal/interrupt",
+        ))
+
+    def test_reopen_requires_exactly_one_result_for_the_same_profile_and_mode(self):
+        profile = lab.PROFILES[lab.CURRENT]
+        args = (None, "sqlite", profile, "delete", "reopen", "unused")
+        marker = lab.REBUILD_RESULT_PREFIX + "3.54.1/delete/reopen"
+        with patch.object(lab, "command", return_value=marker):
+            lab.run_rebuild_stage(*args)
+        for output in ("", marker + "\n" + marker, marker.replace("delete", "wal"),
+                       marker.replace("3.54.1", "3.51.3"), marker.replace("reopen", "resume")):
+            with self.subTest(output=output), patch.object(lab, "command", return_value=output):
+                with self.assertRaises(lab.LabError):
+                    lab.run_rebuild_stage(*args)
