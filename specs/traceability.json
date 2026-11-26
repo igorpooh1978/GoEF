@@ -825,7 +825,7 @@
         "docs/user/MIGRATIONS.md"
       ],
       "test": "test/conformance/driverlab/sqlite_executor_rebuild_test.go#TestSQLiteExecutorRebuildStep",
-      "evidence": null,
+      "evidence": "docs/evidence/W002/SQLITE_EXECUTOR_REBUILD.md",
       "status": "SPECIFIED"
     },
     {
@@ -1014,7 +1014,7 @@
         "docs/architecture/MODULE_GRAPH.md"
       ],
       "test": "test/conformance/driverlab/production_adapter_test.go#TestProductionAdapters",
-      "evidence": null,
+      "evidence": "docs/evidence/W002/PRODUCTION_ADAPTERS.md",
       "status": "SPECIFIED"
     },
     {
@@ -1028,7 +1028,7 @@
         "docs/architecture/MODULE_GRAPH.md"
       ],
       "test": "test/conformance/driverlab/production_adapter_test.go#TestProductionAdapters",
-      "evidence": null,
+      "evidence": "docs/evidence/W002/PRODUCTION_ADAPTERS.md",
       "status": "SPECIFIED"
     },
     {
@@ -1042,7 +1042,7 @@
         "docs/architecture/MODULE_GRAPH.md"
       ],
       "test": "test/conformance/driverlab/production_adapter_test.go#TestProductionAdapters",
-      "evidence": null,
+      "evidence": "docs/evidence/W002/PRODUCTION_ADAPTERS.md",
       "status": "SPECIFIED"
     },
     {
@@ -1056,7 +1056,7 @@
         "docs/architecture/MODULE_GRAPH.md"
       ],
       "test": "test/conformance/driverlab/production_adapter_test.go#TestProductionAdapters",
-      "evidence": null,
+      "evidence": "docs/evidence/W002/PRODUCTION_ADAPTERS.md",
       "status": "SPECIFIED"
     },
     {
