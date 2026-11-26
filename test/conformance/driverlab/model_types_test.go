@@ -20,8 +20,10 @@ const modelTypeTable = "goef_model_type_probe"
 type modelTypeFixture struct {
 	ID     int64
 	Active bool
+	Tiny   int8
 	Small  int16
 	Number int32
+	Native int
 	Text   *string
 	Label  *string `goef:"maxLength=16"`
 	Bytes  []byte
@@ -34,8 +36,10 @@ var modelTypeColumns = [...]struct {
 }{
 	{field: "ID", column: "mapped_id"},
 	{field: "Active", column: "mapped_active"},
+	{field: "Tiny", column: "mapped_tiny"},
 	{field: "Small", column: "mapped_small"},
 	{field: "Number", column: "mapped_number"},
+	{field: "Native", column: "mapped_native"},
 	{field: "Text", column: "mapped_text", nullable: true},
 	{field: "Label", column: "mapped_label", nullable: true, maxLength: 16},
 	{field: "Bytes", column: "mapped_bytes"},
@@ -51,26 +55,26 @@ var modelTypeTargets = map[string]modelTypeTarget{
 	"postgres": {
 		provider:    model.TypePostgreSQL,
 		versionFact: "engine_version",
-		store:       [...]string{"bigint", "boolean", "smallint", "integer", "text", "varchar(16)", "bytea"},
-		native:      [...]string{"bigint", "boolean", "smallint", "integer", "text", "character varying", "bytea"},
+		store:       [...]string{"bigint", "boolean", "smallint", "smallint", "integer", "bigint", "text", "varchar(16)", "bytea"},
+		native:      [...]string{"bigint", "boolean", "smallint", "smallint", "integer", "bigint", "text", "character varying", "bytea"},
 	},
 	"sqlite": {
 		provider:    model.TypeSQLite,
 		versionFact: "engine_version",
-		store:       [...]string{"INTEGER", "INTEGER", "INTEGER", "INTEGER", "TEXT", "TEXT", "BLOB"},
-		native:      [...]string{"integer", "integer", "integer", "integer", "text", "text", "blob"},
+		store:       [...]string{"INTEGER", "INTEGER", "INTEGER", "INTEGER", "INTEGER", "INTEGER", "TEXT", "TEXT", "BLOB"},
+		native:      [...]string{"integer", "integer", "integer", "integer", "integer", "integer", "text", "text", "blob"},
 	},
 	"sqlserver": {
 		provider:    model.TypeSQLServer,
 		versionFact: "version",
-		store:       [...]string{"bigint", "bit", "smallint", "int", "nvarchar(max)", "nvarchar(16)", "varbinary(max)"},
-		native:      [...]string{"bigint", "bit", "smallint", "int", "nvarchar", "nvarchar", "varbinary"},
+		store:       [...]string{"bigint", "bit", "smallint", "smallint", "int", "bigint", "nvarchar(max)", "nvarchar(16)", "varbinary(max)"},
+		native:      [...]string{"bigint", "bit", "smallint", "smallint", "int", "bigint", "nvarchar", "nvarchar", "varbinary"},
 	},
 	"mysql": {
 		provider:    model.TypeMySQL,
 		versionFact: "server_version",
-		store:       [...]string{"bigint", "boolean", "smallint", "int", "longtext CHARACTER SET utf8mb4", "varchar(16) CHARACTER SET utf8mb4", "longblob"},
-		native:      [...]string{"bigint", "tinyint", "smallint", "int", "longtext", "varchar", "longblob"},
+		store:       [...]string{"bigint", "boolean", "tinyint", "smallint", "int", "bigint", "longtext CHARACTER SET utf8mb4", "varchar(16) CHARACTER SET utf8mb4", "longblob"},
+		native:      [...]string{"bigint", "tinyint", "tinyint", "smallint", "int", "bigint", "longtext", "varchar", "longblob"},
 	},
 }
 
@@ -201,18 +205,20 @@ func verifyModelTypeValues(s *scenario, columnNames []string) {
 	type values struct {
 		id     int64
 		active bool
+		tiny   int8
 		small  int16
 		number int32
+		native int
 		text   sql.NullString
 		label  sql.NullString
 		binary []byte
 	}
 	fixtures := []values{
-		{math.MinInt64, true, math.MinInt16, math.MinInt32, sql.NullString{},
+		{math.MinInt64, true, math.MinInt8, math.MinInt16, math.MinInt32, math.MinInt, sql.NullString{},
 			sql.NullString{String: "\u0416\u6c34", Valid: true}, []byte{0, 0xff, 0x80}},
-		{0, false, 0, 0, sql.NullString{String: "\u0427\u0438\u0441\u043b\u043e", Valid: true},
+		{0, false, 0, 0, 0, 0, sql.NullString{String: "\u0427\u0438\u0441\u043b\u043e", Valid: true},
 			sql.NullString{}, []byte{0xff, 0x7f}},
-		{math.MaxInt64, false, math.MaxInt16, math.MaxInt32, sql.NullString{Valid: true},
+		{math.MaxInt64, false, math.MaxInt8, math.MaxInt16, math.MaxInt32, math.MaxInt, sql.NullString{Valid: true},
 			sql.NullString{String: "1234567890abcdef", Valid: true}, []byte{0x7f, 0}},
 	}
 	columns := strings.Join(columnNames, ", ")
@@ -222,7 +228,7 @@ func verifyModelTypeValues(s *scenario, columnNames []string) {
 	}
 	insert := "INSERT INTO " + modelTypeTable + " (" + columns + ") VALUES (" + strings.Join(bindings, ", ") + ")"
 	for i, want := range fixtures {
-		if _, err := s.writer.ExecContext(s.ctx, insert, want.id, want.active, want.small, want.number, want.text, want.label, want.binary); err != nil {
+		if _, err := s.writer.ExecContext(s.ctx, insert, want.id, want.active, want.tiny, want.small, want.number, want.native, want.text, want.label, want.binary); err != nil {
 			s.t.Fatalf("could not write model type row %d", i+1)
 		}
 	}
@@ -233,11 +239,11 @@ func verifyModelTypeValues(s *scenario, columnNames []string) {
 	defer rows.Close()
 	for i, want := range fixtures {
 		var got values
-		if !rows.Next() || rows.Scan(&got.id, &got.active, &got.small, &got.number, &got.text, &got.label, &got.binary) != nil {
+		if !rows.Next() || rows.Scan(&got.id, &got.active, &got.tiny, &got.small, &got.number, &got.native, &got.text, &got.label, &got.binary) != nil {
 			s.t.Fatalf("could not read model type row %d", i+1)
 		}
-		if got.id != want.id || got.active != want.active || got.small != want.small || got.number != want.number ||
-			got.text != want.text || got.label != want.label || !bytes.Equal(got.binary, want.binary) {
+		if got.id != want.id || got.active != want.active || got.tiny != want.tiny || got.small != want.small ||
+			got.number != want.number || got.native != want.native || got.text != want.text || got.label != want.label || !bytes.Equal(got.binary, want.binary) {
 			s.t.Fatalf("model type round trip changed fixture row %d", i+1)
 		}
 	}
