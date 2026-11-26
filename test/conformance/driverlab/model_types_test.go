@@ -228,7 +228,13 @@ func verifyModelTypeValues(s *scenario, columnNames []string) {
 	}
 	insert := "INSERT INTO " + modelTypeTable + " (" + columns + ") VALUES (" + strings.Join(bindings, ", ") + ")"
 	for i, want := range fixtures {
-		if _, err := s.writer.ExecContext(s.ctx, insert, want.id, want.active, want.tiny, want.small, want.number, want.native, want.text, want.label, want.binary); err != nil {
+		var tiny any = want.tiny
+		if s.provider == "sqlserver" {
+			// go-mssqldb sends int8 as a one-byte TDS integer, which SQL Server
+			// treats as unsigned. Match the bound signed smallint column.
+			tiny = int16(want.tiny)
+		}
+		if _, err := s.writer.ExecContext(s.ctx, insert, want.id, want.active, tiny, want.small, want.number, want.native, want.text, want.label, want.binary); err != nil {
 			s.t.Fatalf("could not write model type row %d", i+1)
 		}
 	}
