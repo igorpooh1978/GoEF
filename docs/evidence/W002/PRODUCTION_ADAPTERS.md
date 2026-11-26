@@ -40,3 +40,7 @@ Each parameterized query used the published adapter's execution interface with t
 An independent Ubuntu Linux/amd64 run using Go 1.27.4 installed all four adapters together with the explicit [core preview v0.1.0-alpha.1](https://github.com/igorpooh1978/GoEF/releases/tag/v0.1.0-alpha.1) in another fresh module without replacements. The origin SHA and checksums matched. Module verification, vet, and shuffled tests passed, including a typed row read from file-backed SQLite.
 
 See the [12-profile real-engine conformance matrix for the same source commit](https://github.com/igorpooh1978/GoEF/issues/13#issuecomment-7197938653).
+
+## SQL Server Developer compatibility
+
+The Python runner passed all 104 live checks across four SQL Server Developer profiles using the GoEF checkout, including the production adapter suite. See the [engine builds, database compatibility levels, and run command](LEGACY_COMPATIBILITY.md#sql-server-developer-python-matrix).

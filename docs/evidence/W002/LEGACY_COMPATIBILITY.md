@@ -119,6 +119,24 @@ python -B scripts/ci/goef_w002.py --providers postgres sqlite mysql --compatibil
 
 The run covered PostgreSQL 16.16, 17.12, 18.7 and 19.0, SQLite 3.51.3 and 3.54.1, and MySQL 8.0.46 and 8.4.13.1. It passed 102 Python unit tests, Go module checks, and the selected live scenarios, including SQLite file compatibility and interrupted rebuild. A separate SQL Server Developer selection without consent reported all four SQL Server profiles as blocked before provisioning. The Windows LocalDB quickstart and its typed-value, uniqueness and cancellation probes passed separately with the published adapter.
 
+### SQL Server Developer Python matrix
+
+On 2026-11-26, an authorized run of the Python compatibility matrix with all optional suites exited 0 at [`5f596ea2dcf7d2f93a85f5933ad4bc5d47f2b17b`](https://github.com/igorpooh1978/GoEF/commit/5f596ea2dcf7d2f93a85f5933ad4bc5d47f2b17b). It used Python 3.14.4 and Go 1.27.4 on Windows/amd64, Docker 29.4.0 on Linux/amd64, and go-mssqldb v1.11.0. [Local CI issue #26](https://github.com/igorpooh1978/GoEF/issues/26)
+
+```sh
+python -B scripts/ci/goef_w002.py --providers sqlserver --compatibility --accept-sqlserver-eula --accept-legacy-sqlserver-eula --model-types --owned-tx --savepoint-tx --save-changes --tx-options --decimal-binding --commit-outcome --production-adapters
+```
+
+| SQL Server Developer edition | Observed build | Database compatibility level | Passed scenarios |
+| --- | --- | ---: | ---: |
+| 2017 | `14.0.3570.2` | 140 | 26/26 |
+| 2019 | `15.0.4510.2` | 150 | 26/26 |
+| 2022 | `16.0.4325.4` | 140 | 26/26 |
+| 2022 | `16.0.4325.4` | 160 | 26/26 |
+| **Total** | | | **104/104** |
+
+Each profile included four production adapter scenarios. The 102 Python preflight tests and the Go module checks also passed. The runner removed its test containers.
+
 ## Issue #31 acceptance
 
 The detached source revision `dc13ff64370f7e7348f0f7958dbf996819177a90` was verified on 2026-11-26 with Go 1.27.4 and Python 3.14.4 on Windows/amd64. The server scenarios used the local Docker 29.4.0 Linux/amd64 daemon.
