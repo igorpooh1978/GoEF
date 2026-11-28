@@ -3,7 +3,7 @@ module github.com/igorpooh1978/GoEF/providers/sqlite
 go 1.27.4
 
 require (
-	github.com/igorpooh1978/GoEF v0.0.0-20261126162303-a2b0babac18d
+	github.com/igorpooh1978/GoEF v0.1.0-alpha.1.0.20261128074836-493db45c51d9
 	modernc.org/sqlite v1.47.0
 )
 

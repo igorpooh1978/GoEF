@@ -4170,12 +4170,15 @@
           "status": "BLOCKED",
           "capability": "PROPOSED",
           "engineVersions": [
-            "18.7"
+            "16.16",
+            "17.12",
+            "18.7",
+            "19.0"
           ],
           "driverVersions": [
             "pgx v5.13.0"
           ],
-          "reason": "Live reference scenarios exercise physical reuse and retirement. The integrated release gate has separate evidence.",
+          "reason": "Integrated live reuse cases passed on the pinned profiles. Public release promotion remains separate.",
           "evidence": null
         },
         "sqlite": {
@@ -4189,31 +4192,34 @@
             "modernc.org/sqlite v1.47.0",
             "modernc.org/sqlite v1.63.0"
           ],
-          "reason": "Live reference scenarios exercise physical reuse and retirement. The integrated release gate has separate evidence.",
+          "reason": "Integrated live reuse cases passed on the pinned profiles. Public release promotion remains separate.",
           "evidence": null
         },
         "sqlserver": {
           "status": "BLOCKED",
           "capability": "PROPOSED",
           "engineVersions": [
+            "14.0.3570.2",
+            "15.0.4510.2",
             "16.0.4325.4"
           ],
           "driverVersions": [
             "go-mssqldb v1.11.0"
           ],
-          "reason": "Live reference scenarios exercise physical reuse and retirement. The integrated release gate has separate evidence.",
+          "reason": "Integrated live reuse cases passed on the pinned profiles. Public release promotion remains separate.",
           "evidence": null
         },
         "mysql": {
           "status": "BLOCKED",
           "capability": "PROPOSED",
           "engineVersions": [
+            "8.0.46",
             "8.4.13.1"
           ],
           "driverVersions": [
             "go-sql-driver/mysql v1.10.0"
           ],
-          "reason": "Live reference scenarios exercise physical reuse and retirement. The integrated release gate has separate evidence.",
+          "reason": "Integrated live reuse cases passed on the pinned profiles. Public release promotion remains separate.",
           "evidence": null
         }
       },
@@ -4233,6 +4239,7 @@
       "adr": "docs/adr/0002-module-and-provider-boundaries.md",
       "docs": [
         "docs/architecture/PROVIDER_SPI.md",
+        "docs/evidence/W002/ADOPTION_FOLLOW_UP.md",
         "docs/providers/POSTGRESQL.md",
         "providers/README.md"
       ],

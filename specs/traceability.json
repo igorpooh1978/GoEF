@@ -1212,6 +1212,7 @@
       ],
       "docs": [
         "docs/architecture/PROVIDER_SPI.md",
+        "docs/evidence/W002/ADOPTION_FOLLOW_UP.md",
         "docs/providers/POSTGRESQL.md",
         "providers/README.md"
       ],
@@ -1228,6 +1229,7 @@
       ],
       "docs": [
         "docs/architecture/PROVIDER_SPI.md",
+        "docs/evidence/W002/ADOPTION_FOLLOW_UP.md",
         "docs/providers/POSTGRESQL.md",
         "providers/README.md"
       ],
@@ -1244,6 +1246,7 @@
       ],
       "docs": [
         "docs/architecture/PROVIDER_SPI.md",
+        "docs/evidence/W002/ADOPTION_FOLLOW_UP.md",
         "docs/providers/POSTGRESQL.md",
         "providers/README.md"
       ],

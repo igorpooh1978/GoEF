@@ -33,7 +33,7 @@ The candidate series for the adoption follow-up is `v0.2.0-alpha.1`. It remains 
    python -B test/architecture/public-module/verify.py <core-commit> --version v0.2.0-alpha.1 --generated-bindings --generator-version
    ```
 
-3. Update each provider module's core requirement to the verified core tag and generate dependency sums from that actual module. Provider modules have a local core replacement for checkout builds. Verify the new requirement in a clean module with no local replacements. Keep the provider release commit and its resulting checksums in the release evidence.
+3. Update each provider module's core requirement to the verified core tag. Provider checkout builds use a local core replacement, so verify the public requirement and both dependency sums in a clean consumer without replacements. Keep the provider release commit and observed checksums in the release evidence.
 4. Complete the provider gates and publish each prefixed tag at its reviewed adapter commit. Resolve each adapter version independently in a fresh consumer. Check that `go mod download -json` reports the expected adapter tag commit and both checksums, then use `go list -m -json` to confirm the selected adapter and core versions and the absence of replacements. Repeat the corresponding driver quickstart. Update installation examples to the verified versions after publication. [Adapter preview evidence](../evidence/W002/PRODUCTION_ADAPTERS.md#tagged-adapter-previews)
 
 Go selects root and provider versions using their distinct tag names. A root tag alone leaves adapter installations at their previous tagged versions. [Go module-to-commit mapping](https://go.dev/ref/mod#vcs-version)
