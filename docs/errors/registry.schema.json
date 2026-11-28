@@ -70,6 +70,7 @@
             "unknown",
             "inspect_durable_effects",
             "rollback_unconfirmed",
+            "rolled_back",
             "no_commit_attempted",
             "inspect_transaction"
           ]
@@ -453,6 +454,7 @@
             "unknown",
             "inspect_durable_effects",
             "rollback_unconfirmed",
+            "rolled_back",
             "no_commit_attempted",
             "inspect_transaction"
           ]

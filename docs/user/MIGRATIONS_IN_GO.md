@@ -24,6 +24,8 @@ A malformed registry or a history that differs from the exact prefix produces `G
 
 The proposed authoring API defines ordered operations and reviews rename intent, rollback feasibility and checksums before execution. Schema inspection, model diffs and provider-specific execution have separate contracts. [Migration engine design](../architecture/MIGRATION_ENGINE.md) · [Planned runnable examples](../../examples/README.md)
 
+For the current-source PostgreSQL executor, see [Apply a transactional PostgreSQL migration](MIGRATIONS_POSTGRESQL.md).
+
 ## Apply a reviewed SQLite artifact
 
 Use [migration/sqlite.Apply](../../migration/sqlite/apply.go) with a dedicated SQLite pool, a caller deadline and a finite busy timeout. Set the file's nonzero application ID when provisioning it. Use read-only source and target checks that also verify the identity and dependency inventory specific to the intended file. Check the schema and values that distinguish a safe first application, a completed application and an ambiguous result.

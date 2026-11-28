@@ -1,5 +1,7 @@
 # Microsoft SQL Server provider
 
+Current source can [reuse a physical connection after a reviewed read](../../providers/README.md#reuse-after-a-reviewed-read). Consider connection-scoped effects such as session context when reviewing a command. Ordinary SQL retains conservative connection retirement. [SQL Server session context](https://learn.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-set-session-context-transact-sql?view=sql-server-ver16)
+
 Tracking [#6](https://github.com/igorpooh1978/GoEF/issues/6). W000 research cell: SQL Server 2022 CU28 (16.0.4325.4) with `github.com/microsoft/go-mssqldb` v1.11.0. W001 must confirm an eligible runner, edition, compatibility level, installation or image, and driver configuration. Conformance is pending. [SQL Server builds](https://learn.microsoft.com/en-us/troubleshoot/sql/releases/sqlserver-2022/build-versions) · [Driver README at v1.11.0](https://github.com/microsoft/go-mssqldb/blob/v1.11.0/README.md)
 
 ## Candidate capabilities

@@ -4151,12 +4151,12 @@
       "id": "PROVIDER-REUSE-001",
       "family": "providers",
       "origin": "GOEF_EXTENSION",
-      "scope": "SPECIALIZED",
+      "scope": "PORTABLE",
       "upstream": [],
       "contract": "Return the physical lease after a complete caller-reviewed session-neutral read, and retire it on ordinary dispatch or uncertain cleanup.",
       "goApi": {
         "status": "IMPLEMENTED",
-        "description": "The PostgreSQL lease implements the optional provider.SessionNeutralQuerier interface."
+        "description": "Each pinned SQL adapter implements the optional provider.SessionNeutralQuerier lease interface."
       },
       "wave": "W002",
       "issues": [
@@ -4175,31 +4175,45 @@
           "driverVersions": [
             "pgx v5.13.0"
           ],
-          "reason": "The live cases passed. Integrated acceptance and full coverage evidence remain pending.",
+          "reason": "Live reference scenarios exercise physical reuse and retirement. The integrated release gate has separate evidence.",
           "evidence": null
         },
         "sqlite": {
-          "status": "NOT_APPLICABLE",
-          "capability": "NOT_APPLICABLE",
-          "engineVersions": [],
-          "driverVersions": [],
-          "reason": "This optional capability is offered by the PostgreSQL adapter.",
+          "status": "BLOCKED",
+          "capability": "PROPOSED",
+          "engineVersions": [
+            "3.51.3",
+            "3.54.1"
+          ],
+          "driverVersions": [
+            "modernc.org/sqlite v1.47.0",
+            "modernc.org/sqlite v1.63.0"
+          ],
+          "reason": "Live reference scenarios exercise physical reuse and retirement. The integrated release gate has separate evidence.",
           "evidence": null
         },
         "sqlserver": {
-          "status": "NOT_APPLICABLE",
-          "capability": "NOT_APPLICABLE",
-          "engineVersions": [],
-          "driverVersions": [],
-          "reason": "This optional capability is offered by the PostgreSQL adapter.",
+          "status": "BLOCKED",
+          "capability": "PROPOSED",
+          "engineVersions": [
+            "16.0.4325.4"
+          ],
+          "driverVersions": [
+            "go-mssqldb v1.11.0"
+          ],
+          "reason": "Live reference scenarios exercise physical reuse and retirement. The integrated release gate has separate evidence.",
           "evidence": null
         },
         "mysql": {
-          "status": "NOT_APPLICABLE",
-          "capability": "NOT_APPLICABLE",
-          "engineVersions": [],
-          "driverVersions": [],
-          "reason": "This optional capability is offered by the PostgreSQL adapter.",
+          "status": "BLOCKED",
+          "capability": "PROPOSED",
+          "engineVersions": [
+            "8.4.13.1"
+          ],
+          "driverVersions": [
+            "go-sql-driver/mysql v1.10.0"
+          ],
+          "reason": "Live reference scenarios exercise physical reuse and retirement. The integrated release gate has separate evidence.",
           "evidence": null
         }
       },
@@ -4209,7 +4223,8 @@
         "PROVIDER-REUSE-001-S03"
       ],
       "tests": [
-        "test/conformance/driverlab/postgres_session_reuse_test.go#TestPostgresSessionReuse"
+        "test/conformance/driverlab/postgres_session_reuse_test.go#TestPostgresSessionReuse",
+        "test/conformance/driverlab/production_adapter_test.go#TestProductionAdapters"
       ],
       "status": "PARTIAL",
       "deviations": [
@@ -4218,7 +4233,8 @@
       "adr": "docs/adr/0002-module-and-provider-boundaries.md",
       "docs": [
         "docs/architecture/PROVIDER_SPI.md",
-        "docs/providers/POSTGRESQL.md"
+        "docs/providers/POSTGRESQL.md",
+        "providers/README.md"
       ],
       "evidence": null
     },
@@ -4289,6 +4305,243 @@
       "docs": [
         "docs/development/BUILD_VERSIONS.md",
         "docs/user/LINQ_GENERATED.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "MIG-POSTGRES-001",
+      "family": "migrations",
+      "origin": "GOEF_EXTENSION",
+      "scope": "SPECIALIZED",
+      "upstream": [],
+      "contract": "Apply a reviewed pending migration suffix and its verified lineage in one native PostgreSQL transaction.",
+      "goApi": {
+        "status": "IMPLEMENTED",
+        "description": "The PostgreSQL migration package exposes Apply with audited callbacks, a dedicated native pool, and confirmed outcome handling."
+      },
+      "wave": "W006",
+      "issues": [
+        35
+      ],
+      "dependencies": [
+        "MIG-API-001",
+        "MIG-DRIFT-001",
+        "MIG-LOCK-001",
+        "MIG-RECOVERY-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "BLOCKED",
+          "capability": "PROPOSED",
+          "engineVersions": [
+            "18.7"
+          ],
+          "driverVersions": [
+            "pgx v5.13.0"
+          ],
+          "reason": "Scoped live PostgreSQL scenarios passed. The integrated release gate has separate evidence.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This source feature is specific to the PostgreSQL adapter.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This source feature is specific to the PostgreSQL adapter.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This source feature is specific to the PostgreSQL adapter.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "MIG-POSTGRES-001-S01",
+        "MIG-POSTGRES-001-S02",
+        "MIG-POSTGRES-001-S03",
+        "MIG-POSTGRES-001-S04",
+        "MIG-POSTGRES-001-S05",
+        "MIG-POSTGRES-001-S06"
+      ],
+      "tests": [
+        "test/conformance/driverlab/postgres_migrations_test.go#TestPostgresMigrations"
+      ],
+      "status": "PARTIAL",
+      "deviations": [
+        "Apply supports transactional forward artifacts and exact digest history. Existing application-specific history, PgBouncer, and nontransactional DDL require separate verification."
+      ],
+      "adr": null,
+      "docs": [
+        "docs/user/MIGRATIONS_POSTGRESQL.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "LINQ-PG-001",
+      "family": "query",
+      "origin": "GOEF_EXTENSION",
+      "scope": "SPECIALIZED",
+      "upstream": [],
+      "contract": "Compile a typed equality-filtered projection on PostgreSQL and materialize zero or one result with bound values.",
+      "goApi": {
+        "status": "IMPLEMENTED",
+        "description": "queryable.Compile and CompileGenerated reuse a typed equality plan with PostgreSQL schema-qualified SQL and an explicit reviewed read option."
+      },
+      "wave": "W008",
+      "issues": [
+        36
+      ],
+      "dependencies": [
+        "LINQ-QUERYABLE-001",
+        "QUERY-PARAM-001",
+        "PROVIDER-REUSE-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "BLOCKED",
+          "capability": "PROPOSED",
+          "engineVersions": [
+            "18.7"
+          ],
+          "driverVersions": [
+            "pgx v5.13.0"
+          ],
+          "reason": "Scoped live PostgreSQL scenarios passed. The integrated release gate has separate evidence.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This source feature is specific to the PostgreSQL adapter.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This source feature is specific to the PostgreSQL adapter.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This source feature is specific to the PostgreSQL adapter.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "LINQ-PG-001-S01",
+        "LINQ-PG-001-S02",
+        "LINQ-PG-001-S03",
+        "LINQ-PG-001-S04"
+      ],
+      "tests": [
+        "test/conformance/driverlab/postgres_queryable_test.go#TestPostgresQueryableEquality"
+      ],
+      "status": "PARTIAL",
+      "deviations": [
+        "The executable slice covers one equality predicate and one mapped relation. It does not claim full LINQ operator families or native UUID, JSONB, array or exact-decimal codecs."
+      ],
+      "adr": null,
+      "docs": [
+        "docs/architecture/LINQ_QUERYABLE.md",
+        "docs/user/LINQ_TO_ENTITIES.md"
+      ],
+      "evidence": null
+    },
+    {
+      "id": "TX-PG-NATIVE-001",
+      "family": "transactions",
+      "origin": "GOEF_EXTENSION",
+      "scope": "SPECIALIZED",
+      "upstream": [],
+      "contract": "Bind GoEF transaction operations directly to a native pgx transaction with owned and borrowed completion kept distinct.",
+      "goApi": {
+        "status": "IMPLEMENTED",
+        "description": "postgres.BeginTx and postgres.NewExternal reuse the core transaction coordinator for native pgx pools and handles."
+      },
+      "wave": "W005",
+      "issues": [
+        37
+      ],
+      "dependencies": [
+        "TX-OWN-001",
+        "TX-SAVEPOINT-001",
+        "TX-OUTCOME-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "BLOCKED",
+          "capability": "PROPOSED",
+          "engineVersions": [
+            "18.7"
+          ],
+          "driverVersions": [
+            "pgx v5.13.0"
+          ],
+          "reason": "Scoped live PostgreSQL scenarios passed. The integrated release gate has separate evidence.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This source feature is specific to the PostgreSQL adapter.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This source feature is specific to the PostgreSQL adapter.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This source feature is specific to the PostgreSQL adapter.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "TX-PG-NATIVE-001-S01",
+        "TX-PG-NATIVE-001-S02",
+        "TX-PG-NATIVE-001-S03",
+        "TX-PG-NATIVE-001-S04",
+        "TX-PG-NATIVE-001-S05"
+      ],
+      "tests": [
+        "providers/postgres/transaction_integration_test.go#TestNativeTransactions"
+      ],
+      "status": "PARTIAL",
+      "deviations": [
+        "The native PostgreSQL path is verified on PostgreSQL 18.7. PgBouncer and the external application connection budget remain unmeasured."
+      ],
+      "adr": null,
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
       ],
       "evidence": null
     }

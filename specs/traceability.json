@@ -520,6 +520,66 @@
       "status": "SPECIFIED"
     },
     {
+      "featureId": "LINQ-PG-001",
+      "scenarioId": "LINQ-PG-001-S01",
+      "spec": "specs/features/linq/postgres-equality-read.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/36"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_QUERYABLE.md",
+        "docs/user/LINQ_TO_ENTITIES.md"
+      ],
+      "test": "test/conformance/driverlab/postgres_queryable_test.go#TestPostgresQueryableEquality",
+      "evidence": "docs/evidence/W008/POSTGRES_EQUALITY_READ.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-PG-001",
+      "scenarioId": "LINQ-PG-001-S02",
+      "spec": "specs/features/linq/postgres-equality-read.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/36"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_QUERYABLE.md",
+        "docs/user/LINQ_TO_ENTITIES.md"
+      ],
+      "test": "test/conformance/driverlab/postgres_queryable_test.go#TestPostgresQueryableEquality",
+      "evidence": "docs/evidence/W008/POSTGRES_EQUALITY_READ.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-PG-001",
+      "scenarioId": "LINQ-PG-001-S03",
+      "spec": "specs/features/linq/postgres-equality-read.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/36"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_QUERYABLE.md",
+        "docs/user/LINQ_TO_ENTITIES.md"
+      ],
+      "test": "test/conformance/driverlab/postgres_queryable_test.go#TestPostgresQueryableEquality",
+      "evidence": "docs/evidence/W008/POSTGRES_EQUALITY_READ.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "LINQ-PG-001",
+      "scenarioId": "LINQ-PG-001-S04",
+      "spec": "specs/features/linq/postgres-equality-read.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/36"
+      ],
+      "docs": [
+        "docs/architecture/LINQ_QUERYABLE.md",
+        "docs/user/LINQ_TO_ENTITIES.md"
+      ],
+      "test": "test/conformance/driverlab/postgres_queryable_test.go#TestPostgresQueryableEquality",
+      "evidence": "docs/evidence/W008/POSTGRES_EQUALITY_READ.md",
+      "status": "SPECIFIED"
+    },
+    {
       "featureId": "LINQ-QUERYABLE-001",
       "scenarioId": "LINQ-QUERYABLE-001-S01",
       "spec": "specs/features/linq/queryable.feature",
@@ -718,6 +778,90 @@
       ],
       "test": null,
       "evidence": null,
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-POSTGRES-001",
+      "scenarioId": "MIG-POSTGRES-001-S01",
+      "spec": "specs/features/migrations/mig-postgres-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/35"
+      ],
+      "docs": [
+        "docs/user/MIGRATIONS_POSTGRESQL.md"
+      ],
+      "test": "test/conformance/driverlab/postgres_migrations_test.go#TestPostgresMigrations",
+      "evidence": "docs/evidence/W006/POSTGRES_MIGRATIONS.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-POSTGRES-001",
+      "scenarioId": "MIG-POSTGRES-001-S02",
+      "spec": "specs/features/migrations/mig-postgres-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/35"
+      ],
+      "docs": [
+        "docs/user/MIGRATIONS_POSTGRESQL.md"
+      ],
+      "test": "test/conformance/driverlab/postgres_migrations_test.go#TestPostgresMigrations",
+      "evidence": "docs/evidence/W006/POSTGRES_MIGRATIONS.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-POSTGRES-001",
+      "scenarioId": "MIG-POSTGRES-001-S03",
+      "spec": "specs/features/migrations/mig-postgres-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/35"
+      ],
+      "docs": [
+        "docs/user/MIGRATIONS_POSTGRESQL.md"
+      ],
+      "test": "test/conformance/driverlab/postgres_migrations_test.go#TestPostgresMigrations",
+      "evidence": "docs/evidence/W006/POSTGRES_MIGRATIONS.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-POSTGRES-001",
+      "scenarioId": "MIG-POSTGRES-001-S04",
+      "spec": "specs/features/migrations/mig-postgres-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/35"
+      ],
+      "docs": [
+        "docs/user/MIGRATIONS_POSTGRESQL.md"
+      ],
+      "test": "test/conformance/driverlab/postgres_migrations_test.go#TestPostgresMigrations",
+      "evidence": "docs/evidence/W006/POSTGRES_MIGRATIONS.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-POSTGRES-001",
+      "scenarioId": "MIG-POSTGRES-001-S05",
+      "spec": "specs/features/migrations/mig-postgres-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/35"
+      ],
+      "docs": [
+        "docs/user/MIGRATIONS_POSTGRESQL.md"
+      ],
+      "test": "test/conformance/driverlab/postgres_migrations_test.go#TestPostgresMigrations",
+      "evidence": "docs/evidence/W006/POSTGRES_MIGRATIONS.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "MIG-POSTGRES-001",
+      "scenarioId": "MIG-POSTGRES-001-S06",
+      "spec": "specs/features/migrations/mig-postgres-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/35"
+      ],
+      "docs": [
+        "docs/user/MIGRATIONS_POSTGRESQL.md"
+      ],
+      "test": "test/conformance/driverlab/postgres_migrations_test.go#TestPostgresMigrations",
+      "evidence": "docs/evidence/W006/POSTGRES_MIGRATIONS.md",
       "status": "SPECIFIED"
     },
     {
@@ -1068,10 +1212,11 @@
       ],
       "docs": [
         "docs/architecture/PROVIDER_SPI.md",
-        "docs/providers/POSTGRESQL.md"
+        "docs/providers/POSTGRESQL.md",
+        "providers/README.md"
       ],
-      "test": "test/conformance/driverlab/postgres_session_reuse_test.go#TestPostgresSessionReuse",
-      "evidence": "docs/evidence/W002/POSTGRES_SESSION_REUSE.md",
+      "test": "test/conformance/driverlab/production_adapter_test.go#TestProductionAdapters",
+      "evidence": "docs/evidence/W002/FOUR_PROVIDER_SESSION_REUSE.md",
       "status": "SPECIFIED"
     },
     {
@@ -1083,10 +1228,11 @@
       ],
       "docs": [
         "docs/architecture/PROVIDER_SPI.md",
-        "docs/providers/POSTGRESQL.md"
+        "docs/providers/POSTGRESQL.md",
+        "providers/README.md"
       ],
-      "test": "test/conformance/driverlab/postgres_session_reuse_test.go#TestPostgresSessionReuse",
-      "evidence": "docs/evidence/W002/POSTGRES_SESSION_REUSE.md",
+      "test": "test/conformance/driverlab/production_adapter_test.go#TestProductionAdapters",
+      "evidence": "docs/evidence/W002/FOUR_PROVIDER_SESSION_REUSE.md",
       "status": "SPECIFIED"
     },
     {
@@ -1098,10 +1244,11 @@
       ],
       "docs": [
         "docs/architecture/PROVIDER_SPI.md",
-        "docs/providers/POSTGRESQL.md"
+        "docs/providers/POSTGRESQL.md",
+        "providers/README.md"
       ],
-      "test": "test/conformance/driverlab/postgres_session_reuse_test.go#TestPostgresSessionReuse",
-      "evidence": "docs/evidence/W002/POSTGRES_SESSION_REUSE.md",
+      "test": "test/conformance/driverlab/production_adapter_test.go#TestProductionAdapters",
+      "evidence": "docs/evidence/W002/FOUR_PROVIDER_SESSION_REUSE.md",
       "status": "SPECIFIED"
     },
     {
@@ -1345,6 +1492,81 @@
       ],
       "test": "test/conformance/driverlab/save_changes_transaction_test.go#TestSaveChangesTransaction",
       "evidence": "docs/evidence/W005/SAVE_CHANGES.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-PG-NATIVE-001",
+      "scenarioId": "TX-PG-NATIVE-001-S01",
+      "spec": "specs/features/transactions/tx-pg-native-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/37"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": "providers/postgres/transaction_integration_test.go#TestNativeTransactions",
+      "evidence": "docs/evidence/W005/POSTGRES_NATIVE_TRANSACTIONS.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-PG-NATIVE-001",
+      "scenarioId": "TX-PG-NATIVE-001-S02",
+      "spec": "specs/features/transactions/tx-pg-native-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/37"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": "providers/postgres/transaction_integration_test.go#TestNativeTransactions",
+      "evidence": "docs/evidence/W005/POSTGRES_NATIVE_TRANSACTIONS.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-PG-NATIVE-001",
+      "scenarioId": "TX-PG-NATIVE-001-S03",
+      "spec": "specs/features/transactions/tx-pg-native-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/37"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": "providers/postgres/transaction_integration_test.go#TestNativeTransactions",
+      "evidence": "docs/evidence/W005/POSTGRES_NATIVE_TRANSACTIONS.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-PG-NATIVE-001",
+      "scenarioId": "TX-PG-NATIVE-001-S04",
+      "spec": "specs/features/transactions/tx-pg-native-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/37"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": "providers/postgres/transaction_integration_test.go#TestNativeTransactions",
+      "evidence": "docs/evidence/W005/POSTGRES_NATIVE_TRANSACTIONS.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TX-PG-NATIVE-001",
+      "scenarioId": "TX-PG-NATIVE-001-S05",
+      "spec": "specs/features/transactions/tx-pg-native-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/37"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": "providers/postgres/transaction_integration_test.go#TestNativeTransactions",
+      "evidence": "docs/evidence/W005/POSTGRES_NATIVE_TRANSACTIONS.md",
       "status": "SPECIFIED"
     },
     {

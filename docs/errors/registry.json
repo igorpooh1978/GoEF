@@ -193,13 +193,16 @@
       "deprecated": false,
       "replacement": null,
       "issues": [
-        "https://github.com/igorpooh1978/GoEF/issues/2"
+        "https://github.com/igorpooh1978/GoEF/issues/2",
+        "https://github.com/igorpooh1978/GoEF/issues/36"
       ],
       "featureIds": [
-        "ERR-CONTRACT-001"
+        "ERR-CONTRACT-001",
+        "LINQ-PG-001"
       ],
       "scenarioIds": [
-        "ERR-CONTRACT-001-S01"
+        "ERR-CONTRACT-001-S01",
+        "LINQ-PG-001-S03"
       ],
       "docs": [
         "docs/architecture/ERROR_CONTRACT.md",
@@ -247,13 +250,16 @@
       "deprecated": false,
       "replacement": null,
       "issues": [
-        "https://github.com/igorpooh1978/GoEF/issues/2"
+        "https://github.com/igorpooh1978/GoEF/issues/2",
+        "https://github.com/igorpooh1978/GoEF/issues/36"
       ],
       "featureIds": [
-        "ERR-CONTRACT-001"
+        "ERR-CONTRACT-001",
+        "LINQ-PG-001"
       ],
       "scenarioIds": [
-        "ERR-CONTRACT-001-S01"
+        "ERR-CONTRACT-001-S01",
+        "LINQ-PG-001-S02"
       ],
       "docs": [
         "docs/architecture/ERROR_CONTRACT.md",
@@ -1556,13 +1562,19 @@
       "deprecated": false,
       "replacement": null,
       "issues": [
-        "https://github.com/igorpooh1978/GoEF/issues/2"
+        "https://github.com/igorpooh1978/GoEF/issues/2",
+        "https://github.com/igorpooh1978/GoEF/issues/35",
+        "https://github.com/igorpooh1978/GoEF/issues/37"
       ],
       "featureIds": [
-        "TX-OUTCOME-001"
+        "TX-OUTCOME-001",
+        "MIG-POSTGRES-001",
+        "TX-PG-NATIVE-001"
       ],
       "scenarioIds": [
-        "TX-OUTCOME-001-S01"
+        "TX-OUTCOME-001-S01",
+        "MIG-POSTGRES-001-S06",
+        "TX-PG-NATIVE-001-S03"
       ],
       "docs": [
         "docs/architecture/ERROR_CONTRACT.md",
@@ -1749,6 +1761,65 @@
       }
     },
     {
+      "id": "GOEF-TX-0005",
+      "kind": "CommitRolledBack",
+      "sentinel": "ErrCommitRolledBack",
+      "detailType": "*ErrorDetail",
+      "category": "transaction",
+      "message": "The transaction rolled back during commit.",
+      "trigger": "The server confirmed that the transaction rolled back during commit.",
+      "phase": "commit",
+      "outcome": "rolled_back",
+      "retryClass": "never",
+      "retryPreconditions": "No automatic replay for this classification.",
+      "severity": "error",
+      "safeMetadata": [
+        "id",
+        "phase",
+        "retryClass",
+        "outcome"
+      ],
+      "redaction": "Omit the native error object, statement, parameters and server text.",
+      "firstVersion": null,
+      "status": "PROPOSED",
+      "deprecated": false,
+      "replacement": null,
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/35",
+        "https://github.com/igorpooh1978/GoEF/issues/37"
+      ],
+      "featureIds": [
+        "MIG-POSTGRES-001",
+        "TX-PG-NATIVE-001"
+      ],
+      "scenarioIds": [
+        "MIG-POSTGRES-001-S03",
+        "TX-PG-NATIVE-001-S05"
+      ],
+      "docs": [
+        "docs/architecture/ERROR_CONTRACT.md",
+        "docs/user/MIGRATIONS_POSTGRESQL.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "testIds": [
+        "TEST-GOEF-TX-0005"
+      ],
+      "upstreamSources": [
+        "https://github.com/jackc/pgx/blob/v5.13.0/tx.go",
+        "https://www.postgresql.org/docs/18/sql-commit.html",
+        "https://www.postgresql.org/docs/18/protocol-flow.html"
+      ],
+      "providerMappings": {
+        "postgres": [
+          "postgres-commit-rollback-tag",
+          "postgres-migration-commit-rejected"
+        ],
+        "sqlite": [],
+        "sqlserver": [],
+        "mysql": []
+      }
+    },
+    {
       "id": "GOEF-MIG-0001",
       "kind": "PendingModelChanges",
       "sentinel": "ErrPendingModelChanges",
@@ -1833,14 +1904,17 @@
       "replacement": null,
       "issues": [
         "https://github.com/igorpooh1978/GoEF/issues/2",
-        "https://github.com/igorpooh1978/GoEF/issues/34"
+        "https://github.com/igorpooh1978/GoEF/issues/34",
+        "https://github.com/igorpooh1978/GoEF/issues/35"
       ],
       "featureIds": [
-        "MIG-DRIFT-001"
+        "MIG-DRIFT-001",
+        "MIG-POSTGRES-001"
       ],
       "scenarioIds": [
         "MIG-DRIFT-001-S02",
-        "MIG-DRIFT-001-S03"
+        "MIG-DRIFT-001-S03",
+        "MIG-POSTGRES-001-S02"
       ],
       "docs": [
         "docs/architecture/ERROR_CONTRACT.md",

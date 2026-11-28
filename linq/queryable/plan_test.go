@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -287,16 +288,19 @@ func TestFetchErrors(t *testing.T) {
 		errors.Is(err, nativeErr) || unsupported.lease.releases != 1 || unsupported.lease.disposition != provider.Reuse {
 		t.Fatal("an unsupported lease should be returned without executing a query")
 	}
-	ctx, cancel := context.WithCancel(t.Context())
-	cancel()
+	cause := errors.New("private query context reason")
+	ctx, cancel := context.WithCancelCause(t.Context())
+	cancel(cause)
 	invalid.acquires = 0
-	if _, _, err := plan.Fetch(ctx, invalid, "key"); !errors.Is(err, context.Canceled) || !errors.Is(err, goeferr.ErrCanceled) || invalid.acquires != 0 {
-		t.Fatal("pre-canceled fetch acquired a lease")
+	if _, _, err := plan.Fetch(ctx, invalid, "key"); !errors.Is(err, context.Canceled) || !errors.Is(err, goeferr.ErrCanceled) ||
+		!errors.Is(err, cause) || strings.Contains(err.Error(), cause.Error()) || invalid.acquires != 0 {
+		t.Fatal("pre-canceled fetch must preserve the redacted cause without acquiring a lease")
 	}
-	ctx, expire := context.WithDeadline(t.Context(), time.Time{})
+	ctx, expire := context.WithDeadlineCause(t.Context(), time.Time{}, cause)
 	defer expire()
-	if _, _, err := plan.Fetch(ctx, invalid, "key"); !errors.Is(err, context.DeadlineExceeded) || !errors.Is(err, goeferr.ErrDeadlineExceeded) || invalid.acquires != 0 {
-		t.Fatal("expired fetch acquired a lease")
+	if _, _, err := plan.Fetch(ctx, invalid, "key"); !errors.Is(err, context.DeadlineExceeded) || !errors.Is(err, goeferr.ErrDeadlineExceeded) ||
+		!errors.Is(err, cause) || strings.Contains(err.Error(), cause.Error()) || invalid.acquires != 0 {
+		t.Fatal("expired fetch must preserve the redacted cause without acquiring a lease")
 	}
 }
 

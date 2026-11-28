@@ -1,5 +1,7 @@
 # SQLite provider
 
+Current source can [reuse a physical connection after a reviewed read](../../providers/README.md#reuse-after-a-reviewed-read). SQLite keeps state such as temporary objects and some pragmas per connection. Review those effects before opting in. Ordinary SQL retains conservative connection retirement. [SQLite pragmas](https://www.sqlite.org/pragma.html#pragma_cache_size)
+
 Tracking [#8](https://github.com/igorpooh1978/GoEF/issues/8). W000 research cell: SQLite 3.54.1 with `modernc.org/sqlite` v1.63.0. The driver's platform table documents the embedded engine version. Confirm the actual source ID and compile options in W001 before pinning the runtime. Conformance is pending. [Engine release](https://www.sqlite.org/releaselog/3_54_1.html) · [Tagged driver docs](https://pkg.go.dev/modernc.org/sqlite@v1.63.0)
 
 ## Candidate capabilities

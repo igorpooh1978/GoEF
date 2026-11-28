@@ -20,6 +20,7 @@ To connect and run a first query with the published alpha, choose a database in 
 - [Handle portable errors](ERROR_HANDLING.md)
 - [Review and apply a schema change](MIGRATIONS.md)
 - [Register a migration by hand in Go](MIGRATIONS_IN_GO.md)
+- [Apply a reviewed migration to PostgreSQL](MIGRATIONS_POSTGRESQL.md)
 - [Use the optional migration CLI](MIGRATIONS_CLI.md)
 - [Recover an interrupted migration](MIGRATIONS_UPGRADE_AND_RECOVERY.md)
 - [Measure a comparable data workload](PERFORMANCE.md)

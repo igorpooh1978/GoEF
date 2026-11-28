@@ -11,6 +11,7 @@
 | Server reports a constraint or conversion failure | Inspect the typed native code plus operation-specific context. Use a portable constraint kind when evidence uniquely identifies it. Keep row values and vendor text private. |
 | Caller context caused cancellation or deadline | Return the portable detail and preserve `errors.Is(err, context.Canceled)` or `errors.Is(err, context.DeadlineExceeded)`. A coincidentally canceled context alone is insufficient. A server lock/statement budget with a live context has its own kind and phase. |
 | Commit sent, durable result unknown | Return `ErrCommitOutcomeUnknown` even if a lower layer reports timeout, cancellation or unavailable transport. Preserve causal cancellation as an additional safe cause. Suspend tracker acceptance, stop replay and require reconciliation. |
+| PostgreSQL confirms rollback at commit | Return `ErrCommitRolledBack` with the confirmed `rolled_back` outcome. Preserve a known rollback separately from an uncertain transport failure. |
 | No unique native rule applies | Return `ErrUnknownDriver` and keep retry class never. If an adapter knows the phase but lacks enough evidence to classify the cause, emit safe code, phase and provider. |
 
 ## Go errors and diagnostic boundaries

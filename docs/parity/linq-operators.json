@@ -24976,9 +24976,13 @@
       "issue": 4,
       "scenarioIds": [
         "LINQ-BOUNDARY-001-S01",
-        "LINQ-CONFORMANCE-001-S02"
+        "LINQ-CONFORMANCE-001-S02",
+        "LINQ-PG-001-S01",
+        "LINQ-PG-001-S03"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "test/conformance/driverlab/postgres_queryable_test.go#TestPostgresQueryableEquality"
+      ],
       "evidenceSha": null
     },
     {
@@ -25199,9 +25203,13 @@
       "issue": 4,
       "scenarioIds": [
         "LINQ-BOUNDARY-001-S01",
-        "LINQ-CONFORMANCE-001-S02"
+        "LINQ-CONFORMANCE-001-S02",
+        "LINQ-PG-001-S01",
+        "LINQ-PG-001-S03"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "test/conformance/driverlab/postgres_queryable_test.go#TestPostgresQueryableEquality"
+      ],
       "evidenceSha": null
     },
     {
@@ -25781,9 +25789,13 @@
       "issue": 4,
       "scenarioIds": [
         "LINQ-BOUNDARY-001-S01",
-        "LINQ-CONFORMANCE-001-S02"
+        "LINQ-CONFORMANCE-001-S02",
+        "LINQ-PG-001-S01",
+        "LINQ-PG-001-S03"
       ],
-      "executableTests": [],
+      "executableTests": [
+        "test/conformance/driverlab/postgres_queryable_test.go#TestPostgresQueryableEquality"
+      ],
       "evidenceSha": null
     },
     {

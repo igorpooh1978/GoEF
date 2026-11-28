@@ -13,6 +13,8 @@
 
 The owned transaction API reports a portable invalid-state error for completed handles. It preserves cancellation and deadline causes, reports failed rollback separately, and surfaces unknown commit outcome without exposing native driver text. [Ownership evidence](../evidence/W005/OWNED_TRANSACTION.md)
 
+Native PostgreSQL operations report `ErrCommitRolledBack` when commit gives a confirmed rollback. The outcome is `rolled_back` and the retry class is `never`. An uncertain commit still requires independent reconciliation. [Native transaction evidence](../evidence/W005/POSTGRES_NATIVE_TRANSACTIONS.md) · [Migration evidence](../evidence/W006/POSTGRES_MIGRATIONS.md)
+
 Managed savepoints use `ErrUnsupportedFeature` for dialect selection errors and `ErrSavepointFailed` for failed native savepoint commands. A retired point or detached participant returns `ErrInvalidState`. [Savepoint evidence](../evidence/W005/SAVEPOINTS_AND_EXTERNAL.md)
 
 `SaveChanges` uses `ErrSaveChangesFailed` for a callback failure without a causal cancellation or a known writer error. `ErrSavepointFailed` identifies failed savepoint control. A caller-owned coordinator joins `ErrRollbackFailed` when it detaches after recovery could not be confirmed. The caller still controls native rollback. [SaveChanges evidence](../evidence/W005/SAVE_CHANGES.md)

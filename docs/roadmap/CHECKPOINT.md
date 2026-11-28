@@ -4,6 +4,12 @@ The [published W000 baseline](https://github.com/igorpooh1978/GoEF/commit/c78960
 
 Confirm origin and HEAD, open the live tracker, read the [source lock](../upstream/lock.json), and load the relevant [skills](../development/SKILLS.md). GitHub is authoritative for current issue state.
 
+## Adoption review follow-up
+
+The first alpha retired a used physical connection after each ordinary query. The follow-up adds opt-in reuse for a fully consumed, reviewed read, plus a PostgreSQL typed equality projection, transactional migration execution, native pgx transactions, and build version reporting. These features apply to current source. The published alpha remains the installation baseline until a new preview is approved. [Pool lifecycle](../evidence/W002/FOUR_PROVIDER_SESSION_REUSE.md) · [Typed projection](../evidence/W008/POSTGRES_EQUALITY_READ.md) · [Migrations](../evidence/W006/POSTGRES_MIGRATIONS.md) · [Native transactions](../evidence/W005/POSTGRES_NATIVE_TRANSACTIONS.md) · [Build versions](../development/BUILD_VERSIONS.md)
+
+## Published baseline and wave handoff
+
 | Issue | Handoff |
 | --- | --- |
 | [#12](https://github.com/igorpooh1978/GoEF/issues/12) W001 architecture | The module graph, external compile fixture and execution SPI are accepted. Future compiler, model, transaction and migration extensions retain their own implementation gates. |

@@ -34,10 +34,11 @@ func (p Plan[Result, Parameter]) fetch(ctx context.Context, backend provider.Bac
 		return result, false, goeferr.NewInvalidState()
 	}
 	if err := ctx.Err(); err != nil {
+		detail := goeferr.NewCanceled()
 		if err == context.DeadlineExceeded {
-			return result, false, errors.Join(goeferr.NewDeadlineExceeded(), err)
+			detail = goeferr.NewDeadlineExceeded()
 		}
-		return result, false, errors.Join(goeferr.NewCanceled(), err)
+		return result, false, &canceledFetch{error: detail, status: err, cause: context.Cause(ctx)}
 	}
 	if backend.Descriptor() != p.dialect {
 		return result, false, goeferr.NewUnsupportedFeature()
@@ -47,16 +48,8 @@ func (p Plan[Result, Parameter]) fetch(ctx context.Context, backend provider.Bac
 	if err != nil {
 		return result, false, err
 	}
-	query := lease.Query
-	if sessionNeutral {
-		capability, ok := lease.(provider.SessionNeutralQuerier)
-		if !ok {
-			return result, false, errors.Join(goeferr.NewUnsupportedFeature(), lease.Release(ctx, provider.Reuse))
-		}
-		query = capability.QuerySessionNeutral
-	}
-
 	var rows provider.Rows
+	dispatched := false
 	defer func() {
 		cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 		defer cancel()
@@ -64,7 +57,7 @@ func (p Plan[Result, Parameter]) fetch(ctx context.Context, backend provider.Bac
 			err = errors.Join(err, rows.Close(cleanup))
 		}
 		disposition := provider.Reuse
-		if err != nil || ctx.Err() != nil {
+		if ctx.Err() != nil || (dispatched && err != nil) {
 			disposition = provider.Discard
 		}
 		err = errors.Join(err, lease.Release(cleanup, disposition))
@@ -74,12 +67,34 @@ func (p Plan[Result, Parameter]) fetch(ctx context.Context, backend provider.Bac
 		}
 	}()
 
+	query := lease.Query
+	if sessionNeutral {
+		capability, ok := lease.(provider.SessionNeutralQuerier)
+		if !ok {
+			return result, false, goeferr.NewUnsupportedFeature()
+		}
+		query = capability.QuerySessionNeutral
+	}
+	dispatched = true
 	rows, err = query(ctx, p.command, args)
 	if err != nil {
 		return result, false, err
 	}
 	return readSingle(rows, p.dialect.ID, len(p.command.Columns), p.decode)
 }
+
+// Match a private caller cause without including its text or exposing its
+// concrete type through the public error chain.
+type canceledFetch struct {
+	error
+	status, cause error
+}
+
+func (e *canceledFetch) Is(target error) bool {
+	return errors.Is(e.status, target) || errors.Is(e.cause, target)
+}
+
+func (e *canceledFetch) Unwrap() error { return e.error }
 
 func readSingle[Result any](rows provider.Rows, dialect string, columns int, decode func([]provider.Value, *Result) bool) (Result, bool, error) {
 	var result, zero Result

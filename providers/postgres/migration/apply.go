@@ -108,7 +108,7 @@ func Apply(ctx context.Context, pool *pgxpool.Pool, plan Plan) (count int, err e
 	}
 	if err := tx.Commit(ctx); err != nil {
 		if errors.Is(err, pgx.ErrTxCommitRollback) || rejectedCommit(conn.Conn(), err) {
-			return 0, safeError(err)
+			return 0, goeferr.NewCommitRolledBack()
 		}
 		cleanup, cancel := cleanupContext(ctx)
 		defer cancel()

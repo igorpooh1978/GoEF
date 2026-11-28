@@ -23,6 +23,8 @@ go mod edit "-require=github.com/igorpooh1978/GoEF/providers/mysql@v0.1.0-alpha.
 
 After adding the imports to your code, run `go mod tidy` to download the pinned modules and update `go.sum`.
 
+Builds from current source include [version and Git revision reporting](docs/development/BUILD_VERSIONS.md).
+
 ### GitHub prereleases
 
 - [GoEF core](https://github.com/igorpooh1978/GoEF/releases/tag/v0.1.0-alpha.1)

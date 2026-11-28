@@ -17,7 +17,9 @@ The Code First decimal fixture checks physical precision, scale, nullability and
 
 The ordered `SaveChanges` fixture checks partial-write recovery, preservation of earlier writes, acceptance of staged values after commit and preflight rejection for unusable recovery settings. [SaveChanges profile results](../evidence/W005/SAVE_CHANGES.md)
 
-PostgreSQL 18.7 with pgx v5.13.0 exercises the optional session-neutral read contract on direct and native-pool-backed `database/sql` routes. It checks PID reuse after clean completion and retirement after ordinary SQL, cancellation, errors and incomplete streams. [Session reuse scenarios and evidence](../evidence/W002/POSTGRES_SESSION_REUSE.md)
+The optional session-neutral read scenarios exercise all four adapters. They check physical connection reuse after clean completion and retirement after ordinary SQL, cancellation, errors and incomplete streams. PostgreSQL also has a dedicated native pgx pool and benchmark fixture. [Four-provider evidence](../evidence/W002/FOUR_PROVIDER_SESSION_REUSE.md) · [PostgreSQL pool and benchmark](../evidence/W002/POSTGRES_SESSION_REUSE.md)
+
+PostgreSQL 18.7 with pgx v5.13.0 also has source evidence for the transactional migration executor, the native pgx transaction API, and the typed equality projection. Those results apply to the specified contracts and database profile. [Migrations](../evidence/W006/POSTGRES_MIGRATIONS.md) · [Native transactions](../evidence/W005/POSTGRES_NATIVE_TRANSACTIONS.md) · [Typed equality read](../evidence/W008/POSTGRES_EQUALITY_READ.md)
 
 ## Acceptance per version
 

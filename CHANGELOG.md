@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Apply reviewed PostgreSQL migrations and their verified history in one transaction under an advisory lock ([#35](https://github.com/igorpooh1978/GoEF/issues/35)).
+- Compile typed PostgreSQL equality projections, distinguish missing rows from SQL NULL, and allow explicit reuse for reviewed reads ([#36](https://github.com/igorpooh1978/GoEF/issues/36)).
+- Start cancellable transactions directly on a native pgx pool, coordinate work in an existing pgx transaction, and distinguish confirmed commit rollback from an unknown outcome ([#37](https://github.com/igorpooh1978/GoEF/issues/37)).
 - Report the generator's Go module version, Git revision and dirty state with `goef-linqgen -version` ([#38](https://github.com/igorpooh1978/GoEF/issues/38)).
 - Reuse PostgreSQL, SQLite, SQL Server and MySQL physical connections after explicitly reviewed reads reach EOF and close successfully. Ordinary SQL and uncertain streams retain conservative retirement ([#39](https://github.com/igorpooh1978/GoEF/issues/39)).
 - Add a reproducible LINQ generator for typed equality bindings and scalar projections, with stale artifact rejection ([#24](https://github.com/igorpooh1978/GoEF/issues/24)).

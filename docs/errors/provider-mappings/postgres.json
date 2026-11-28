@@ -211,6 +211,78 @@
       },
       "testId": "TEST-MAP-POSTGRES-006",
       "evidence": null
+    },
+    {
+      "id": "postgres-commit-rollback-tag",
+      "errorId": "GOEF-TX-0005",
+      "engineVersionRange": "PostgreSQL 18.7",
+      "driver": "github.com/jackc/pgx/v5",
+      "driverVersion": "v5.13.0",
+      "driverField": "pgx.ErrTxCommitRollback",
+      "native": {
+        "type": "typedError",
+        "value": "pgx.ErrTxCommitRollback"
+      },
+      "requiredContext": "Native pgx commit returns a matched rollback sentinel after a server ROLLBACK command tag.",
+      "priority": 100,
+      "disambiguation": "Require explicit server confirmation. An unacknowledged transport failure retains ErrCommitOutcomeUnknown.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrCommitRolledBack",
+      "errorsIs": [
+        "ErrCommitRolledBack"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "rolled_back",
+      "officialSources": [
+        "https://github.com/jackc/pgx/blob/v5.13.0/tx.go",
+        "https://www.postgresql.org/docs/18/sql-commit.html",
+        "https://www.postgresql.org/docs/18/protocol-flow.html"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "The server confirms rollback at COMMIT for an aborted transaction in TX-PG-NATIVE-001-S05.",
+        "observed": null,
+        "reason": "The scoped live result is linked from the feature evidence. Final registry promotion needs integrated acceptance."
+      },
+      "testId": "TEST-MAP-POSTGRES-007",
+      "evidence": null
+    },
+    {
+      "id": "postgres-migration-commit-rejected",
+      "errorId": "GOEF-TX-0005",
+      "engineVersionRange": "PostgreSQL 18.7",
+      "driver": "github.com/jackc/pgx/v5",
+      "driverVersion": "v5.13.0",
+      "driverField": "*pgconn.PgError.SeverityUnlocalized and PgConn.TxStatus()",
+      "native": {
+        "type": "typedError",
+        "value": "pgconn.PgError (ERROR)"
+      },
+      "requiredContext": "PostgreSQL rejects COMMIT with an ERROR response and returns an open, idle session.",
+      "priority": 100,
+      "disambiguation": "Require explicit server confirmation. An unacknowledged transport failure retains ErrCommitOutcomeUnknown.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrCommitRolledBack",
+      "errorsIs": [
+        "ErrCommitRolledBack"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "rolled_back",
+      "officialSources": [
+        "https://github.com/jackc/pgx/blob/v5.13.0/tx.go",
+        "https://www.postgresql.org/docs/18/sql-commit.html",
+        "https://www.postgresql.org/docs/18/protocol-flow.html"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "PostgreSQL rejects a deferred constraint at COMMIT in MIG-POSTGRES-001-S03.",
+        "observed": null,
+        "reason": "The scoped live result is linked from the feature evidence. Final registry promotion needs integrated acceptance."
+      },
+      "testId": "TEST-MAP-POSTGRES-008",
+      "evidence": null
     }
   ],
   "gaps": [

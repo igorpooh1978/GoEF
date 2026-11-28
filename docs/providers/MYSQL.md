@@ -1,5 +1,7 @@
 # MySQL provider
 
+Current source can [reuse a physical connection after a reviewed read](../../providers/README.md#reuse-after-a-reviewed-read). MySQL user-defined variables persist for one session, and ordinary SQL retains conservative connection retirement. [MySQL 8.4 session variables](https://dev.mysql.com/doc/refman/8.4/en/user-variables.html)
+
 Tracking [#11](https://github.com/igorpooh1978/GoEF/issues/11). W000 research cell: Oracle MySQL 8.4.13.1 LTS with InnoDB and `github.com/go-sql-driver/mysql` v1.10.0. W001 must confirm the exact artifact, digest and settings. Conformance is pending. [Engine release](https://dev.mysql.com/doc/relnotes/mysql/8.4/en/news-8-4-13-1.html) · [Driver README at v1.10.0](https://github.com/go-sql-driver/mysql/blob/v1.10.0/README.md)
 
 ## Candidate capabilities

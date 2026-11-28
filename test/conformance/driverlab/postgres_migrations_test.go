@@ -323,7 +323,7 @@ func postgresMigrationRollback(s postgresMigrationFixture) {
 		return err
 	}
 	// The checks pass but PostgreSQL rejects COMMIT with a known rollback.
-	s.assertApplyResult(plan, 0, goeferr.ErrUnknownDriver)
+	s.assertApplyResult(plan, 0, goeferr.ErrCommitRolledBack)
 	s.assertNoRelation("public.goef_migration_deferred_child")
 	s.assertNoRelation(s.table)
 	s.assertNoRelation("public." + s.history)

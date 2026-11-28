@@ -53,6 +53,7 @@ the pool and may close it after Apply returns. [PostgreSQL advisory locks](https
 | ErrMigrationLocked | The configured migration lock wait expired. Inspect the competing migration and apply again only as an explicit decision. |
 | context.Canceled or context.DeadlineExceeded | The caller canceled the operation or exhausted its request budget. Check joined errors, including an unconfirmed rollback or commit. |
 | ErrCommitOutcomeUnknown | The server outcome could not be established from the commit response. Inspect the exact history, schema and data through a fresh connection before deciding how to proceed. |
+| ErrCommitRolledBack | PostgreSQL confirmed rollback during commit. Inspect the artifact and constraint behavior before submitting another apply. |
 
 The executor leaves legacy tables in place. Establish a reviewed mapping
 from every legacy entry to its immutable artifact and verify the live schema
