@@ -282,6 +282,11 @@ func TestFetchErrors(t *testing.T) {
 	if _, _, err := plan.Fetch(t.Context(), incompatible, "key"); !errors.Is(err, goeferr.ErrUnsupportedFeature) || incompatible.acquires != 0 {
 		t.Fatal("an incompatible dialect acquired a lease")
 	}
+	unsupported := &adapter{queryErr: nativeErr}
+	if _, _, err := plan.FetchSessionNeutral(t.Context(), unsupported, "key"); !errors.Is(err, goeferr.ErrUnsupportedFeature) ||
+		errors.Is(err, nativeErr) || unsupported.lease.releases != 1 || unsupported.lease.disposition != provider.Reuse {
+		t.Fatal("an unsupported lease should be returned without executing a query")
+	}
 	ctx, cancel := context.WithCancel(t.Context())
 	cancel()
 	invalid.acquires = 0

@@ -40,6 +40,8 @@ Import `time` and the GoEF packages `model`, `linq/expressions`, `linq/queryable
 
 For a [generated equality binding](LINQ_GENERATED.md), pass the binding to `queryable.CompileGenerated` and execute the returned scalar plan using `Fetch(ctx, backend, binding.Value())`. The scalar comes from the SQL projection.
 
+Use `plan.FetchSessionNeutral(ctx, backend, key)` to keep the physical session after a successful read of a reviewed relation. The caller verifies that referenced relations, functions, operators and policies leave the session unchanged. The method requires a lease that advertises the capability and reports `goeferr.ErrUnsupportedFeature` when it is missing. [Session reuse contract](../../providers/README.md#reuse-after-a-reviewed-read)
+
 ## Supported scope
 
 This path accepts signed integers, booleans, strings, `float64`, byte slices and `time.Time`, along with pointers to those types in projected fields. The caller maps fields to PostgreSQL columns that the pgx `database/sql` driver can read as the corresponding transport types. UUID, JSONB, arrays and exact decimal values need separately supported mappings. The equality argument is non-null. Equality matches only non-null predicate columns. PostgreSQL governs equality and collation.

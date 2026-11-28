@@ -11,7 +11,7 @@ from runtime import Blocked, Lab, LabError, safe_reason
 
 PROFILE = "postgres-18"
 TEST = "TestPostgresQueryableEquality"
-SCENARIOS = ("LINQ-PG-001-S01", "LINQ-PG-001-S02", "LINQ-PG-001-S03")
+SCENARIOS = tuple(f"LINQ-PG-001-S{index:02d}" for index in range(1, 5))
 
 
 def main():

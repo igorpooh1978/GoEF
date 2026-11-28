@@ -16,7 +16,20 @@ import (
 // [goeferr.ErrMultipleResults]. On all errors Fetch returns no partial result.
 // An already canceled context stops before acquisition. Fetch closes its rows
 // and releases its lease before returning. The caller owns the pool.
-func (p Plan[Result, Parameter]) Fetch(ctx context.Context, backend provider.Backend, value Parameter) (result Result, found bool, err error) {
+func (p Plan[Result, Parameter]) Fetch(ctx context.Context, backend provider.Backend, value Parameter) (Result, bool, error) {
+	return p.fetch(ctx, backend, value, false)
+}
+
+// FetchSessionNeutral executes Fetch with explicit permission to reuse the
+// physical session. Review the entire database read, including the objects it
+// invokes, against the [provider.SessionNeutralQuerier] contract. If the lease
+// lacks that capability, FetchSessionNeutral returns [goeferr.ErrUnsupportedFeature]
+// without executing the plan.
+func (p Plan[Result, Parameter]) FetchSessionNeutral(ctx context.Context, backend provider.Backend, value Parameter) (Result, bool, error) {
+	return p.fetch(ctx, backend, value, true)
+}
+
+func (p Plan[Result, Parameter]) fetch(ctx context.Context, backend provider.Backend, value Parameter, sessionNeutral bool) (result Result, found bool, err error) {
 	if ctx == nil || isNil(backend) || p.decode == nil {
 		return result, false, goeferr.NewInvalidState()
 	}
@@ -33,6 +46,14 @@ func (p Plan[Result, Parameter]) Fetch(ctx context.Context, backend provider.Bac
 	lease, err := backend.Acquire(ctx)
 	if err != nil {
 		return result, false, err
+	}
+	query := lease.Query
+	if sessionNeutral {
+		capability, ok := lease.(provider.SessionNeutralQuerier)
+		if !ok {
+			return result, false, errors.Join(goeferr.NewUnsupportedFeature(), lease.Release(ctx, provider.Reuse))
+		}
+		query = capability.QuerySessionNeutral
 	}
 
 	var rows provider.Rows
@@ -53,7 +74,7 @@ func (p Plan[Result, Parameter]) Fetch(ctx context.Context, backend provider.Bac
 		}
 	}()
 
-	rows, err = lease.Query(ctx, p.command, args)
+	rows, err = query(ctx, p.command, args)
 	if err != nil {
 		return result, false, err
 	}

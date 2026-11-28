@@ -23,3 +23,9 @@ Feature: Materialize a typed PostgreSQL equality read
     When two settings rows match or an in-flight read is canceled
     Then the corresponding typed error is observable
     And the caller-owned pool can run subsequent reads
+
+  @LINQ-PG-001-S04
+  Scenario: Reuse the connection for a reviewed compiled read
+    Given a vetted settings projection and a single available PostgreSQL pool slot
+    When a matching and a missing key are fetched with explicit permission to reuse
+    Then the results preserve their cardinality and the next checkout has the original backend PID

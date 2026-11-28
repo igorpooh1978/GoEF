@@ -121,6 +121,25 @@ func TestPostgresQueryableEquality(t *testing.T) {
 		}
 	})
 
+	t.Run("LINQ-PG-001-S04", func(t *testing.T) {
+		// The writer occupies the first slot. The second is the same physical
+		// connection observed by the plain checkout and both compiled reads.
+		var before, after int
+		if err := s.db.QueryRowContext(ctx, "SELECT pg_backend_pid()").Scan(&before); err != nil {
+			t.Fatal("could not observe the original PostgreSQL session")
+		}
+		projected, found, err := plan.FetchSessionNeutral(ctx, backend, firstKey)
+		if err != nil || !found || projected.Revision != 42 {
+			t.Fatal("reviewed settings read did not return the expected row")
+		}
+		if _, found, err := plan.FetchSessionNeutral(ctx, backend, firstKey+" absent"); err != nil || found {
+			t.Fatal("a missing row did not complete cleanly")
+		}
+		if err := s.db.QueryRowContext(ctx, "SELECT pg_backend_pid()").Scan(&after); err != nil || after != before {
+			t.Fatal("reviewed settings reads did not preserve the PostgreSQL session")
+		}
+	})
+
 	t.Run("LINQ-PG-001-S03", func(t *testing.T) {
 		if _, err := s.writer.ExecContext(ctx, insert, firstKey, int64(43), nil, savedAt, nil, false, ""); err != nil {
 			t.Fatal("could not seed duplicate settings row")
