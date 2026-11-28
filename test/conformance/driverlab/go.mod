@@ -4,7 +4,7 @@ go 1.27.4
 
 require (
 	github.com/go-sql-driver/mysql v1.10.0
-	github.com/igorpooh1978/GoEF v0.0.0
+	github.com/igorpooh1978/GoEF v0.2.0-alpha.1
 	github.com/igorpooh1978/GoEF/providers/mysql v0.0.0
 	github.com/igorpooh1978/GoEF/providers/postgres v0.0.0
 	github.com/igorpooh1978/GoEF/providers/sqlite v0.0.0

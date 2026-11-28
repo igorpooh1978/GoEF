@@ -283,6 +283,44 @@
       },
       "testId": "TEST-MAP-POSTGRES-008",
       "evidence": null
+    },
+    {
+      "id": "postgres-native-commit-foreign-key-rejected",
+      "errorId": "GOEF-TX-0005",
+      "engineVersionRange": "PostgreSQL 18.7",
+      "driver": "github.com/jackc/pgx/v5",
+      "driverVersion": "v5.13.0",
+      "driverField": "*pgconn.PgError.Code, SeverityUnlocalized and PgConn.TxStatus()",
+      "native": {
+        "type": "sqlstate",
+        "value": "23503"
+      },
+      "requiredContext": "Native pgx COMMIT receives a foreign key ERROR and completes with an open, idle connection.",
+      "priority": 100,
+      "disambiguation": "Requires native COMMIT and ReadyForQuery idle status. A foreign key failure during a write has different transaction semantics. Transport failure without acknowledgement retains ErrCommitOutcomeUnknown.",
+      "status": "PROPOSED",
+      "expectedGoError": "ErrCommitRolledBack",
+      "errorsIs": [
+        "ErrCommitRolledBack"
+      ],
+      "errorsAs": "*ErrorDetail",
+      "retryClass": "never",
+      "outcome": "rolled_back",
+      "officialSources": [
+        "https://www.postgresql.org/docs/18/sql-set-constraints.html",
+        "https://www.postgresql.org/docs/18/errcodes-appendix.html",
+        "https://www.postgresql.org/docs/18/protocol-message-formats.html",
+        "https://github.com/postgres/postgres/blob/REL_18_7/src/backend/access/transam/xact.c#L2116-L2224",
+        "https://github.com/jackc/pgx/blob/v5.13.0/tx.go#L198-L221"
+      ],
+      "reproduction": {
+        "status": "BLOCKED",
+        "planned": "PostgreSQL rejects a deferred foreign key at COMMIT in TX-PG-NATIVE-001-S06.",
+        "observed": null,
+        "reason": "The live result is recorded in the native transaction evidence. The bootstrap registry validator cannot promote native reproductions."
+      },
+      "testId": "TEST-MAP-POSTGRES-009",
+      "evidence": null
     }
   ],
   "gaps": [

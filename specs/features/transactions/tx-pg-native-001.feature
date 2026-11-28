@@ -38,3 +38,11 @@ Feature: Coordinate GoEF transactions directly on a caller-owned pgx pool
     Then GoEF reports ErrCommitRolledBack and StateRolledBack
     And the caller can reuse the same idle physical connection
     And the independent observer finds no row from the rolled back transaction
+
+  @TX-PG-NATIVE-001-S06
+  Scenario: A deferred foreign key rejection confirms rollback at COMMIT
+    Given a native transaction has executed valid writes and an insert that violates a deferred foreign key
+    When PostgreSQL rejects COMMIT with the foreign key violation and the session returns to idle
+    Then GoEF reports ErrCommitRolledBack and StateRolledBack
+    And the independent observer finds no writes from the transaction
+    And the caller can reuse the same idle physical connection

@@ -1794,7 +1794,8 @@
       ],
       "scenarioIds": [
         "MIG-POSTGRES-001-S03",
-        "TX-PG-NATIVE-001-S05"
+        "TX-PG-NATIVE-001-S05",
+        "TX-PG-NATIVE-001-S06"
       ],
       "docs": [
         "docs/architecture/ERROR_CONTRACT.md",
@@ -1812,7 +1813,8 @@
       "providerMappings": {
         "postgres": [
           "postgres-commit-rollback-tag",
-          "postgres-migration-commit-rejected"
+          "postgres-migration-commit-rejected",
+          "postgres-native-commit-foreign-key-rejected"
         ],
         "sqlite": [],
         "sqlserver": [],

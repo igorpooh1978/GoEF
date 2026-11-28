@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Report a confirmed PostgreSQL rollback when a deferred foreign key rejects a native commit and the connection returns to idle ([#37](https://github.com/igorpooh1978/GoEF/issues/37)).
+- Synchronize the conformance test module with the released core version so read-only builds can run the provider suites ([#38](https://github.com/igorpooh1978/GoEF/issues/38)).
+
 ## v0.2.0-alpha.1
 
 - Apply reviewed PostgreSQL migrations and their verified history in one transaction under an advisory lock ([#35](https://github.com/igorpooh1978/GoEF/issues/35)).

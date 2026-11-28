@@ -4479,7 +4479,7 @@
       "origin": "GOEF_EXTENSION",
       "scope": "SPECIALIZED",
       "upstream": [],
-      "contract": "Bind GoEF transaction operations directly to a native pgx transaction with owned and borrowed completion kept distinct.",
+      "contract": "Bind GoEF transaction operations directly to native pgx transactions, preserve ownership and distinguish a confirmed rollback from an unknown commit outcome.",
       "goApi": {
         "status": "IMPLEMENTED",
         "description": "postgres.BeginTx and postgres.NewExternal reuse the core transaction coordinator for native pgx pools and handles."
@@ -4536,7 +4536,8 @@
         "TX-PG-NATIVE-001-S02",
         "TX-PG-NATIVE-001-S03",
         "TX-PG-NATIVE-001-S04",
-        "TX-PG-NATIVE-001-S05"
+        "TX-PG-NATIVE-001-S05",
+        "TX-PG-NATIVE-001-S06"
       ],
       "tests": [
         "providers/postgres/transaction_integration_test.go#TestNativeTransactions"

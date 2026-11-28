@@ -1573,6 +1573,21 @@
       "status": "SPECIFIED"
     },
     {
+      "featureId": "TX-PG-NATIVE-001",
+      "scenarioId": "TX-PG-NATIVE-001-S06",
+      "spec": "specs/features/transactions/tx-pg-native-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/37"
+      ],
+      "docs": [
+        "docs/architecture/TRANSACTION_ENGINE.md",
+        "docs/user/TRANSACTIONS.md"
+      ],
+      "test": "providers/postgres/transaction_integration_test.go#TestNativeTransactions",
+      "evidence": "docs/evidence/W005/POSTGRES_NATIVE_TRANSACTIONS.md",
+      "status": "SPECIFIED"
+    },
+    {
       "featureId": "TX-RETRY-001",
       "scenarioId": "TX-RETRY-001-S01",
       "spec": "specs/features/transactions/tx-retry-001.feature",

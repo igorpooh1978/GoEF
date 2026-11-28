@@ -8,6 +8,8 @@ Confirm origin and HEAD, open the live tracker, read the [source lock](../upstre
 
 The first alpha retired a used physical connection after each ordinary query. The follow-up adds opt-in reuse for a fully consumed, reviewed read, plus a PostgreSQL typed equality projection, transactional migration execution, native pgx transactions, and build version reporting. The combined source passed the 12-profile matrix and independent acceptance. The published `v0.2.0-alpha.1` includes the core and all four provider modules. [Public release verification](../evidence/W013/RELEASE_V0_2_0_ALPHA_1.md) [Integrated acceptance](../evidence/W002/ADOPTION_FOLLOW_UP.md) · [Pool lifecycle](../evidence/W002/FOUR_PROVIDER_SESSION_REUSE.md) · [Typed projection](../evidence/W008/POSTGRES_EQUALITY_READ.md) · [Migrations](../evidence/W006/POSTGRES_MIGRATIONS.md) · [Native transactions](../evidence/W005/POSTGRES_NATIVE_TRANSACTIONS.md) · [Build versions](../development/BUILD_VERSIONS.md)
 
+The review follow-up restores read-only builds of the conformance module and covers a deferred foreign key rejection during native PostgreSQL commit. The live fixture checks the typed rollback, durable data and reuse of the original connection. [Follow-up evidence](../evidence/W005/POSTGRES_NATIVE_TRANSACTIONS.md#deferred-foreign-key-rejection-at-commit)
+
 ## Published baseline and wave handoff
 
 | Issue | Handoff |

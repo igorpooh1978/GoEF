@@ -11,6 +11,7 @@ import (
 	"github.com/igorpooh1978/GoEF/goeferr"
 	"github.com/igorpooh1978/GoEF/transaction"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -19,6 +20,8 @@ import (
 // Serializable. ReadOnly is optional for each level. ctx controls pool
 // acquisition, BEGIN, the transaction lifetime and COMMIT. Rollback and
 // connection cleanup can continue with a bounded budget after ctx expires.
+// A deferred foreign key violation at COMMIT confirms rollback when PostgreSQL
+// returns the connection to an idle state.
 //
 // Use transaction-preserving statements and avoid session-level effects on
 // the borrowed connection. The caller owns the pool and its configuration.
@@ -112,6 +115,15 @@ func (tx *pgxTransaction) Commit(ctx context.Context) error {
 	err := tx.native.Commit(ctx)
 	if errors.Is(err, pgx.ErrTxCommitRollback) {
 		return goeferr.ErrCommitRolledBack
+	}
+	var rejection *pgconn.PgError
+	// PostgreSQL checks deferred foreign keys before it records the commit.
+	// An idle transaction status alone does not identify the outcome.
+	if errors.As(err, &rejection) && rejection.SeverityUnlocalized == "ERROR" && rejection.Code == "23503" {
+		conn := tx.conn.Conn()
+		if !conn.IsClosed() && conn.PgConn().TxStatus() == 'I' {
+			return goeferr.ErrCommitRolledBack
+		}
 	}
 	return err
 }

@@ -350,6 +350,44 @@ func TestNativeTransactions(t *testing.T) {
 			t.Fatalf("fresh native transaction could not commit: %v, %s", err, fresh.State())
 		}
 	})
+
+	t.Run("TX-PG-NATIVE-001-S06", func(t *testing.T) {
+		if _, err := observer.Exec(ctx, `CREATE TABLE IF NOT EXISTS goef_native_tx_deferred_fk (
+			id integer REFERENCES goef_native_tx_probe(id) DEFERRABLE INITIALLY DEFERRED
+		)`); err != nil {
+			t.Fatal("failed to create the deferred constraint fixture")
+		}
+		pool := nativeTestPool(t, ctx, config, nil)
+		tx, err := postgres.BeginTx(ctx, pool, sql.TxOptions{})
+		if err != nil {
+			t.Fatalf("could not begin the transaction: %v", err)
+		}
+		t.Cleanup(func() { _ = tx.Close() })
+		var oldPID int
+		if err := tx.Scan(ctx, "SELECT pg_backend_pid()", nil, &oldPID); err != nil {
+			t.Fatalf("could not observe the original backend: %v", err)
+		}
+		if _, err := tx.Exec(ctx, nativeTxInsert, 66); err != nil {
+			t.Fatalf("could not write the pending row: %v", err)
+		}
+		if _, err := tx.Exec(ctx, "INSERT INTO goef_native_tx_deferred_fk (id) VALUES ($1)", 6); err != nil {
+			t.Fatalf("the deferred foreign key rejected the row before commit: %v", err)
+		}
+		err = tx.Commit()
+		if !errors.Is(err, goeferr.ErrCommitRolledBack) || tx.State() != transaction.StateRolledBack {
+			t.Fatalf("deferred foreign key rollback = %v, state = %s", err, tx.State())
+		}
+		checkNativePool(t, ctx, pool)
+		var nextPID int
+		if err := pool.QueryRow(ctx, "SELECT pg_backend_pid()").Scan(&nextPID); err != nil || oldPID != nextPID {
+			t.Fatalf("confirmed rollback lost an idle backend: %v", err)
+		}
+		checkNativeCount(t, ctx, observer, 66)
+		var count int
+		if err := observer.QueryRow(ctx, "SELECT COUNT(*) FROM goef_native_tx_deferred_fk").Scan(&count); err != nil || count != 0 {
+			t.Fatalf("observer found %d rows after the deferred constraint rollback: %v", count, err)
+		}
+	})
 }
 
 func checkNativeAlreadyCompleted(t *testing.T, ctx context.Context, native pgx.Tx) {
