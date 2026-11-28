@@ -193,7 +193,7 @@ func (tx *Tx) withSavepoints(ctx context.Context, run func(*savepointStack, func
 			}
 			_, err := owned.native.ExecContext(command, statement)
 			if errors.Is(err, driver.ErrBadConn) {
-				return errors.Join(savepointError(err), owned.rollback(true))
+				return errors.Join(savepointError(commandError(ctx, command, err)), owned.rollback(true))
 			}
 			return savepointError(commandError(ctx, command, err))
 		})

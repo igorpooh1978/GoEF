@@ -52,7 +52,7 @@ func (tx *Tx) Scan(ctx context.Context, query string, args []any, dest ...any) e
 			return sql.ErrNoRows
 		}
 		if errors.Is(err, driver.ErrBadConn) {
-			return errors.Join(operationError(err), owned.rollback(true))
+			return errors.Join(operationError(commandError(ctx, command, err)), owned.rollback(true))
 		}
 		return operationError(commandError(ctx, command, err))
 	})

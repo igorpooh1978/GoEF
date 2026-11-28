@@ -130,7 +130,7 @@ func (tx *Tx) Exec(ctx context.Context, query string, args ...any) (sql.Result, 
 	err := tx.withCommand(ctx, func(command context.Context, owned *ownedTx) error {
 		nativeResult, err := owned.native.ExecContext(command, query, args...)
 		if errors.Is(err, driver.ErrBadConn) {
-			return errors.Join(operationError(err), owned.rollback(true))
+			return errors.Join(operationError(commandError(ctx, command, err)), owned.rollback(true))
 		}
 		if err != nil {
 			return operationError(commandError(ctx, command, err))

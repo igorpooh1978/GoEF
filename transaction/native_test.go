@@ -2,6 +2,8 @@ package transaction_test
 
 import (
 	"context"
+	"database/sql"
+	"database/sql/driver"
 	"errors"
 	"testing"
 	"time"
@@ -100,6 +102,65 @@ func TestNativeBridgeCleansUpAfterCanceledOpen(t *testing.T) {
 			}
 			if probe.discarded != (tc.rollbackErr != nil) {
 				t.Fatal("BeginNative selected the wrong disposition after rollback")
+			}
+		})
+	}
+}
+
+type deadlineProbe struct {
+	beginProbe
+	expire context.CancelFunc
+}
+
+func (p *deadlineProbe) fail(ctx context.Context) error {
+	p.expire()
+	<-ctx.Done()
+	return errors.Join(driver.ErrBadConn, ctx.Err())
+}
+
+func (p *deadlineProbe) ExecContext(ctx context.Context, _ string, _ ...any) (sql.Result, error) {
+	return nil, p.fail(ctx)
+}
+
+func (p *deadlineProbe) Scan(ctx context.Context, _ string, _ []any, _ ...any) error {
+	return p.fail(ctx)
+}
+
+func TestNativeLifetimeDeadlineAndBadConnection(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		run  func(context.Context, *transaction.Tx) error
+	}{
+		{"exec", func(ctx context.Context, tx *transaction.Tx) error {
+			_, err := tx.Exec(ctx, "UPDATE fixture")
+			return err
+		}},
+		{"scan", func(ctx context.Context, tx *transaction.Tx) error {
+			return tx.Scan(ctx, "SELECT fixture", nil, new(int))
+		}},
+		{"savepoint", func(ctx context.Context, tx *transaction.Tx) error {
+			_, err := tx.Savepoint(ctx, transaction.DialectPostgreSQL)
+			return err
+		}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx, stop := context.WithTimeout(t.Context(), 5*time.Second)
+			defer stop()
+			lifetime, expire := context.WithCancel(ctx)
+			defer expire()
+			probe := &deadlineProbe{expire: expire}
+			tx, err := transaction.BeginNative(cancelAsDeadline{lifetime}, transaction.DialectPostgreSQL, func(context.Context) (transaction.NativeTransaction, error) {
+				return probe, nil
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = tc.run(ctx, tx)
+			if !errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) || errors.Is(err, driver.ErrBadConn) {
+				t.Fatalf("the public error lost the lifetime deadline: %v", err)
+			}
+			if !probe.discarded || probe.rollbackDone != nil || probe.releaseDone != nil || tx.State() != transaction.StateFailed {
+				t.Fatal("the interrupted transaction did not discard the failed session with bounded cleanup")
 			}
 		})
 	}
