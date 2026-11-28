@@ -3,7 +3,7 @@ module github.com/igorpooh1978/GoEF/providers/postgres
 go 1.27.4
 
 require (
-	github.com/igorpooh1978/GoEF v0.1.0-alpha.1.0.20261128074836-493db45c51d9
+	github.com/igorpooh1978/GoEF v0.2.0-alpha.1
 	github.com/jackc/pgx/v5 v5.13.0
 )
 
