@@ -6,7 +6,6 @@ import (
 	"database/sql/driver"
 	"errors"
 	"sync/atomic"
-	"time"
 
 	"github.com/igorpooh1978/GoEF/goeferr"
 )
@@ -62,7 +61,7 @@ func (e *External) saveChanges(ctx context.Context, options SaveOptions, change 
 		return nil, goeferr.NewInvalidState()
 	}
 	var saved *SavedChanges
-	err := e.withNative(func(native *sql.Tx) error {
+	err := e.withNative(func(native NativeCommands) error {
 		if enlisted != nil && enlisted.detached {
 			return goeferr.NewInvalidState()
 		}
@@ -92,15 +91,13 @@ func (s *savepointStack) saved(values []func(), committed func() bool) *SavedCha
 	})
 }
 
-const saveRecoveryTimeout = 5 * time.Second
-
 // XACT_ABORT ON can roll back the transaction or make it uncommittable after a
 // statement error, so a savepoint would be insufficient for atomic recovery.
 const sqlServerXactAbort = "SELECT CASE WHEN (16384 & @@OPTIONS) = 16384 THEN 1 ELSE 0 END"
 
 // saveBatch runs entirely under the transaction operation gate. Its private
 // point is scoped to the batch, separate from caller-visible points.
-func saveBatch(ctx context.Context, native *sql.Tx, stack *savepointStack, options SaveOptions, change func(*SaveWriter) error, normalize func(error) error, abandon func(bool) error) ([]func(), error) {
+func saveBatch(ctx context.Context, native NativeCommands, stack *savepointStack, options SaveOptions, change func(*SaveWriter) error, normalize func(error) error, abandon func(bool) error) ([]func(), error) {
 	if err := ctx.Err(); err != nil {
 		return nil, operationError(normalize(err))
 	}
@@ -132,7 +129,7 @@ func saveBatch(ctx context.Context, native *sql.Tx, stack *savepointStack, optio
 	}
 	if options.Dialect == DialectSQLServer {
 		var xactAbort int
-		if err := native.QueryRowContext(ctx, sqlServerXactAbort).Scan(&xactAbort); err != nil {
+		if err := native.Scan(ctx, sqlServerXactAbort, nil, &xactAbort); err != nil {
 			detail := redact(err)
 			if nativeDone {
 				return nil, errors.Join(detail, abandon(false))
@@ -171,7 +168,7 @@ func saveBatch(ctx context.Context, native *sql.Tx, stack *savepointStack, optio
 		if badConnection || nativeDone {
 			return unsafe(goeferr.NewSavepointFailed())
 		}
-		cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), saveRecoveryTimeout)
+		cleanup, cancel := cleanupContext(ctx)
 		defer cancel()
 		if err := execPoint(cleanup, rewind+name); err != nil {
 			return unsafe(savepointError(err))

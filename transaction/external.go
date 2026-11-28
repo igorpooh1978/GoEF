@@ -18,7 +18,7 @@ type External struct {
 
 type externalTx struct {
 	mu         sync.Mutex
-	native     *sql.Tx
+	native     NativeCommands
 	savepoints savepointStack
 }
 
@@ -30,14 +30,14 @@ func NewExternal(native *sql.Tx) (*External, error) {
 	if native == nil {
 		return nil, goeferr.NewInvalidState()
 	}
-	return &External{shared: &externalTx{native: native}}, nil
+	return &External{shared: &externalTx{native: sqlCommands{native}}}, nil
 }
 
 // Enlist attaches an independent participant to the shared transaction.
 // The participant's commands use the coordinator's native transaction.
 func (e *External) Enlist() (*Participant, error) {
 	var participant *Participant
-	err := e.withNative(func(*sql.Tx) error {
+	err := e.withNative(func(NativeCommands) error {
 		participant = &Participant{enlistment: &enlistment{external: *e}}
 		return nil
 	})
@@ -60,7 +60,7 @@ func (e *External) Close() error {
 
 // withNative runs action under the coordinator's shared gate. Actions return
 // sql.ErrTxDone when they observe native completion and redact other errors.
-func (e *External) withNative(action func(*sql.Tx) error) error {
+func (e *External) withNative(action func(NativeCommands) error) error {
 	if e == nil || e.shared == nil {
 		return goeferr.NewInvalidState()
 	}
@@ -104,26 +104,48 @@ type enlistment struct {
 // operations return ErrContextBusy. Command errors leave recovery and
 // completion to the owner.
 func (p *Participant) Exec(ctx context.Context, query string, args ...any) (sql.Result, error) {
-	if p == nil || p.enlistment == nil || ctx == nil {
-		return nil, goeferr.NewInvalidState()
-	}
-	enlisted := p.enlistment
 	var result sql.Result
-	err := enlisted.external.withNative(func(native *sql.Tx) error {
-		if enlisted.detached {
-			return goeferr.NewInvalidState()
-		}
+	err := p.withCommands(ctx, func(native NativeCommands) error {
 		var err error
 		result, err = native.ExecContext(ctx, query, args...)
-		if errors.Is(err, sql.ErrTxDone) {
-			return sql.ErrTxDone
-		}
-		return operationError(err)
+		return err
 	})
 	if err != nil {
 		return nil, err
 	}
 	return safeResult{underlying: result}, nil
+}
+
+// Scan reads one row through the caller's transaction using the participant's
+// operation gate. A missing row returns sql.ErrNoRows. The caller owns recovery
+// or completion after cancellation or an execution error.
+func (p *Participant) Scan(ctx context.Context, query string, args []any, dest ...any) error {
+	return p.withCommands(ctx, func(native NativeCommands) error {
+		return native.Scan(ctx, query, args, dest...)
+	})
+}
+
+func (p *Participant) withCommands(ctx context.Context, run func(NativeCommands) error) error {
+	if p == nil || p.enlistment == nil || ctx == nil {
+		return goeferr.NewInvalidState()
+	}
+	enlisted := p.enlistment
+	return enlisted.external.withNative(func(native NativeCommands) error {
+		if enlisted.detached {
+			return goeferr.NewInvalidState()
+		}
+		if err := ctx.Err(); err != nil {
+			return operationError(err)
+		}
+		err := run(native)
+		if errors.Is(err, sql.ErrNoRows) {
+			return sql.ErrNoRows
+		}
+		if errors.Is(err, sql.ErrTxDone) {
+			return sql.ErrTxDone
+		}
+		return operationError(err)
+	})
 }
 
 // Close waits for any active coordinator operation, then detaches this

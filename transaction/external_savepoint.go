@@ -19,7 +19,7 @@ func (e *External) withSavepoints(ctx context.Context, run func(*savepointStack,
 	if ctx == nil {
 		return goeferr.NewInvalidState()
 	}
-	return e.withNative(func(native *sql.Tx) error {
+	return e.withNative(func(native NativeCommands) error {
 		if err := ctx.Err(); err != nil {
 			return operationError(err)
 		}

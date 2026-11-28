@@ -56,6 +56,16 @@ Use `transaction.BeginWithOptions(ctx, db, dialect, sql.TxOptions{Isolation: sql
 
 `Default` uses the server and driver defaults. GoEF rejects unsupported options with `goeferr.ErrUnsupportedFeature`; the SQLite Serializable check reads connection state before beginning. SQL Server explicitly configured isolation uses one physical connection throughout, then discards that connection at completion to prevent the isolation setting carrying over into a later checkout. Use transaction-preserving statements and keep session settings fixed during the transaction. [Isolation fixture](../../test/conformance/driverlab/transaction_options_test.go) · [Local results](../evidence/W005/ISOLATION_OPTIONS.md)
 
+## Use a native PostgreSQL pool or transaction
+
+Import the [PostgreSQL adapter](../providers/POSTGRESQL.md) to use GoEF with a caller-owned pgx pool. Pass your existing pool to `postgres.BeginTx(ctx, pool, sql.TxOptions{Isolation: sql.LevelRepeatableRead, ReadOnly: true})`. It returns the same GoEF transaction handle with `Exec`, `Scan`, savepoints and `SaveChanges`. Read the effective isolation with `tx.Scan(ctx, "SHOW transaction_isolation", nil, &isolation)`. PostgreSQL reports `repeatable read` for that request. Use the caller's pool settings and transaction-preserving SQL.
+
+The native API passes your lifetime context to pool acquisition, `BEGIN` and `COMMIT`. Rollback and connection cleanup use fresh five-second budgets. A canceled operation can close the native connection before explicit rollback is acknowledged. In that case `Close` reports `ErrRollbackFailed` and the handle records `StateFailed`. A server-confirmed rollback of an aborted transaction at commit returns `goeferr.ErrCommitRolledBack` and records `StateRolledBack`. An inconclusive commit follows the reconciliation contract above.
+
+If the caller already opened a `pgx.Tx`, pass it to `postgres.NewExternal(native)` and call `Enlist`. Participants can write with `Exec` and read one row with `Scan`. Use the external coordinator rules below. Close the coordinator before the caller commits or rolls back the native transaction. For a root transaction, native completion is the caller's consistency boundary. For a pgx savepoint-backed transaction, releasing it still leaves the enclosing transaction open.
+
+The fixture covers direct connections to PostgreSQL 18.7 with pgx v5.13.0 in Exec query mode. PgBouncer pooling modes and connection budgets require separate measurements. [Executable fixture](../../providers/postgres/transaction_integration_test.go) · [Evidence and command](../evidence/W005/POSTGRES_NATIVE_TRANSACTIONS.md) · [Issue #37](https://github.com/igorpooh1978/GoEF/issues/37)
+
 ## Use savepoints inside a transaction
 
 Call `tx.Savepoint(ctx, dialect)` on an owned transaction or `external.Savepoint(ctx, dialect)` on an external coordinator. Supply the dialect for the actual driver and database. The package generates point names. Rolling back to a live point reverts transactional writes made after it, keeps that point available and invalidates younger handles. Release the innermost live point when it is no longer needed. A release keeps the writes pending in the enclosing transaction. A retired handle, or an attempt to release an older point first, returns an error matching `goeferr.ErrInvalidState`.
@@ -73,7 +83,7 @@ On SQL Server, GoEF recreates the target after a successful native rollback so t
 
 ## Enlist in an external transaction
 
-Use one `transaction.NewExternal(native)` coordinator per caller-owned `*sql.Tx`. Each `Enlist` call creates a participant on that transaction. Participant `Exec` and coordinator savepoint operations share one operation slot. An overlapping operation returns `goeferr.ErrContextBusy`. A participant's `Close` waits for any active managed operation and detaches just that participant. It can be repeated. The caller retains control of the native transaction and connection.
+Use one `transaction.NewExternal(native)` coordinator per caller-owned `*sql.Tx`. Each `Enlist` call creates a participant on that transaction. Participant `Exec`, `Scan` and coordinator savepoint operations share one operation slot. An overlapping operation returns `goeferr.ErrContextBusy`. A participant's `Close` waits for any active managed operation and detaches just that participant. It can be repeated. The caller retains control of the native transaction and connection.
 
 The example uses the same `transaction_markers` fixture and driver parameter syntax as `WriteMarker`. It requires Go 1.27.4. The owner inserts `A` through its native transaction, creates an external coordinator and calls `StageMarker` with `"B", false`. On success the owner closes the coordinator and commits the native transaction. A separate connection sees only `A`. On error the helper returns control to the native owner for cleanup.
 

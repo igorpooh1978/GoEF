@@ -23,6 +23,7 @@ func TestTransactionDetailsMatchTheErrorRegistry(t *testing.T) {
 		{"GOEF-IO-0004", goeferr.ErrDeadlineExceeded, goeferr.NewDeadlineExceeded, "execute", "inspect_transaction", "never", "The caller deadline expired."},
 		{"GOEF-IO-0007", goeferr.ErrUnknownDriver, goeferr.NewUnknownDriver, "classify", "inspect_transaction", "never", "An unclassified database error occurred."},
 		{"GOEF-TX-0001", goeferr.ErrCommitOutcomeUnknown, goeferr.NewCommitOutcomeUnknown, "commit", "unknown", "resolve_outcome", "The commit outcome is unknown."},
+		{"GOEF-TX-0005", goeferr.ErrCommitRolledBack, goeferr.NewCommitRolledBack, "commit", "rolled_back", "never", "The transaction rolled back during commit."},
 		{"GOEF-TX-0003", goeferr.ErrRollbackFailed, goeferr.NewRollbackFailed, "rollback", "rollback_unconfirmed", "resolve_outcome", "Transaction rollback could not be confirmed."},
 	} {
 		t.Run(string(tc.id), func(t *testing.T) {

@@ -19,13 +19,13 @@ type SaveWriter struct {
 type saveWriterState struct {
 	mu      sync.Mutex
 	ctx     context.Context
-	native  *sql.Tx
+	native  NativeCommands
 	redact  func(error) error
 	publish []func()
 	err     error
 }
 
-func newSaveWriter(ctx context.Context, native *sql.Tx, redact func(error) error) *SaveWriter {
+func newSaveWriter(ctx context.Context, native NativeCommands, redact func(error) error) *SaveWriter {
 	return &SaveWriter{shared: &saveWriterState{ctx: ctx, native: native, redact: redact}}
 }
 
@@ -49,7 +49,7 @@ func (w *SaveWriter) Exec(query string, args ...any) (sql.Result, error) {
 // them to the application after commit.
 func (w *SaveWriter) Scan(query string, args []any, dest ...any) error {
 	return w.use(func(state *saveWriterState) error {
-		err := state.native.QueryRowContext(state.ctx, query, args...).Scan(dest...)
+		err := state.native.Scan(state.ctx, query, args, dest...)
 		if err != nil {
 			return state.redact(err)
 		}

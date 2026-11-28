@@ -47,7 +47,7 @@ func supportsOptions(dialect Dialect, options sql.TxOptions) bool {
 // match. Use parameterised SQL and pass arguments separately from destinations.
 func (tx *Tx) Scan(ctx context.Context, query string, args []any, dest ...any) error {
 	return tx.withCommand(ctx, func(command context.Context, owned *ownedTx) error {
-		err := owned.native.QueryRowContext(command, query, args...).Scan(dest...)
+		err := owned.native.Scan(command, query, args, dest...)
 		if errors.Is(err, sql.ErrNoRows) {
 			return sql.ErrNoRows
 		}

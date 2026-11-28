@@ -11,14 +11,21 @@ One operation at a time can use the native handle. An overlapping `Exec`, `Commi
 | Terminal outcome | Lease and handle behavior |
 | --- | --- |
 | Commit acknowledged or rollback confirmed | Release the checkout so the pool can reuse it. Commands and explicit completion through the handle return `ErrInvalidState`. |
+| Server explicitly confirms a rollback at commit | Return `ErrCommitRolledBack` and publish `StateRolledBack`. Return the idle connection through the driver's pool release. |
 | Commit error with unconfirmed result | Report `StateOutcomeUnknown` and `ErrCommitOutcomeUnknown`. Discard the checkout. The caller can use **ReconcileCommit** to verify the result on a fresh authoritative connection. |
 | Rollback failure or unusable connection before commit | Discard the connection and record `StateFailed`. An explicit completion call returns any error it observes. Cancellation-driven rollback publishes its state for inspection. |
 
 The behavior of owned transactions is exercised by `TX-OWN-001-S02` through a one-checkout worker and an independent observer on each engine. [Ownership scenario](../../specs/features/transactions/tx-own-001.feature)
 
+## PostgreSQL native transaction boundary
+
+`postgres.BeginTx` acquires one `pgxpool.Conn` and begins with the caller's lifetime context. PostgreSQL's native pgx transaction accepts per-operation contexts. The adapter keeps its own lease independent of native commit or rollback so GoEF can discard that checkout if the outcome is unknown. After cancellation, rollback and release each get a bounded context. The PostgreSQL adapter translates an explicit pgx rollback result from commit into the portable `ErrCommitRolledBack`. An ambiguous completion discards the leased connection and never replays work. [Pinned pgx transaction API](https://github.com/jackc/pgx/blob/v5.13.0/tx.go) · [Evidence](../evidence/W005/POSTGRES_NATIVE_TRANSACTIONS.md)
+
+The generic `database/sql` path still lets GoEF own cleanup while a native begin is in progress. It enters native begin with an independent context because `database/sql` would otherwise own the rollback on the begin context's cancellation and could obscure its result. The PostgreSQL native path supplies cancelable control without relying on that automatic rollback. [Pinned Go transaction lifetime](https://github.com/golang/go/blob/go1.27.4/src/database/sql/sql.go)
+
 ## Implemented external enlistment
 
-`transaction.NewExternal` accepts one existing caller-owned `*sql.Tx`. Participants obtained through the same `External` coordinator dispatch through exactly that native transaction and share its operation gate. Statement errors and cancellation leave completion to the native owner. A participant's `Close` waits for the current managed operation and detaches just that participant. Closing the coordinator waits for the current managed operation and invalidates all managed handles. Both forms of close leave the native transaction and connection with the caller.
+`transaction.NewExternal` accepts one existing caller-owned `*sql.Tx`. The PostgreSQL adapter's `postgres.NewExternal` adapts a caller-owned `pgx.Tx` to the same coordinator, using GoEF's engine-neutral command bridge. Participants obtained through the same `External` coordinator dispatch through exactly that native transaction and share its operation gate. Statement errors and cancellation leave completion to the native owner. A participant's `Close` waits for the current managed operation and detaches just that participant. Closing the coordinator waits for the current managed operation and invalidates all managed handles. Both forms of close leave the native transaction and connection with the caller.
 
 The application uses one coordinator per native transaction and serializes its direct native calls with managed calls. The owner closes the coordinator before native completion. When the owner completes directly, GoEF can detect native completion on a later SQL dispatch. The ownership fixture checks that the owner can read pending rows after participants detach, roll those rows back, and keep using its connection. [Ownership scenario](../../specs/features/transactions/tx-own-001.feature) · [EF Core external transaction reference](https://learn.microsoft.com/en-us/ef/core/saving/transactions#cross-context-transaction)
 

@@ -31,15 +31,13 @@ type Tx struct {
 }
 
 type ownedTx struct {
-	mu                 sync.Mutex
-	state              atomic.Value // State, initialized before publishing the handle
-	lifetime           context.Context
-	conn               *sql.Conn
-	native             *sql.Tx
-	stopRollback       func() bool
-	cleanupErr         error
-	savepoints         savepointStack
-	discardAfterFinish bool
+	mu           sync.Mutex
+	state        atomic.Value // State, initialized before publishing the handle
+	lifetime     context.Context
+	native       NativeTransaction
+	stopRollback func() bool
+	cleanupErr   error
+	savepoints   savepointStack
 }
 
 // Begin acquires one connection and starts a transaction with the driver defaults.
@@ -95,16 +93,23 @@ func begin(ctx context.Context, db *sql.DB, dialect Dialect, options sql.TxOptio
 		return nil, errors.Join(operationError(err), rollbackError(rollbackErr))
 	}
 
+	return own(ctx, dialect, &sqlNativeTransaction{
+		sqlCommands: sqlCommands{native},
+		conn:        conn, discardAfterFinish: discardAfterFinish,
+	}), nil
+}
+
+func own(ctx context.Context, dialect Dialect, native NativeTransaction) *Tx {
 	owned := &ownedTx{
-		lifetime: ctx, conn: conn, native: native,
-		savepoints: savepointStack{dialect: dialect}, discardAfterFinish: discardAfterFinish,
+		lifetime: ctx, native: native,
+		savepoints: savepointStack{dialect: dialect},
 	}
 	owned.state.Store(StateActive)
 	tx := &Tx{owned: owned}
 	owned.mu.Lock()
 	owned.stopRollback = context.AfterFunc(ctx, func() { _ = tx.Close() })
 	owned.mu.Unlock()
-	return tx, nil
+	return tx
 }
 
 // State reports the status without waiting for an active command. The zero
@@ -171,10 +176,10 @@ func commandError(ctx, command context.Context, err error) error {
 	return err
 }
 
-// Commit commits and releases the lease. A native commit error leaves the
-// outcome unknown and discards the connection. Call [Tx.ReconcileCommit]
-// before considering retry. If lifetime cancellation is already known,
-// Commit rolls back first.
+// Commit ends the transaction and releases the lease. An explicitly confirmed
+// rollback returns goeferr.ErrCommitRolledBack. An unconfirmed commit error
+// discards the connection and requires [Tx.ReconcileCommit] before considering
+// retry. If lifetime cancellation is already known, Commit rolls back first.
 func (tx *Tx) Commit() error {
 	owned, err := tx.lockState(StateActive)
 	if err != nil {
@@ -185,7 +190,11 @@ func (tx *Tx) Commit() error {
 	if err := owned.lifetime.Err(); err != nil {
 		return errors.Join(operationError(err), owned.rollback(false))
 	}
-	if err := owned.native.Commit(); err != nil {
+	if err := owned.native.Commit(owned.lifetime); err != nil {
+		if errors.Is(err, goeferr.ErrCommitRolledBack) {
+			owned.finish(StateRolledBack, false)
+			return goeferr.NewCommitRolledBack()
+		}
 		owned.finish(StateOutcomeUnknown, true)
 		return errors.Join(goeferr.NewCommitOutcomeUnknown(), contextCause(err))
 	}
@@ -241,7 +250,9 @@ func (tx *Tx) lockState(expected State) (*ownedTx, error) {
 
 // The lock is held until the connection has returned or been discarded.
 func (o *ownedTx) rollback(badConnection bool) error {
-	err := o.native.Rollback()
+	cleanup, cancel := cleanupContext(o.lifetime)
+	defer cancel()
+	err := o.native.Rollback(cleanup)
 	o.cleanupErr = rollbackError(err)
 	if err != nil || badConnection {
 		o.finish(StateFailed, true)
@@ -253,8 +264,10 @@ func (o *ownedTx) rollback(badConnection bool) error {
 
 func (o *ownedTx) finish(state State, discard bool) {
 	o.stopRollback()
-	release(o.conn, discard || o.discardAfterFinish)
-	o.native, o.conn, o.lifetime, o.stopRollback = nil, nil, nil, nil
+	cleanup, cancel := cleanupContext(o.lifetime)
+	defer cancel()
+	o.native.Release(cleanup, discard)
+	o.native, o.lifetime, o.stopRollback = nil, nil, nil
 	o.savepoints = savepointStack{}
 	o.state.Store(state)
 }

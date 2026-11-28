@@ -91,7 +91,7 @@ func probeSaveWriter(t *testing.T, ctx context.Context, p *saveWriterProbe) *Sav
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = native.Rollback() })
-	return newSaveWriter(ctx, native, operationError)
+	return newSaveWriter(ctx, sqlCommands{native}, operationError)
 }
 
 func TestSaveWriterStagesValuesAndClosesRows(t *testing.T) {

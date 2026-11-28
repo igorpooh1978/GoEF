@@ -10,6 +10,7 @@ const (
 	UnknownDriverID        ID = "GOEF-IO-0007"
 	CommitOutcomeUnknownID ID = "GOEF-TX-0001"
 	RollbackFailedID       ID = "GOEF-TX-0003"
+	CommitRolledBackID     ID = "GOEF-TX-0005"
 )
 
 const (
@@ -25,6 +26,8 @@ const (
 	OutcomeInspectTransaction  Outcome = "inspect_transaction"
 	OutcomeUnknown             Outcome = "unknown"
 	OutcomeRollbackUnconfirmed Outcome = "rollback_unconfirmed"
+	// OutcomeRolledBack identifies a confirmed rollback during commit.
+	OutcomeRolledBack Outcome = "rolled_back"
 )
 
 // RetryResolveOutcome requires reconciliation before considering replay.
@@ -43,6 +46,8 @@ var (
 	ErrUnknownDriver = errors.New("An unclassified database error occurred.")
 	// ErrCommitOutcomeUnknown identifies an unconfirmed commit result.
 	ErrCommitOutcomeUnknown = errors.New("The commit outcome is unknown.")
+	// ErrCommitRolledBack identifies an explicitly confirmed rollback at commit.
+	ErrCommitRolledBack = errors.New("The transaction rolled back during commit.")
 	// ErrRollbackFailed identifies an unconfirmed rollback.
 	ErrRollbackFailed = errors.New("Transaction rollback could not be confirmed.")
 )
@@ -75,6 +80,11 @@ func NewUnknownDriver() *ErrorDetail {
 // NewCommitOutcomeUnknown returns a safe detail requiring outcome reconciliation.
 func NewCommitOutcomeUnknown() *ErrorDetail {
 	return newDetail(CommitOutcomeUnknownID, PhaseCommit, RetryResolveOutcome, OutcomeUnknown, ErrCommitOutcomeUnknown)
+}
+
+// NewCommitRolledBack reports that commit explicitly confirmed a rollback.
+func NewCommitRolledBack() *ErrorDetail {
+	return newDetail(CommitRolledBackID, PhaseCommit, RetryNever, OutcomeRolledBack, ErrCommitRolledBack)
 }
 
 // NewRollbackFailed returns a safe detail for an unconfirmed rollback.
