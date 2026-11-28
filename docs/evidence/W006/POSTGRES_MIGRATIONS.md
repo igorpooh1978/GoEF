@@ -53,6 +53,15 @@ exports the scenario markers and statement numerator/denominator.
 | `go test -mod=readonly -shuffle=on ./...` and `go vet -mod=readonly ./...` from `providers/postgres` | 0 each | Provider module tests and vet passed on Windows amd64. |
 | `go test -mod=readonly -shuffle=on ./...` and `go vet -mod=readonly ./...` from `test/conformance/driverlab` | 0 each | Driverlab compilation and default checks passed on Windows amd64. The dedicated runner executed the migration scenarios. |
 
+The six native scenarios also passed under the Go race detector on Linux
+amd64 (exit 0, 134/140 statements). The same lab runner used a binary built
+in the locally cached Go 1.27.4 image
+`golang@sha256:5f1b98fa02fe396ebce2a0227a0e08309e11792915b9dd2e1f71053d7e7e6666`.
+The build set `CGO_ENABLED=1` and ran
+`go test -c -mod=readonly -race -covermode=atomic -coverpkg=github.com/igorpooh1978/GoEF/providers/postgres/migration -o /out/driverlab .`
+from `test/conformance/driverlab`. The pinned PostgreSQL test binary also
+received `-test.shuffle=on`.
+
 | Scenario | Durable and lifecycle observation |
 | --- | --- |
 | MIG-POSTGRES-001-S01 | Apply the first artifact, then extend to the second. The result counts were 1, 1 and 0. History matched positions, IDs, predecessors and 32-byte digests. The final target check verified the seed row. |
