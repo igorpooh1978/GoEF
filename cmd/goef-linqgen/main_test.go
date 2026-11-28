@@ -19,7 +19,7 @@ func TestFreshness(t *testing.T) {
 	generateFirst := []string{"-source", source, "-output", first}
 	checkFirst := append(append([]string(nil), generateFirst...), "-check")
 
-	if err := run(checkFirst, io.Discard); err == nil || !strings.Contains(err.Error(), "is missing") {
+	if err := run(checkFirst, io.Discard, io.Discard); err == nil || !strings.Contains(err.Error(), "is missing") {
 		t.Fatalf("expected missing output, got %v", err)
 	}
 	if _, err := os.Stat(first); !os.IsNotExist(err) {
@@ -34,7 +34,7 @@ func TestFreshness(t *testing.T) {
 	mustRun(t, checkFirst)
 	changed := append(readFixture(t, first), []byte("// edited manually\n")...)
 	writeFixture(t, first, changed)
-	if err := run(checkFirst, io.Discard); err == nil || !strings.Contains(err.Error(), "is stale") {
+	if err := run(checkFirst, io.Discard, io.Discard); err == nil || !strings.Contains(err.Error(), "is stale") {
 		t.Fatalf("changed output was not rejected: %v", err)
 	}
 	if actual := readFixture(t, first); !bytes.Equal(actual, changed) {
@@ -46,7 +46,7 @@ func TestFreshness(t *testing.T) {
 	// A legitimate declaration edit changes the fingerprint and the projection.
 	writeFixture(t, source, []byte(strings.Replace(querySource, "row.Name", "row.City", 1)))
 	previous := readFixture(t, first)
-	if err := run(checkFirst, io.Discard); err == nil || !strings.Contains(err.Error(), "is stale") {
+	if err := run(checkFirst, io.Discard, io.Discard); err == nil || !strings.Contains(err.Error(), "is stale") {
 		t.Fatalf("a changed declaration was not rejected: %v", err)
 	}
 	if actual := readFixture(t, first); !bytes.Equal(actual, previous) {
@@ -74,7 +74,7 @@ func TestRunRejectsUnsafePaths(t *testing.T) {
 	writeFixture(t, source, []byte(querySource))
 	output := filepath.Join(dir, "query_gen.go")
 	var diagnostics bytes.Buffer
-	if err := run([]string{"-help"}, &diagnostics); err != nil || !strings.Contains(diagnostics.String(), "-check") {
+	if err := run([]string{"-help"}, io.Discard, &diagnostics); err != nil || !strings.Contains(diagnostics.String(), "-check") {
 		t.Fatalf("expected help with exit success, got %q, %v", diagnostics.String(), err)
 	}
 	for _, tt := range []struct {
@@ -94,7 +94,7 @@ func TestRunRejectsUnsafePaths(t *testing.T) {
 		{"source not found", []string{"-source", filepath.Join(dir, "absent.go"), "-output", output}, "absent.go"},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := run(tt.args, io.Discard); err == nil || !strings.Contains(err.Error(), tt.want) {
+			if err := run(tt.args, io.Discard, io.Discard); err == nil || !strings.Contains(err.Error(), tt.want) {
 				t.Fatalf("expected %q, got %v", tt.want, err)
 			}
 		})
@@ -103,7 +103,7 @@ func TestRunRejectsUnsafePaths(t *testing.T) {
 	userSource := []byte("package sample\nvar KeepMe bool\n")
 	writeFixture(t, output, userSource)
 	args := []string{"-source", source, "-output", output}
-	if err := run(args, io.Discard); err == nil || !strings.Contains(err.Error(), "refusing to overwrite") {
+	if err := run(args, io.Discard, io.Discard); err == nil || !strings.Contains(err.Error(), "refusing to overwrite") {
 		t.Fatalf("expected protection for hand-written file, got %v", err)
 	}
 	if current := readFixture(t, output); !bytes.Equal(current, userSource) {
@@ -114,11 +114,11 @@ func TestRunRejectsUnsafePaths(t *testing.T) {
 	if err := os.Mkdir(directory, 0o700); err != nil {
 		t.Fatal(err)
 	}
-	if err := run([]string{"-source", directory, "-output", output}, io.Discard); err == nil ||
+	if err := run([]string{"-source", directory, "-output", output}, io.Discard, io.Discard); err == nil ||
 		!strings.Contains(err.Error(), "source must be a regular file") {
 		t.Fatalf("expected directory source rejection, got %v", err)
 	}
-	if err := run([]string{"-source", source, "-output", directory}, io.Discard); err == nil ||
+	if err := run([]string{"-source", source, "-output", directory}, io.Discard, io.Discard); err == nil ||
 		!strings.Contains(err.Error(), "output must be a separate regular file") {
 		t.Fatalf("expected directory output rejection, got %v", err)
 	}
@@ -126,7 +126,7 @@ func TestRunRejectsUnsafePaths(t *testing.T) {
 	if err := os.Link(source, linked); err != nil {
 		t.Skipf("requires hard link support: %v", err)
 	}
-	if err := run([]string{"-source", source, "-output", linked}, io.Discard); err == nil ||
+	if err := run([]string{"-source", source, "-output", linked}, io.Discard, io.Discard); err == nil ||
 		!strings.Contains(err.Error(), "output must be a separate regular file") {
 		t.Fatalf("expected hard link rejection, got %v", err)
 	}
@@ -152,7 +152,7 @@ func TestWriteFailureLeavesNoTemporaryArtifact(t *testing.T) {
 
 func mustRun(t *testing.T, args []string) {
 	t.Helper()
-	if err := run(args, io.Discard); err != nil {
+	if err := run(args, io.Discard, io.Discard); err != nil {
 		t.Fatalf("goef-linqgen %q: %v", args, err)
 	}
 }
@@ -208,7 +208,7 @@ func TestInvalidSourceLeavesExistingBinding(t *testing.T) {
 	original := readFixture(t, output)
 
 	writeFixture(t, source, []byte(strings.Replace(querySource, "==", "!=", 1)))
-	if err := run(args, io.Discard); err == nil || !strings.Contains(err.Error(), "predicate must compare") {
+	if err := run(args, io.Discard, io.Discard); err == nil || !strings.Contains(err.Error(), "predicate must compare") {
 		t.Fatalf("expected source diagnostic, got %v", err)
 	}
 	if contents := readFixture(t, output); !bytes.Equal(contents, original) {
@@ -230,7 +230,7 @@ func TestRunReportsInvalidOutputPath(t *testing.T) {
 	if !errors.As(pathErr, &expected) {
 		t.Fatalf("expected a filesystem path error, got %v", pathErr)
 	}
-	err := run([]string{"-source", source, "-output", output}, io.Discard)
+	err := run([]string{"-source", source, "-output", output}, io.Discard, io.Discard)
 	if !errors.As(err, &failure) || failure.Op != expected.Op || failure.Path != output || !errors.Is(err, expected.Err) {
 		t.Fatalf("expected the output path diagnostic, got %v", err)
 	}
@@ -266,7 +266,7 @@ func TestRunPreservesUnreadableRegularFiles(t *testing.T) {
 			if _, err := os.ReadFile(protected); !errors.Is(err, os.ErrPermission) {
 				t.Skipf("filesystem permits reading this file mode: %v", err)
 			}
-			if err := run(args, io.Discard); !errors.Is(err, os.ErrPermission) {
+			if err := run(args, io.Discard, io.Discard); !errors.Is(err, os.ErrPermission) {
 				t.Fatalf("expected the read permission error, got %v", err)
 			}
 			if err := os.Chmod(protected, 0o600); err != nil {

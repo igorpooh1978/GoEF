@@ -46,7 +46,7 @@ func TestRunPreservesExclusivelyOpenedFiles(t *testing.T) {
 				if !errors.As(readErr, &expected) {
 					t.Fatalf("expected the exclusive open to prevent reading, got %v", readErr)
 				}
-				if err := run(args, io.Discard); !errors.Is(err, expected.Err) {
+				if err := run(args, io.Discard, io.Discard); !errors.Is(err, expected.Err) {
 					t.Fatalf("expected the file sharing violation, got %v", err)
 				}
 			}()

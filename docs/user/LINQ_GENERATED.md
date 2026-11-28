@@ -27,6 +27,14 @@ go run github.com/igorpooh1978/GoEF/cmd/goef-linqgen -source query.go -output qu
 
 Commit the output and run the second command in CI. The generator normalizes line endings and fingerprints the source bytes. The same declaration file produces identical output regardless of checkout path. `-check` exits 1 if the output is missing or differs from a fresh generation, including manual edits. A rejected expression reports the source file, line and column and leaves the output intact. Regeneration only replaces a regular file with the generator's header.
 
+To identify an executable built from the current source, run the version command by itself.
+
+```sh
+goef-linqgen -version
+```
+
+The command writes one line to standard output. A generator installed from a module tag prints `goef-linqgen` followed by its module version. Builds from Git add the revision and dirty state when Go recorded them. The version is `(devel)` when the module has no embedded version. See [Build and preview versions](../development/BUILD_VERSIONS.md) for source builds and release verification. [Issue #38](https://github.com/igorpooh1978/GoEF/issues/38)
+
 Call the generated `FindCustomer(city)` each time you want to bind a new value. Its `Shape()` gives the Go field, argument and projection names. Its `Value()` retains the argument passed during that call. Generated bindings can be reused across goroutines, and each call owns its scalar value. `Project(row)` reads the selected field from an existing Go row supplied by the caller.
 
 This generated frontend produces typed data for a single source row and a single non-null comparison. Query IR integration, provider translation and terminal database execution are planned in the [query architecture](../architecture/QUERY_ENGINE.md). For executable local LINQ pipelines, see [LINQ Objects](LINQ_OBJECTS.md).

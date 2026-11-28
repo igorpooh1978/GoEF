@@ -16,13 +16,14 @@ GO_VERSION = "go1.27.4"
 EXPECTED_OUTPUT = "8 true\n002_customer_notes\n"
 
 
-def verify(commit, version, generated_bindings=False):
+def verify(commit, version, generated_bindings=False, *, generator_version=False):
     with TemporaryDirectory(prefix="goef-public-consumer-") as temporary:
         root = Path(temporary)
         consumer = root / "consumer"
         consumer.mkdir()
         env = dict(
             os.environ,
+            GOBIN=str(root / "bin"),
             GOENV="off",
             GOFLAGS="",
             GOINSECURE="",
@@ -71,6 +72,8 @@ def verify(commit, version, generated_bindings=False):
         go("mod", "tidy")
         if generated_bindings:
             verify_generated_bindings(go, consumer)
+        if generator_version:
+            verify_generator_version(go, consumer, env, resolved)
         go("mod", "verify")
         selected = json.loads(go("list", "-mod=readonly", "-m", "-json", MODULE))
         if selected.get("Path") != MODULE or selected.get("Version") != resolved or "Replace" in selected:
@@ -89,7 +92,19 @@ def verify(commit, version, generated_bindings=False):
         "go": toolchain,
         "consumer": "PASS",
         **({"generatedBindings": "PASS"} if generated_bindings else {}),
+        **({"generatorVersion": resolved} if generator_version else {}),
     }
+
+
+def verify_generator_version(go, consumer, env, version):
+    go("install", f"{MODULE}/cmd/goef-linqgen@{version}")
+    executable = Path(env["GOBIN"]) / ("goef-linqgen.exe" if os.name == "nt" else "goef-linqgen")
+    result = subprocess.run(
+        [executable, "-version"], cwd=consumer, env=env, check=True,
+        capture_output=True, encoding="utf-8", timeout=15,
+    )
+    if result.stdout != f"goef-linqgen {version}\n" or result.stderr:
+        raise ValueError("installed generator did not report the expected module version")
 
 
 def verify_generated_bindings(go, consumer):
@@ -141,6 +156,8 @@ def main():
     parser.add_argument("--version", help="exact public module version to resolve")
     parser.add_argument("--generated-bindings", action="store_true",
                         help="generate and exercise typed LINQ bindings from the downloaded revision")
+    parser.add_argument("--generator-version", action="store_true",
+                        help="install the versioned generator and check its build version")
     args = parser.parse_args()
     if not re.fullmatch(r"[0-9a-f]{40}", args.commit):
         parser.error("commit must be a full lowercase Git SHA")
@@ -148,7 +165,11 @@ def main():
         parser.error("version must be an exact Go module version")
 
     try:
-        print(json.dumps(verify(args.commit, args.version, args.generated_bindings), indent=2))
+        report = verify(
+            args.commit, args.version, args.generated_bindings,
+            generator_version=args.generator_version,
+        )
+        print(json.dumps(report, indent=2))
     except (OSError, ValueError, subprocess.SubprocessError) as error:
         print(error, file=sys.stderr)
         if isinstance(error, subprocess.CalledProcessError) and error.stderr:
