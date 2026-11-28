@@ -1,5 +1,16 @@
 # Provider-backed LINQ queries
 
+## PostgreSQL equality and projection
+
+[Issue #36](https://github.com/igorpooh1978/GoEF/issues/36) implements a single-relation read on PostgreSQL. The typed field expression and the generated equality binding share the `EqualityRead` representation. It contains resolved table and column names, ordered transport kinds and nullability. Each `Plan.Fetch` call supplies a fresh typed value to the compiled command. A plan stores its command layout and decoder independently of any connection.
+
+The PostgreSQL compiler selects explicit columns, quotes schema and identifiers, binds one non-null argument, and requests at most two rows. The terminal operation distinguishes zero, one and multiple matches. It returns detached values, copies borrowed binary data, and observes EOF or a late error before reporting success. An existing caller-owned backend executes the command. The plan validates declared Go types before acquisition and closes its stream and lease on every exit.
+
+- [User example](../user/LINQ_TO_ENTITIES.md)
+- [PostgreSQL conformance specification](../../specs/features/linq/postgres-equality-read.feature)
+
+## Remaining composition contract
+
 **Proposed contract · LINQ-QUERYABLE-001 · [issue #4](https://github.com/igorpooh1978/GoEF/issues/4).** Building a query returns a new typed plan. Two plans derived from the same root can carry different predicates and projections. Composition opens no connection. A terminal operation receives the caller's context and executes through its selected provider.
 
 1. Bind the root, model fields, aliases, tracking mode, required tenant/filter scope and typed parameters. Keep captured values outside reusable plan shapes.

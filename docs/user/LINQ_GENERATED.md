@@ -37,4 +37,4 @@ The command writes one line to standard output. A generator installed from a mod
 
 Call the generated `FindCustomer(city)` each time you want to bind a new value. Its `Shape()` gives the Go field, argument and projection names. Its `Value()` retains the argument passed during that call. Generated bindings can be reused across goroutines, and each call owns its scalar value. `Project(row)` reads the selected field from an existing Go row supplied by the caller.
 
-This generated frontend produces typed data for a single source row and a single non-null comparison. Query IR integration, provider translation and terminal database execution are planned in the [query architecture](../architecture/QUERY_ENGINE.md). For executable local LINQ pipelines, see [LINQ Objects](LINQ_OBJECTS.md).
+For the PostgreSQL equality path, pass the generated invocation to `queryable.CompileGenerated` with the row's mapped entity and a PostgreSQL compiler. Use the returned plan's `Fetch` with the invocation's `Value()` to read the scalar projection from the database. [PostgreSQL Queryable guide](LINQ_TO_ENTITIES.md) [Issue #36](https://github.com/igorpooh1978/GoEF/issues/36)
