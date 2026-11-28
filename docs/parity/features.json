@@ -4146,6 +4146,81 @@
         "docs/architecture/MODULE_GRAPH.md"
       ],
       "evidence": null
+    },
+    {
+      "id": "PROVIDER-REUSE-001",
+      "family": "providers",
+      "origin": "GOEF_EXTENSION",
+      "scope": "SPECIALIZED",
+      "upstream": [],
+      "contract": "Return the physical lease after a complete caller-reviewed session-neutral read, and retire it on ordinary dispatch or uncertain cleanup.",
+      "goApi": {
+        "status": "IMPLEMENTED",
+        "description": "The PostgreSQL lease implements the optional provider.SessionNeutralQuerier interface."
+      },
+      "wave": "W002",
+      "issues": [
+        39
+      ],
+      "dependencies": [
+        "PROVIDER-EXEC-001"
+      ],
+      "providers": {
+        "postgres": {
+          "status": "BLOCKED",
+          "capability": "PROPOSED",
+          "engineVersions": [
+            "18.7"
+          ],
+          "driverVersions": [
+            "pgx v5.13.0"
+          ],
+          "reason": "The live cases passed. Integrated acceptance and full coverage evidence remain pending.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This optional capability is offered by the PostgreSQL adapter.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This optional capability is offered by the PostgreSQL adapter.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "This optional capability is offered by the PostgreSQL adapter.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "PROVIDER-REUSE-001-S01",
+        "PROVIDER-REUSE-001-S02",
+        "PROVIDER-REUSE-001-S03"
+      ],
+      "tests": [
+        "test/conformance/driverlab/postgres_session_reuse_test.go#TestPostgresSessionReuse"
+      ],
+      "status": "PARTIAL",
+      "deviations": [
+        "Caller review is required. PgBouncer performance has no evidence."
+      ],
+      "adr": "docs/adr/0002-module-and-provider-boundaries.md",
+      "docs": [
+        "docs/architecture/PROVIDER_SPI.md",
+        "docs/providers/POSTGRESQL.md"
+      ],
+      "evidence": null
     }
   ]
 }

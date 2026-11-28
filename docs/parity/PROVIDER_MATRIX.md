@@ -17,6 +17,8 @@ The Code First decimal fixture checks physical precision, scale, nullability and
 
 The ordered `SaveChanges` fixture checks partial-write recovery, preservation of earlier writes, acceptance of staged values after commit and preflight rejection for unusable recovery settings. [SaveChanges profile results](../evidence/W005/SAVE_CHANGES.md)
 
+PostgreSQL 18.7 with pgx v5.13.0 exercises the optional session-neutral read contract on direct and native-pool-backed `database/sql` routes. It checks PID reuse after clean completion and retirement after ordinary SQL, cancellation, errors and incomplete streams. [Session reuse scenarios and evidence](../evidence/W002/POSTGRES_SESSION_REUSE.md)
+
 ## Acceptance per version
 
 | Suite | Required proof | W000 execution |

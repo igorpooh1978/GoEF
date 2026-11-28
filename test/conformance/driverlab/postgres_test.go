@@ -15,7 +15,9 @@ import (
 	"github.com/jackc/pgx/v5/stdlib"
 )
 
-func openPostgres(t *testing.T) fixture {
+func openPostgres(t *testing.T) fixture { return openPostgresFixture(t) }
+
+func openPostgresFixture(t testing.TB) fixture {
 	t.Helper()
 
 	var expectedVersion, expectedVersionNum string

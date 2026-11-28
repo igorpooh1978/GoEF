@@ -21,6 +21,7 @@ type stream struct {
 	values    []provider.Value
 	terminal  error
 	nativeErr error
+	mayReuse  bool
 }
 
 func newStream(lease *lease, rows *sql.Rows, ctx context.Context, columns []provider.Column) *stream {
@@ -104,6 +105,9 @@ func (s *stream) Close(_ context.Context) error {
 	clear(s.raw)
 	clear(s.values)
 	err := rows.Close()
+	if s.mayReuse && s.terminal == io.EOF && err == nil && s.ctx.Err() == nil {
+		s.lease.discard = false
+	}
 	if s.nativeErr != nil && errors.Is(err, s.nativeErr) {
 		return nil
 	}

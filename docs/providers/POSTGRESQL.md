@@ -1,6 +1,14 @@
 # PostgreSQL provider
 
-Tracking [#10](https://github.com/igorpooh1978/GoEF/issues/10). W000 research cell: PostgreSQL 18.7 with `github.com/jackc/pgx/v5` v5.13.0. Select the adapter mode, CI image digest and server settings in W001. Conformance is pending. [Engine release](https://www.postgresql.org/docs/release/18.7/) · [Driver README at v5.13.0](https://github.com/jackc/pgx/blob/v5.13.0/README.md)
+The reference engine is PostgreSQL 18.7 with `github.com/jackc/pgx/v5` v5.13.0. The GoEF adapter accepts a caller-owned pgx `database/sql` pool. [Reference cell](../parity/ENGINE_COMPATIBILITY.md) · [Engine release](https://www.postgresql.org/docs/release/18.7/) · [Driver README at v5.13.0](https://github.com/jackc/pgx/blob/v5.13.0/README.md)
+
+## Reuse after a reviewed read
+
+In current source, PostgreSQL leases support `provider.SessionNeutralQuerier`. Review the entire statement and the relations, functions, operators and row-level security it reaches before opting in. A `SELECT` can change session configuration or take a session-level advisory lock. Other examples of session state include temporary objects and `LISTEN` subscriptions. Ordinary `Query` retains its previous retirement behavior. Keep `pgx`'s zero idle connections on the `database/sql` wrapper returned by `stdlib.OpenDBFromPool` so native pool users can acquire the physical connections. [PostgreSQL session functions](https://www.postgresql.org/docs/18/functions-admin.html) · [pgx wrapper ownership](https://pkg.go.dev/github.com/jackc/pgx/v5@v5.13.0/stdlib#OpenDBFromPool)
+
+The [executable fixture](../../test/conformance/driverlab/postgres_session_reuse_test.go) binds a Unicode string to `SELECT pg_backend_pid(), $1::text, NULL::bigint`. With Go 1.27.4 and a disposable PostgreSQL 18.7 instance, it gets back the original string, a typed NULL, and one backend PID before, during and after the read. Run it with `python -B test/conformance/lab/postgres_session_reuse.py`. [Issue #39 and benchmark evidence](../evidence/W002/POSTGRES_SESSION_REUSE.md)
+
+Use the lease serially. Check the optional interface, call `QuerySessionNeutral`, read until `io.EOF`, close the rows, and call `Release` with `provider.Reuse` and a live cleanup context. A decoding failure can return `goeferr.ErrMaterialization`. On error or early exit, close the rows and request `provider.Discard`. An incomplete or failed read retires the session even when the caller requests reuse. If you supplied the pool, you remain responsible for closing it. The direct pool and `stdlib.OpenDBFromPool` routes have executable evidence. PgBouncer performance is unmeasured.
 
 ## Candidate capabilities
 

@@ -29,9 +29,10 @@ func Open(dsn string) (*Backend, error) {
 	return New(stdlib.OpenDB(*config))
 }
 
-// New binds a caller-owned database/sql pool built with the pgx stdlib driver.
-// Existing driver settings remain in effect. Use a direct stdlib pool so the
-// adapter can retire the physical connection when a lease is discarded.
+// New binds a caller-owned database/sql pool built with the pgx stdlib driver,
+// including pools created by stdlib.OpenDBFromPool. Existing driver settings
+// remain in effect. Leases support provider.SessionNeutralQuerier for reviewed
+// reads. The adapter can retire a physical session on either pool route.
 func New(db *sql.DB) (*Backend, error) {
 	if db == nil {
 		return nil, goeferr.NewInvalidState()
@@ -41,6 +42,7 @@ func New(db *sql.DB) (*Backend, error) {
 	}
 	return sqladapter.New(db, sqladapter.Config{
 		ID: providerID, Classify: classify, ClosePhysical: closePhysical,
+		SessionNeutralReads: true,
 	})
 }
 

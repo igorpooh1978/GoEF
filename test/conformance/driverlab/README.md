@@ -62,6 +62,8 @@ Add `--commit-outcome` to exercise a real commit whose success is withheld and a
 
 Add `--production-adapters` to exercise the four concrete adapters. Both Python launchers accept `--production-adapters` and count covered and total statements for the selected adapter and the shared transport. [Adapter contract](../../../specs/features/providers/provider-exec-001.feature)
 
+Run `python -B test/conformance/lab/postgres_session_reuse.py` for the PostgreSQL 18.7 physical session reuse scenarios, including the pgx native pool wrapped in `database/sql`. Add `--benchmark` to compare three read paths on the same one-connection native pool. [Reuse scenarios](../../../specs/features/providers/provider-reuse-001.feature) · [Evidence](../../../docs/evidence/W002/POSTGRES_SESSION_REUSE.md)
+
 Run `python -B test/conformance/lab/mysql_in_flight_read.py` for both pinned MySQL blocked-read cancellation checks. Run `python -B test/conformance/lab/sqlite_wal_recovery.py` for recovery of a durable WAL commit across the two pinned SQLite runtimes. [MySQL cancellation evidence](../../../docs/evidence/W002/MYSQL_IN_FLIGHT_READ.md) · [SQLite WAL recovery evidence](../../../docs/evidence/W002/SQLITE_WAL_RECOVERY.md)
 
 The SQL Server 2022 profiles also check that `GENERATE_SERIES` returns the expected values at compatibility level 160 and is unavailable at 140 under the fixture's database settings.

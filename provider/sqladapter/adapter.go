@@ -20,6 +20,8 @@ type Config struct {
 	IntegerBool   bool
 	Classify      func(error) (error, string)
 	ClosePhysical func(context.Context, any) error
+	// SessionNeutralReads enables the optional capability for a reviewed driver.
+	SessionNeutralReads bool
 }
 
 // Backend implements the GoEF execution SPI over an application-owned pool.
@@ -56,17 +58,33 @@ func (b *Backend) Acquire(ctx context.Context) (provider.Lease, error) {
 	if err != nil {
 		return nil, b.failure(ctx, goeferr.PhaseAcquire, err)
 	}
-	return &lease{backend: b, conn: conn}, nil
+	l := lease{backend: b, conn: conn}
+	if b.config.SessionNeutralReads {
+		return &sessionNeutralLease{lease: l}, nil
+	}
+	return &l, nil
 }
 
 type lease struct {
 	backend *Backend
 	conn    *sql.Conn
 	rows    *stream
-	used    bool
+	discard bool
 }
 
 func (l *lease) Query(ctx context.Context, command provider.Command, bindings provider.Bindings) (provider.Rows, error) {
+	return l.query(ctx, command, bindings, false)
+}
+
+type sessionNeutralLease struct{ lease }
+
+var _ provider.SessionNeutralQuerier = (*sessionNeutralLease)(nil)
+
+func (l *sessionNeutralLease) QuerySessionNeutral(ctx context.Context, command provider.Command, bindings provider.Bindings) (provider.Rows, error) {
+	return l.query(ctx, command, bindings, true)
+}
+
+func (l *lease) query(ctx context.Context, command provider.Command, bindings provider.Bindings, sessionNeutral bool) (provider.Rows, error) {
 	args, err := l.preflight(ctx, command, bindings, goeferr.PhaseRead)
 	if err != nil {
 		return nil, err
@@ -76,7 +94,10 @@ func (l *lease) Query(ctx context.Context, command provider.Command, bindings pr
 			return nil, goeferr.NewInvalidState()
 		}
 	}
-	l.used = true
+	// A dispatched command requires discard until a reviewed stream has been
+	// completely consumed and closed. Earlier commands may already require it.
+	mayReuse := sessionNeutral && !l.discard
+	l.discard = true
 	rows, err := l.conn.QueryContext(ctx, command.SQL, args...)
 	if err != nil {
 		return nil, l.backend.failure(ctx, goeferr.PhaseRead, err)
@@ -99,6 +120,7 @@ func (l *lease) Query(ctx context.Context, command provider.Command, bindings pr
 	}
 
 	result := newStream(l, rows, ctx, command.Columns)
+	result.mayReuse = mayReuse
 	l.rows = result
 	return result, nil
 }
@@ -111,7 +133,7 @@ func (l *lease) Exec(ctx context.Context, command provider.Command, bindings pro
 	if len(command.Columns) != 0 {
 		return provider.WriteResult{}, goeferr.NewInvalidState()
 	}
-	l.used = true
+	l.discard = true
 	result, err := l.conn.ExecContext(ctx, command.SQL, args...)
 	if err != nil {
 		return provider.WriteResult{}, l.backend.failure(ctx, goeferr.PhaseWrite, err)
@@ -156,7 +178,7 @@ func (l *lease) Release(ctx context.Context, disposition provider.Disposition) e
 		ctx = context.Background()
 		disposition = provider.Discard
 	}
-	if disposition == provider.Reuse && !l.used && ctx.Err() == nil {
+	if disposition == provider.Reuse && !l.discard && cleanup == nil && ctx.Err() == nil {
 		return errors.Join(cleanup, l.backend.failure(ctx, goeferr.PhaseRelease, conn.Close()))
 	}
 

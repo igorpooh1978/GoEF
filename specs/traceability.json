@@ -1060,6 +1060,51 @@
       "status": "SPECIFIED"
     },
     {
+      "featureId": "PROVIDER-REUSE-001",
+      "scenarioId": "PROVIDER-REUSE-001-S01",
+      "spec": "specs/features/providers/provider-reuse-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/39"
+      ],
+      "docs": [
+        "docs/architecture/PROVIDER_SPI.md",
+        "docs/providers/POSTGRESQL.md"
+      ],
+      "test": "test/conformance/driverlab/postgres_session_reuse_test.go#TestPostgresSessionReuse",
+      "evidence": "docs/evidence/W002/POSTGRES_SESSION_REUSE.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "PROVIDER-REUSE-001",
+      "scenarioId": "PROVIDER-REUSE-001-S02",
+      "spec": "specs/features/providers/provider-reuse-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/39"
+      ],
+      "docs": [
+        "docs/architecture/PROVIDER_SPI.md",
+        "docs/providers/POSTGRESQL.md"
+      ],
+      "test": "test/conformance/driverlab/postgres_session_reuse_test.go#TestPostgresSessionReuse",
+      "evidence": "docs/evidence/W002/POSTGRES_SESSION_REUSE.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "PROVIDER-REUSE-001",
+      "scenarioId": "PROVIDER-REUSE-001-S03",
+      "spec": "specs/features/providers/provider-reuse-001.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/39"
+      ],
+      "docs": [
+        "docs/architecture/PROVIDER_SPI.md",
+        "docs/providers/POSTGRESQL.md"
+      ],
+      "test": "test/conformance/driverlab/postgres_session_reuse_test.go#TestPostgresSessionReuse",
+      "evidence": "docs/evidence/W002/POSTGRES_SESSION_REUSE.md",
+      "status": "SPECIFIED"
+    },
+    {
       "featureId": "QUERY-PARAM-001",
       "scenarioId": "QUERY-PARAM-001-S01",
       "spec": "specs/features/query/query-param-001.feature",

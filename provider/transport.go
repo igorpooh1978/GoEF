@@ -61,6 +61,18 @@ type Lease interface {
 	Release(context.Context, Disposition) error
 }
 
+// SessionNeutralQuerier is an optional lease capability for reviewed reads.
+// A caller asserts that the whole command, including referenced database
+// objects and functions, leaves no state on the physical session. The adapter
+// does not validate that assertion. A read-only transaction or a SELECT prefix
+// alone does not establish this property.
+type SessionNeutralQuerier interface {
+	// QuerySessionNeutral follows Query's stream and context contract. It
+	// permits Reuse only after clean EOF and successful caller close, and
+	// cannot make an earlier unsafe operation on the same lease reusable.
+	QuerySessionNeutral(context.Context, Command, Bindings) (Rows, error)
+}
+
 // Executor dispatches commands on its bound connection. It never falls back
 // to a pool or transparently replays an operation.
 type Executor interface {
