@@ -461,9 +461,12 @@ class ApplicationEvidenceTests(unittest.TestCase):
         expected = [
             {
                 "provider": "sqlite", "profile": "sqlite-3.54", "engine_version": "3.54.1",
-                "scenario": f"PROVIDER-EXEC-001-S{i:02d}", "status": "PASS",
+                "scenario": scenario, "status": "PASS",
             }
-            for i in range(1, 5)
+            for scenario in (
+                "PROVIDER-EXEC-001-S01", "PROVIDER-EXEC-001-S02", "PROVIDER-EXEC-001-S03", "PROVIDER-EXEC-001-S04",
+                "PROVIDER-REUSE-001-S01", "PROVIDER-REUSE-001-S02", "PROVIDER-REUSE-001-S03",
+            )
         ]
         prefix = "GOEF_PRODUCTION_ADAPTER_RESULT="
         markers = [prefix + json.dumps(row) for row in expected]

@@ -37,6 +37,9 @@ func TestProductionAdapters(t *testing.T) {
 		{"PROVIDER-EXEC-001-S02", checkProductionConstraintErrors},
 		{"PROVIDER-EXEC-001-S03", checkProductionCancellation},
 		{"PROVIDER-EXEC-001-S04", checkProductionTransaction},
+		{"PROVIDER-REUSE-001-S01", checkReviewedReadReuse},
+		{"PROVIDER-REUSE-001-S02", checkUnsafeReadDiscard},
+		{"PROVIDER-REUSE-001-S03", checkExplicitReadDiscard},
 	}
 	for _, tc := range tests {
 		var version string
