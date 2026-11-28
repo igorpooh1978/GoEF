@@ -36,7 +36,8 @@ func connectionFailure() error {
 }
 
 // New binds a caller-owned Go MySQL Driver pool. A pool used for timestamp
-// transport must set ParseTime in the driver configuration.
+// transport must set ParseTime in the driver configuration. Leases support
+// provider.SessionNeutralQuerier for reviewed reads.
 func New(db *sql.DB) (*Backend, error) {
 	if db == nil {
 		return nil, goeferr.NewInvalidState()
@@ -46,7 +47,9 @@ func New(db *sql.DB) (*Backend, error) {
 	default:
 		return nil, goeferr.NewInvalidState()
 	}
-	return sqladapter.New(db, sqladapter.Config{ID: providerID, Classify: classify, IntegerBool: true})
+	return sqladapter.New(db, sqladapter.Config{
+		ID: providerID, Classify: classify, IntegerBool: true, SessionNeutralReads: true,
+	})
 }
 
 func classify(err error) (error, string) {

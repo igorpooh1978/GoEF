@@ -33,6 +33,7 @@ func Open(dsn string) (*Backend, error) {
 
 // New binds a caller-owned pool using modernc.org/sqlite. The pool must use a
 // file-backed database or keep an independent anchor for named shared memory.
+// Leases support provider.SessionNeutralQuerier for reviewed reads.
 func New(db *sql.DB) (*Backend, error) {
 	if db == nil {
 		return nil, goeferr.NewInvalidState()
@@ -40,7 +41,9 @@ func New(db *sql.DB) (*Backend, error) {
 	if _, ok := db.Driver().(*sqliteDriver.Driver); !ok {
 		return nil, goeferr.NewInvalidState()
 	}
-	return sqladapter.New(db, sqladapter.Config{ID: providerID, Classify: classify, IntegerBool: true})
+	return sqladapter.New(db, sqladapter.Config{
+		ID: providerID, Classify: classify, IntegerBool: true, SessionNeutralReads: true,
+	})
 }
 
 func classify(err error) (error, string) {

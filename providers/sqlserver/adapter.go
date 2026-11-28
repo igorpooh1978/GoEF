@@ -27,6 +27,7 @@ func Open(dsn string) (*Backend, error) {
 }
 
 // New binds a caller-owned SQL Server pool built with go-mssqldb.
+// Leases support provider.SessionNeutralQuerier for reviewed reads.
 func New(db *sql.DB) (*Backend, error) {
 	if db == nil {
 		return nil, goeferr.NewInvalidState()
@@ -34,7 +35,7 @@ func New(db *sql.DB) (*Backend, error) {
 	if _, ok := db.Driver().(*mssql.Driver); !ok {
 		return nil, goeferr.NewInvalidState()
 	}
-	return sqladapter.New(db, sqladapter.Config{ID: providerID, Classify: classify})
+	return sqladapter.New(db, sqladapter.Config{ID: providerID, Classify: classify, SessionNeutralReads: true})
 }
 
 func classify(err error) (error, string) {
