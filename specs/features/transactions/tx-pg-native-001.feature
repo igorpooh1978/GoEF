@@ -12,8 +12,8 @@ Feature: Coordinate GoEF transactions directly on a caller-owned pgx pool
   @TX-PG-NATIVE-001-S02
   Scenario: Owned commands stay on one backend and cancellation rolls back pending work
     Given one owned transaction has reserved the only connection and has inserted a row
-    When an advisory lock wait is canceled through the lifetime context
-    Then the command preserves the cancellation cause and the transaction ends
+    When a caller cancels the lifetime or its deadline expires during an observed advisory lock wait
+    Then the command distinguishes cancellation from a deadline and the transaction ends
     And no row persists and a fresh operation can acquire the pool slot
 
   @TX-PG-NATIVE-001-S03

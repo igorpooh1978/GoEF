@@ -134,57 +134,71 @@ func TestNativeTransactions(t *testing.T) {
 		}
 	})
 
-	t.Run("TX-PG-NATIVE-001-S02", func(t *testing.T) {
-		pool := nativeTestPool(t, ctx, config, nil)
-		const lock = 792455
-		holdNativeAdvisoryLock(t, ctx, observer, lock)
+	for _, mode := range []struct {
+		name  string
+		start func(context.Context) (context.Context, context.CancelFunc)
+		cause error
+		kind  error
+	}{
+		{"cancel", context.WithCancel, context.Canceled, goeferr.ErrCanceled},
+		{"deadline", func(ctx context.Context) (context.Context, context.CancelFunc) {
+			return context.WithTimeout(ctx, 5*time.Second)
+		}, context.DeadlineExceeded, goeferr.ErrDeadlineExceeded},
+	} {
+		t.Run("TX-PG-NATIVE-001-S02/"+mode.name, func(t *testing.T) {
+			pool := nativeTestPool(t, ctx, config, nil)
+			const lock = 792455
+			holdNativeAdvisoryLock(t, ctx, observer, lock)
 
-		lifetime, stop := context.WithCancel(ctx)
-		defer stop()
-		tx, err := postgres.BeginTx(lifetime, pool, sql.TxOptions{})
-		if err != nil {
-			t.Fatalf("could not begin the owned transaction: %v", err)
-		}
-		t.Cleanup(func() { _ = tx.Close() })
-		var pid int
-		if err := tx.Scan(ctx, "SELECT pg_backend_pid()", nil, &pid); err != nil || pid == 0 {
-			t.Fatalf("owned transaction could not read its backend identity: %v", err)
-		}
-		if _, err := tx.Exec(ctx, nativeTxInsert, 2); err != nil {
-			t.Fatalf("owned transaction could not write: %v", err)
-		}
-		queryErr := make(chan error, 1)
-		go func() {
-			var result bool
-			queryErr <- tx.Scan(ctx, "SELECT true FROM pg_advisory_xact_lock($1)", []any{lock}, &result)
-		}()
-		waitForAdvisoryLock(t, ctx, observer, pid)
-		if pool.Stat().AcquiredConns() != 1 {
-			t.Fatal("owned transaction did not reserve the pool connection")
-		}
-		stop()
-		if err := awaitNativeError(t, ctx, queryErr); !errors.Is(err, context.Canceled) || !errors.Is(err, goeferr.ErrCanceled) {
-			t.Fatalf("in-flight cancellation lost its cause: %v", err)
-		}
-		// The default pgx cancellation watcher can close a busy connection
-		// before an explicit rollback is acknowledged. Either outcome must
-		// consume the checkout and must leave no committed writes.
-		rollbackErr := tx.Close()
-		switch tx.State() {
-		case transaction.StateRolledBack:
-			if rollbackErr != nil {
-				t.Fatalf("confirmed rollback reported an error: %v", rollbackErr)
+			lifetime, stop := mode.start(ctx)
+			defer stop()
+			tx, err := postgres.BeginTx(lifetime, pool, sql.TxOptions{})
+			if err != nil {
+				t.Fatalf("could not begin the owned transaction: %v", err)
 			}
-		case transaction.StateFailed:
-			if !errors.Is(rollbackErr, goeferr.ErrRollbackFailed) {
-				t.Fatalf("failed rollback lost its typed cause: %v", rollbackErr)
+			t.Cleanup(func() { _ = tx.Close() })
+			var pid int
+			if err := tx.Scan(ctx, "SELECT pg_backend_pid()", nil, &pid); err != nil || pid == 0 {
+				t.Fatalf("owned transaction could not read its backend identity: %v", err)
 			}
-		default:
-			t.Fatalf("cancellation left transaction state %s", tx.State())
-		}
-		checkNativePool(t, ctx, pool)
-		checkNativeCount(t, ctx, observer, 2)
-	})
+			if _, err := tx.Exec(ctx, nativeTxInsert, 2); err != nil {
+				t.Fatalf("owned transaction could not write: %v", err)
+			}
+			queryErr := make(chan error, 1)
+			go func() {
+				var result bool
+				queryErr <- tx.Scan(ctx, "SELECT true FROM pg_advisory_xact_lock($1)", []any{lock}, &result)
+			}()
+			waitForAdvisoryLock(t, ctx, observer, pid)
+			if pool.Stat().AcquiredConns() != 1 {
+				t.Fatal("owned transaction did not reserve the pool connection")
+			}
+			if mode.cause == context.Canceled {
+				stop()
+			}
+			if err := awaitNativeError(t, ctx, queryErr); !errors.Is(err, mode.cause) || !errors.Is(err, mode.kind) {
+				t.Fatalf("in-flight interruption lost its expected %v cause: %v", mode.cause, err)
+			}
+			// The default pgx cancellation watcher can close a busy connection
+			// before an explicit rollback is acknowledged. Either outcome must
+			// consume the checkout and must leave no committed writes.
+			rollbackErr := tx.Close()
+			switch tx.State() {
+			case transaction.StateRolledBack:
+				if rollbackErr != nil {
+					t.Fatalf("confirmed rollback reported an error: %v", rollbackErr)
+				}
+			case transaction.StateFailed:
+				if !errors.Is(rollbackErr, goeferr.ErrRollbackFailed) {
+					t.Fatalf("failed rollback lost its typed cause: %v", rollbackErr)
+				}
+			default:
+				t.Fatalf("cancellation left transaction state %s", tx.State())
+			}
+			checkNativePool(t, ctx, pool)
+			checkNativeCount(t, ctx, observer, 2)
+		})
+	}
 
 	t.Run("TX-PG-NATIVE-001-S03", func(t *testing.T) {
 		tracer := newTransactionControlTracer("commit", false)
