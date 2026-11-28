@@ -4221,6 +4221,76 @@
         "docs/providers/POSTGRESQL.md"
       ],
       "evidence": null
+    },
+    {
+      "id": "TOOL-VERSION-001",
+      "family": "tooling",
+      "origin": "GOEF_EXTENSION",
+      "scope": "SPECIALIZED",
+      "upstream": [],
+      "contract": "Report the embedded module version and recorded Git state so a generator binary can be traced to its source.",
+      "goApi": {
+        "status": "IMPLEMENTED",
+        "description": "goef-linqgen -version prints the build identity from Go metadata."
+      },
+      "wave": "W013",
+      "issues": [
+        38
+      ],
+      "dependencies": [],
+      "providers": {
+        "postgres": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Build metadata is independent of database execution.",
+          "evidence": null
+        },
+        "sqlite": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Build metadata is independent of database execution.",
+          "evidence": null
+        },
+        "sqlserver": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Build metadata is independent of database execution.",
+          "evidence": null
+        },
+        "mysql": {
+          "status": "NOT_APPLICABLE",
+          "capability": "NOT_APPLICABLE",
+          "engineVersions": [],
+          "driverVersions": [],
+          "reason": "Build metadata is independent of database execution.",
+          "evidence": null
+        }
+      },
+      "scenarios": [
+        "TOOL-VERSION-001-S01",
+        "TOOL-VERSION-001-S02"
+      ],
+      "tests": [
+        "cmd/goef-linqgen/main_test.go#TestRunVersion",
+        "cmd/goef-linqgen/version_test.go#TestWriteVersion",
+        "test/architecture/public-module/verify.py"
+      ],
+      "status": "PARTIAL",
+      "deviations": [
+        "The tag rehearsal runs locally; public preview publication has separate gates."
+      ],
+      "adr": null,
+      "docs": [
+        "docs/development/BUILD_VERSIONS.md",
+        "docs/user/LINQ_GENERATED.md"
+      ],
+      "evidence": null
     }
   ]
 }

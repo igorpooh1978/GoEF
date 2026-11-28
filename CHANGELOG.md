@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Report the generator's Go module version, Git revision and dirty state with `goef-linqgen -version` ([#38](https://github.com/igorpooh1978/GoEF/issues/38)).
 - Reuse PostgreSQL physical connections after explicitly reviewed reads reach EOF and close successfully. Ordinary SQL and uncertain streams retain conservative retirement ([#39](https://github.com/igorpooh1978/GoEF/issues/39)).
 - Add a reproducible LINQ generator for typed equality bindings and scalar projections, with stale artifact rejection ([#24](https://github.com/igorpooh1978/GoEF/issues/24)).
 - Add separate pinned PostgreSQL, SQLite, SQL Server, and MySQL execution adapters with typed bindings, cancellation, and redacted provider errors ([#13](https://github.com/igorpooh1978/GoEF/issues/13)).

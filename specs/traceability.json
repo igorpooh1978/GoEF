@@ -1133,6 +1133,36 @@
       "status": "SPECIFIED"
     },
     {
+      "featureId": "TOOL-VERSION-001",
+      "scenarioId": "TOOL-VERSION-001-S01",
+      "spec": "specs/features/documentation/build_version.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/38"
+      ],
+      "docs": [
+        "docs/development/BUILD_VERSIONS.md",
+        "docs/user/LINQ_GENERATED.md"
+      ],
+      "test": "test/architecture/public-module/verify.py",
+      "evidence": "docs/evidence/W013/BUILD_VERSIONS.md",
+      "status": "SPECIFIED"
+    },
+    {
+      "featureId": "TOOL-VERSION-001",
+      "scenarioId": "TOOL-VERSION-001-S02",
+      "spec": "specs/features/documentation/build_version.feature",
+      "issues": [
+        "https://github.com/igorpooh1978/GoEF/issues/38"
+      ],
+      "docs": [
+        "docs/development/BUILD_VERSIONS.md",
+        "docs/user/LINQ_GENERATED.md"
+      ],
+      "test": "cmd/goef-linqgen/main_test.go#TestRunVersion",
+      "evidence": "docs/evidence/W013/BUILD_VERSIONS.md",
+      "status": "SPECIFIED"
+    },
+    {
       "featureId": "TX-AFFINITY-001",
       "scenarioId": "TX-AFFINITY-001-S01",
       "spec": "specs/features/transactions/tx-affinity-001.feature",
