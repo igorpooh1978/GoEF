@@ -2,7 +2,7 @@
 
 ## Database quickstarts
 
-These examples run against the published GoEF and adapter modules at `v0.1.0-alpha.1` in a separate Go module without `replace`. Each walkthrough includes the installation commands, connection settings, and expected output.
+These examples run against the published GoEF and adapter modules at `v0.2.0-alpha.1` in a separate Go module without `replace`. Each walkthrough includes the installation commands, connection settings, and expected output.
 
 | Database | Walkthrough | Go source |
 | --- | --- | --- |

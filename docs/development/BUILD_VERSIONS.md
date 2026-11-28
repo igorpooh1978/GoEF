@@ -1,6 +1,6 @@
 # Build and preview versions
 
-[Issue #38](https://github.com/igorpooh1978/GoEF/issues/38) tracks build identification and preparation of the next preview.
+[Issue #38](https://github.com/igorpooh1978/GoEF/issues/38) tracks build identification and the [published v0.2.0-alpha.1 preview](../evidence/W013/RELEASE_V0_2_0_ALPHA_1.md).
 
 ## Identify a build
 
@@ -16,9 +16,9 @@ When using `go build -o <binary>`, put the output outside the checkout to keep G
 
 ## Prepare an immutable preview
 
-The candidate series for the adoption follow-up is `v0.2.0-alpha.1`. It remains a prerelease while wider query parity, provider maturity and production support are in progress. Increment the prerelease number for subsequent candidates in the series. A Git commit hash or its Go pseudo-version identifies an untagged build.
+The adoption follow-up shipped as `v0.2.0-alpha.1`. It remains a prerelease while wider query parity, provider maturity and production support are in progress. Increment the prerelease number for subsequent candidates in the series. A Git commit hash or its Go pseudo-version identifies an untagged build.
 
-| Go module suffix | Candidate Git tag |
+| Go module suffix | Published Git tag |
 | --- | --- |
 | Root module | `v0.2.0-alpha.1` |
 | `providers/postgres` | `providers/postgres/v0.2.0-alpha.1` |

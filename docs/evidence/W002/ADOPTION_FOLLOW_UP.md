@@ -27,7 +27,7 @@ The read-only reviewer accepted the tested source after the unsupported lease cl
 
 ## Build candidate
 
-Go 1.27.4 built Windows/amd64 and Linux/amd64 generator binaries from the exact clean source and an isolated `v0.2.0-alpha.1` tag. Both binaries reported their full source revision and `dirty=false`, with matching `go version -m` output. A separate local release rehearsal resolved all five candidate Go modules without replacement directives and built an independent consumer. The public prerelease continues to use the existing `v0.1.0-alpha.1` release tags. [Build and preview version procedure](../../development/BUILD_VERSIONS.md)
+Go 1.27.4 built Windows/amd64 and Linux/amd64 generator binaries from the exact clean source and an isolated `v0.2.0-alpha.1` tag. Both binaries reported their full source revision and `dirty=false`, with matching `go version -m` output. A separate local release rehearsal resolved all five candidate Go modules without replacement directives and built an independent consumer. The public prerelease still used `v0.1.0-alpha.1` during this rehearsal. See the [public v0.2.0-alpha.1 verification](../W013/RELEASE_V0_2_0_ALPHA_1.md) for the published modules. [Build and preview version procedure](../../development/BUILD_VERSIONS.md)
 
 | Build | SHA-256 |
 | --- | --- |
@@ -36,6 +36,6 @@ Go 1.27.4 built Windows/amd64 and Linux/amd64 generator binaries from the exact 
 
 ## Public source build
 
-The tested source is available by commit. `python -B test/architecture/public-module/verify.py 493db45c51d9a2acd1998fe413e1d9ae241aff2a --generated-bindings --generator-version` exited 0 in a fresh external module with Go 1.27.4. The public Go proxy and checksum database resolved `v0.1.0-alpha.1.0.20261128074836-493db45c51d9` at the expected origin commit. The archive checksum was `h1:VU4/6zZNXYvy5Vef1azVH00pLFHs1nh/xgqj/xf1R7g=` and the manifest checksum was `h1:ABeTL0NnLBe42NYSr8liTicW7AUWHsszrL7EzWFpFF0=`. Generated bindings compiled and the installed generator reported the selected source version. The four provider modules pin that source revision in their manifests so consuming applications resolve the same core without local replacements.
+The tested source is available by commit. `python -B test/architecture/public-module/verify.py 493db45c51d9a2acd1998fe413e1d9ae241aff2a --generated-bindings --generator-version` exited 0 in a fresh external module with Go 1.27.4. The public Go proxy and checksum database resolved `v0.1.0-alpha.1.0.20261128074836-493db45c51d9` at the expected origin commit. The archive checksum was `h1:VU4/6zZNXYvy5Vef1azVH00pLFHs1nh/xgqj/xf1R7g=` and the manifest checksum was `h1:ABeTL0NnLBe42NYSr8liTicW7AUWHsszrL7EzWFpFF0=`. Generated bindings compiled and the installed generator reported the selected source version. The source preview provider manifests pinned that revision so consuming applications could resolve the same core without local replacements.
 
 Each pinned provider module passed `go mod verify`, `go mod tidy -diff`, build, vet and shuffled tests in the checkout. Separate temporary copies dropped their local core replacements and ran `go mod tidy`, `go mod verify`, build and tests with the public module. All four selected the exact core source version and exited 0.

@@ -9,29 +9,29 @@ GoEF is a Go data access library in alpha. It uses Entity Framework Core as a be
 Use Go 1.27.4 or later. Pin the core version from your application's Go module.
 
 ```sh
-go mod edit "-require=github.com/igorpooh1978/GoEF@v0.1.0-alpha.1"
+go mod edit "-require=github.com/igorpooh1978/GoEF@v0.2.0-alpha.1"
 ```
 
 Pin the adapter for your database.
 
 ```sh
-go mod edit "-require=github.com/igorpooh1978/GoEF/providers/postgres@v0.1.0-alpha.1"
-go mod edit "-require=github.com/igorpooh1978/GoEF/providers/sqlite@v0.1.0-alpha.1"
-go mod edit "-require=github.com/igorpooh1978/GoEF/providers/sqlserver@v0.1.0-alpha.1"
-go mod edit "-require=github.com/igorpooh1978/GoEF/providers/mysql@v0.1.0-alpha.1"
+go mod edit "-require=github.com/igorpooh1978/GoEF/providers/postgres@v0.2.0-alpha.1"
+go mod edit "-require=github.com/igorpooh1978/GoEF/providers/sqlite@v0.2.0-alpha.1"
+go mod edit "-require=github.com/igorpooh1978/GoEF/providers/sqlserver@v0.2.0-alpha.1"
+go mod edit "-require=github.com/igorpooh1978/GoEF/providers/mysql@v0.2.0-alpha.1"
 ```
 
 After adding the imports to your code, run `go mod tidy` to download the pinned modules and update `go.sum`.
 
-Builds from current source include [version and Git revision reporting](docs/development/BUILD_VERSIONS.md).
+The generator includes [version and Git revision reporting](docs/development/BUILD_VERSIONS.md).
 
 ### GitHub prereleases
 
-- [GoEF core](https://github.com/igorpooh1978/GoEF/releases/tag/v0.1.0-alpha.1)
-- [PostgreSQL adapter](https://github.com/igorpooh1978/GoEF/releases/tag/providers/postgres/v0.1.0-alpha.1)
-- [SQLite adapter](https://github.com/igorpooh1978/GoEF/releases/tag/providers/sqlite/v0.1.0-alpha.1)
-- [SQL Server adapter](https://github.com/igorpooh1978/GoEF/releases/tag/providers/sqlserver/v0.1.0-alpha.1)
-- [MySQL adapter](https://github.com/igorpooh1978/GoEF/releases/tag/providers/mysql/v0.1.0-alpha.1)
+- [GoEF core](https://github.com/igorpooh1978/GoEF/releases/tag/v0.2.0-alpha.1)
+- [PostgreSQL adapter](https://github.com/igorpooh1978/GoEF/releases/tag/providers/postgres/v0.2.0-alpha.1)
+- [SQLite adapter](https://github.com/igorpooh1978/GoEF/releases/tag/providers/sqlite/v0.2.0-alpha.1)
+- [SQL Server adapter](https://github.com/igorpooh1978/GoEF/releases/tag/providers/sqlserver/v0.2.0-alpha.1)
+- [MySQL adapter](https://github.com/igorpooh1978/GoEF/releases/tag/providers/mysql/v0.2.0-alpha.1)
 
 See the [provider matrix](docs/parity/PROVIDER_MATRIX.md) for verified capabilities and open gaps.
 
@@ -41,7 +41,7 @@ In a new directory outside the GoEF checkout and any Go workspace, initialize a 
 
 ```sh
 go mod init example.com/goef-demo
-go mod edit "-require=github.com/igorpooh1978/GoEF@v0.1.0-alpha.1" "-require=github.com/igorpooh1978/GoEF/providers/sqlite@v0.1.0-alpha.1"
+go mod edit "-require=github.com/igorpooh1978/GoEF@v0.2.0-alpha.1" "-require=github.com/igorpooh1978/GoEF/providers/sqlite@v0.2.0-alpha.1"
 ```
 
 Save this program as `main.go`. It runs a parameterized SQLite query against a temporary file and closes the result stream, connection lease, and pool before removing the file.
@@ -132,7 +132,7 @@ Choose one database. In a new directory outside the GoEF checkout and any Go wor
 
 ```sh
 go mod init example.com/goef-demo
-go mod edit "-require=github.com/igorpooh1978/GoEF@v0.1.0-alpha.1"
+go mod edit "-require=github.com/igorpooh1978/GoEF@v0.2.0-alpha.1"
 ```
 
 Save the [shared program](examples/testdata/alpha-quickstart/main.go) as `main.go` and the [Python launcher](examples/testdata/alpha-quickstart/run.py) as `run.py`. Use Python 3.11 or later. The Go program binds the integer `41`, gives the query and row read a five-second timeout, and closes the rows and connection lease before the adapter closes its pool.
@@ -192,7 +192,7 @@ func readValue(backend provider.Backend, command provider.Command) (err error) {
 Use a running PostgreSQL instance and an existing database. A connection string for a disposable local instance looks like `postgres://demo:password@127.0.0.1:5432/demo?sslmode=disable`.
 
 ```sh
-go mod edit "-require=github.com/igorpooh1978/GoEF/providers/postgres@v0.1.0-alpha.1"
+go mod edit "-require=github.com/igorpooh1978/GoEF/providers/postgres@v0.2.0-alpha.1"
 ```
 
 Save the [PostgreSQL example](examples/testdata/alpha-quickstart/postgres/adapter.go) as `adapter.go`.
@@ -227,7 +227,7 @@ func run(dsn string) (err error) {
 On Windows, install SQL Server Express LocalDB and use the `MSSQLLocalDB` instance. The Python launcher starts it, reads its current named pipe, and the adapter connects using your Windows account. [Microsoft LocalDB documentation](https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/sql-server-express-localdb)
 
 ```sh
-go mod edit "-require=github.com/igorpooh1978/GoEF/providers/sqlserver@v0.1.0-alpha.1"
+go mod edit "-require=github.com/igorpooh1978/GoEF/providers/sqlserver@v0.2.0-alpha.1"
 ```
 
 Save the [LocalDB example](examples/testdata/alpha-quickstart/sqlserver/adapter.go) as `adapter.go`. It imports the SQL Server driver's named-pipe support.
@@ -263,7 +263,7 @@ func run(dsn string) (err error) {
 Use a running MySQL instance and an existing database. A connection string for a disposable local instance looks like `demo:password@tcp(127.0.0.1:3306)/demo`.
 
 ```sh
-go mod edit "-require=github.com/igorpooh1978/GoEF/providers/mysql@v0.1.0-alpha.1"
+go mod edit "-require=github.com/igorpooh1978/GoEF/providers/mysql@v0.2.0-alpha.1"
 ```
 
 Save the [MySQL example](examples/testdata/alpha-quickstart/mysql/adapter.go) as `adapter.go`.
